@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"
+    />
+    <title>Britannia Survivors</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="menu-scene">
+    <main id="app">
+      <header>
+        <div class="brand">
+          <span class="sigil" aria-hidden="true"></span>
+          <div>
+            BRITANNIA <b>SURVIVORS</b
+            ><small>A CHRONICLE OF THE SHATTERED REALM</small>
+          </div>
+        </div>
+        <div class="header-right">
+          <span class="live-dot"></span> LOCAL CHRONICLE
+          <button id="bestiary-button">Bestiary</button>
+          <button id="sound" title="Toggle sound">Sound off</button
+          >
+        </div>
+      </header>
+      <div id="game-stage">
+      <section id="field">
+        <canvas id="world" aria-label="Survival battlefield"></canvas>
+        <div class="vignette"></div>
+        <div id="hud" class="hidden">
+        <div id="top-hud" class="hidden">
+          <div class="hero-card panel">
+            <span id="hero-icon"></span>
+            <div>
+              <button id="stats-button" title="Current stats / C" aria-label="Current stats (C)">Stats</button><small id="hero-title">THE ARCANIST</small
+              >
+              <div class="hero-meta">
+                <strong id="hero-level">Level 1</strong>
+                <div class="counts" aria-label="Slain enemies and gold">
+                  <div><small>SLAIN</small><strong id="kills">0</strong></div>
+                  <div><small>GOLD</small><strong id="gold">0</strong></div>
+                </div>
+              </div>
+              <div class="meter health">
+                <i id="hp-fill"></i><span id="hp-text"></span>
+              </div>
+            </div>
+          </div>
+          <div class="run-clock panel">
+            <small>HOLD THE REALM</small><strong id="clock">00:00</strong
+            ><span id="chapter">The awakening</span><div id="zone-timeline" class="hidden"><div id="zone-time-track"><i id="zone-time-fill"></i></div><div id="zone-time-events"></div></div>
+        <div id="zone">
+          <span>FELUCCA</span><strong>The Yew Wilds</strong><i></i><button id="zone-action" class="hidden">Spell choices</button>
+        </div>
+          </div>
+        </div>
+        <div id="message"></div>
+        <div id="side-hud">
+        <canvas
+          id="minimap"
+          width="200"
+          height="200"
+          class="hidden"
+          aria-label="Nearby enemies and pickups"
+        ></canvas>
+        <button id="pause">Pause <kbd>ESC</kbd></button>
+        </div>
+        <div id="bottom-hud" class="hidden">
+          <div id="pickup-feed" aria-live="polite"></div><div id="active-buffs"></div><div id="dash-status"></div>
+          <div class="xp-label">
+            <span id="xp-label">LEVEL 1</span><span id="xp-text"></span>
+          </div>
+          <div class="meter experience"><i id="xp-fill"></i></div>
+          <div class="action-bar">
+            <div id="skills"></div>
+            <div class="actions">
+              <button id="dash-button" class="hud-shortcut" aria-label="Dash" title="Dash"><img src="assets/classic-ui/abilities/spells/teleport.png" alt="" draggable="false"></button><button id="inventory-button" class="hud-shortcut" aria-label="Backpack (I)" title="Backpack / I — drag to move"><img src="assets/classic-ui/hud/backpack.png" alt="" draggable="false"></button
+              ><button id="shop-button" class="hud-shortcut" aria-label="Wandering trader (B)" title="Wandering trader / B — drag to move"><img src="assets/classic-ui/hud/shop.png" alt="" draggable="false"><span id="hud-gold" class="gold-balance">0</span></button>
+            </div>
+          </div>
+          <p class="controls">
+            CLICK / WASD TO MOVE <span>·</span> SPELLS CAST AUTOMATICALLY
+            <span>·</span> RIGHT-DRAG TO STEER / SPACE TO DASH
+          </p>
+        </div>
+        <div id="joystick" aria-hidden="true"><i></i></div>
+        </div>
+        <div id="overlay">
+          <div id="menu" class="menu panel" data-view="home">
+            <div class="menu-ornaments" aria-hidden="true"></div>
+            <div id="menu-message" role="status"></div>
+            <h1>Britannia<br /><em>Survivors</em></h1>
+            <div id="home-actions">
+              <button id="continue" class="hidden primary">Continue</button>
+              <small id="saved-summary"></small>
+              <button id="new-game">New Game</button>
+              <button id="camp-button">Camp</button>
+              <button id="options-button">Options</button>
+              <button id="exit-button">Exit</button>
+            </div>
+            <section id="new-game-setup" class="hidden" aria-label="New game">
+              <h2>New Game</h2>
+              <div id="classes" class="class-grid"></div>
+              <div id="difficulty-controls"></div>
+              <button id="start" class="primary">Play</button>
+              <button id="menu-back">Back</button>
+            </section>
+            <p id="loading" class="fine"></p>
+            <p class="fan-notice" aria-label="Fan project disclaimer">Unofficial fan project. Ultima Online and its original assets belong to Electronic Arts Inc. and their respective rights holders. Originally created by Origin Systems. Not affiliated with or endorsed by EA or Broadsword Online Games.</p>
+          </div>
+          <div id="dialog" class="panel hidden"></div>
+        </div>
+      </section>
+      </div>
+      <footer>
+        <span>A TALE FROM BRITANNIA</span
+        ><span id="footer-status">YOUR WORLD. YOUR CHRONICLE.</span
+        ><span>LOCAL BUILD <b>0.9.18 · Classic</b></span>
+      </footer>
+    </main>
+    <script type="module" src="app.mjs"></script>
+  </body>
+</html>

@@ -1,0 +1,133 @@
+import {effectiveSpellRank} from './spell-levels.mjs';
+import {spellDamageChannel} from './combat-types.mjs';
+import {spellUpgradeKinds,upgradeLabel,spellTuning,applyStatUpgrade,validUpgradeState} from './spell-upgrades.mjs';
+// Magery identities and elements are sourced from RunUO; cooldowns/ranks adapt combat to survivors.
+export const SPELL_CAPACITY=Object.freeze({offense:7,defense:3});
+const circles=['First','Second','Third','Fourth','Fifth','Sixth','Seventh','Eighth'];
+const book=[['Clumsy','CreateFood','Feeblemind','Heal','MagicArrow','NightSight','ReactiveArmor','Weaken'],['Agility','Cunning','Cure','Harm','MagicTrap','RemoveTrap','Protection','Strength'],['Bless','Fireball','MagicLock','Poison','Telekinesis','Teleport','Unlock','WallOfStone'],['ArchCure','ArchProtection','Curse','FireField','GreaterHeal','Lightning','ManaDrain','Recall'],['BladeSpirits','DispelField','Incognito','MagicReflect','MindBlast','Paralyze','PoisonField','SummonCreature'],['Dispel','EnergyBolt','Explosion','Invisibility','Mark','MassCurse','ParalyzeField','Reveal'],['ChainLightning','EnergyField','FlameStrike','GateTravel','ManaVampire','MassDispel','MeteorSwarm','Polymorph'],['AirElemental','SummonDaemon','Earthquake','EnergyVortex','EarthElemental','FireElemental','Resurrection','WaterElemental']];
+export const RETIRED_SPELLS=new Set(['mana-drain','mana-vampire','dispel','mass-dispel','cure','arch-cure']);
+const excluded=new Set([...RETIRED_SPELLS,'create-food','night-sight','magic-trap','magic-untrap','magic-lock','telekinesis','unlock','recall','incognito','mark','gate-travel','polymorph','resurrection','reveal','dispel-field']);
+const defensive=new Set(['heal','greater-heal','cure','arch-cure','reactive-armor','magic-reflection','protection','arch-protection','agility','cunning','strength','bless','invisibility','teleport']);
+const cooldowns={'magic-arrow':2,fireball:3.5,lightning:5,'energy-bolt':7,'chain-lightning':10,'meteor-swarm':11,'fire-field':9,heal:8,'greater-heal':13,cure:6,'arch-cure':10,'reactive-armor':45,protection:45,'arch-protection':45,agility:45,cunning:45,strength:45,bless:45,'magic-reflection':20,'flame-strike':10,explosion:9,'mind-blast':7,poison:6,harm:4,'poison-field':12,'paralyze-field':14,'energy-field':16,'wall-of-stone':12,earthquake:18,teleport:14,invisibility:24};
+const descriptions={"magic-arrow": "Launch a swift magical arrow with a small splash on impact.", "fireball": "Hurl a fireball with a small splash on impact.", "lightning": "Strike a creature with lightning and splash nearby enemies.", "energy-bolt": "Launch an energy bolt with a small splash on impact.", "chain-lightning": "Strike a cluster of creatures with lightning.", "meteor-swarm": "Rain fiery meteors onto nearby creatures.", "fire-field": "Create a persistent wall of fire that burns crossing creatures.", "heal": "Restore health automatically when injured.", "greater-heal": "Restore a larger amount of health when badly injured.", "cure": "Remove poison from yourself.", "arch-cure": "Cleanse poison with a stronger restorative spell.", "mana-drain": "Temporarily drain an enemy caster's mana; it returns after five seconds.", "mana-vampire": "Drain an enemy caster's mana to suppress spells.", "magic-reflection": "Reflect spells back to the caster. Lasts 35 seconds with a limited circle budget; 20-second cooldown.", "reactive-armor": "Increase physical resistance at the cost of elemental resistance.", "mind-blast": "Deal cold damage with a small splash after a one-second delay.", "flame-strike": "Strike an enemy with a column of fire that splashes nearby creatures.", "poison-field": "Poison creatures crossing a persistent wall of poison.", "paralyze-field": "Paralyze creatures crossing this wall; damage breaks paralysis.", "energy-field": "Create an impassable wall of energy.", "wall-of-stone": "Create a short impassable stone wall.", "explosion": "Place a delayed explosion that splashes nearby creatures.", "dispel": "Dismiss a summoned creature; ordinary creatures are unaffected.", "mass-dispel": "Dismiss nearby summoned creatures; ordinary creatures are unaffected.", "teleport": "Blink away from a nearby enemy to a passable location.", "agility": "Move faster while the blessing lasts.", "cunning": "Strengthen magical attacks while the blessing lasts.", "strength": "Strengthen weapon attacks while the blessing lasts.", "bless": "Improve movement, weapon attacks and magical attacks.", "protection": "Ward yourself against physical attacks.", "arch-protection": "Raise a protective ward against physical attacks.", "invisibility": "Vanish briefly to escape pursuit. Automatic attacks pause while hidden.", "clumsy": "Slow a nearby creature.", "weaken": "Reduce a nearby creature's attack damage.", "feeblemind": "Interrupt and silence a group of nearby casters, preventing new spells briefly.", "curse": "Slow and weaken a creature and disrupt its casting.", "mass-curse": "Slow and weaken a group of creatures and disrupt their casting.", "harm": "Deal cold damage, with greater force at close range.", "poison": "Poison a creature and its close neighbors, dealing damage over time.", "paralyze": "Immobilize a creature and its close neighbors. Damage breaks paralysis.", "earthquake": "Shake the ground, damaging nearby creatures with physical force.", "blade-spirits": "Summon whirling blades to pursue and strike nearby creatures.", "summon-creature": "Summon a bear to fight nearby creatures.", "energy-vortex": "Summon a vortex to pursue and strike nearby creatures.", "air-elemental": "Summon an air elemental to fight alongside you.", "earth-elemental": "Summon an earth elemental to fight alongside you.", "fire-elemental": "Summon a fire elemental whose attacks burn nearby creatures.", "water-elemental": "Summon a water elemental whose attacks chill nearby creatures.", "summon-daemon": "Summon a daemon to pursue and attack nearby creatures."};
+export const MAGERY_BOOK=Object.freeze(book.flatMap((names,c)=>names.map((file,index)=>{const id=file==='MagicReflect'?'magic-reflection':file==='RemoveTrap'?'magic-untrap':file.replace(/([a-z])([A-Z])/g,'$1-$2').toLowerCase();return Object.freeze({id,name:file==='MagicReflect'?'Magic Reflection':file==='RemoveTrap'?'Magic Untrap':file.replace(/([a-z])([A-Z])/g,'$1 $2'),category:defensive.has(id)?'defense':'offense',circle:c+1,bookIndex:c*8+index,cooldown:cooldowns[id]||12+c,element:['harm','mind-blast'].includes(id)?'Cold':['magic-arrow','fireball','fire-field','flame-strike','meteor-swarm','explosion'].includes(id)?'Fire':['lightning','energy-bolt','chain-lightning'].includes(id)?'Energy':id.includes('poison')?'Poison':id==='earthquake'?'Physical':null,maxRank:5,icon:`assets/classic-ui/abilities/spells/${id}.png`,source:`runuo/Scripts/Spells/${circles[c]}/${file}.cs`,available:!excluded.has(id),description:descriptions[id]||`${file.replace(/([a-z])([A-Z])/g,'$1 $2')}: automatic combat casting with rank-scaled potency.`});})));
+export const SPELLS=Object.freeze(MAGERY_BOOK.filter(s=>s.available));
+const byId=new Map(SPELLS.map(s=>[s.id,s]));
+const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),clamp=(n,lo,hi)=>Math.max(lo,Math.min(hi,n));
+export const PASSIVE_ICONS=Object.freeze({power:'skills/evaluatingintelligence',haste:'stats/faster-cast',vitality:'skills/anatomy',speed:'skills/ninjitsu',magnet:'skills/spiritspeak',nova:'spells/meteor-swarm',chain:'spells/chain-lightning',multishot:'weaponspecials/doublestrike',regen:'skills/healing',armor:'skills/resistingspells'});
+export function passiveIcon(id){return `assets/classic-ui/abilities/${PASSIVE_ICONS[id]||'skills/magery'}.png`;}
+export function initSpellState(game){
+ game.spellLoadout??=[];game.spellFields??=[];game.pendingSpellSupers??=[];
+ // Preserve earned ranks when opening a save from before the combat cleanup.
+ for(const i of game.spellLoadout)if(RETIRED_SPELLS.has(i.id)){
+  const category=MAGERY_BOOK.find(s=>s.id===i.id).category;
+  const preferred=category==='defense'?['heal','greater-heal','protection','reactive-armor']:['lightning','flame-strike','energy-bolt','fireball','harm'];
+  i.id=[...preferred,...SPELLS.filter(s=>s.category===category).map(s=>s.id)].find(id=>!game.spellLoadout.some(v=>v.id===id));
+  i.cooldown=0;i.active=false;delete i.activeRemaining;delete i.reflectionCharges;
+ }
+ if(game.spellFields.some(f=>RETIRED_SPELLS.has(f.kind)))game.spellFields=game.spellFields.filter(f=>!RETIRED_SPELLS.has(f.kind));
+ const retiredChoice=c=>RETIRED_SPELLS.has(c.spellId||c.id?.replace(/^spell:/,''));
+ if(game.choices?.some(retiredChoice)){
+  const used=new Set(game.choices.filter(c=>!retiredChoice(c)).map(c=>c.id));
+  game.choices=game.choices.map(c=>{
+   if(!retiredChoice(c))return c;
+   const category=MAGERY_BOOK.find(s=>s.id===(c.spellId||c.id.replace(/^spell:/,''))).category;
+   const s=SPELLS.find(s=>s.category===category&&!used.has('spell:'+s.id)&&!game.spellLoadout.some(i=>i.id===s.id));
+   used.add('spell:'+s.id);
+   return {...s,id:'spell:'+s.id,spellId:s.id,type:'spell',level:1,requiresReplacement:game.spellLoadout.filter(i=>byId.get(i.id)?.category===category).length>=SPELL_CAPACITY[category]};
+  });
+ }
+ for(const choice of game.choices||[])if(choice.type==='spell'||choice.id?.startsWith('spell:')){
+  const s=byId.get(choice.spellId||choice.id.slice(6));
+  if(s)choice.requiresReplacement=!game.spellLoadout.some(i=>i.id===s.id)&&game.spellLoadout.filter(i=>byId.get(i.id)?.category===s.category).length>=SPELL_CAPACITY[s.category];
+ }
+ delete game.player.mana;delete game.player.maxMana;
+ for(const i of game.spellLoadout){
+  if(i.id==='magic-reflection'&&i.active&&i.activeRemaining===undefined){i.activeRemaining=35;i.reflectionCharges=8+i.rank*2;i.cooldown=20;}
+  if(i.active&&i.activeRemaining===undefined)i.activeRemaining=25+i.rank*5;
+ }
+}
+export function spellChoices(game){
+ initSpellState(game);
+ return SPELLS.flatMap(s=>{
+  const current=game.spellLoadout.find(v=>v.id===s.id);
+  if(!current)return [];
+  return spellUpgradeKinds(s,current,game).map(kind=>({...s,id:'spell:'+s.id+':'+kind,spellId:s.id,spellName:s.name,name:s.name+' / '+(kind==='damage'?(s.category==='defense'?'Potency':spellDamageChannel(s.id,s.element)+' damage'):upgradeLabel(kind)),upgradeLabel:kind==='damage'?(s.category==='defense'?'Potency':spellDamageChannel(s.id,s.element)+' damage'):upgradeLabel(kind),upgradeKind:kind,type:'spell',level:1,requiresReplacement:false}));
+ });
+}
+export function newSpellChoices(game){
+ initSpellState(game);return SPELLS.filter(s=>!game.spellLoadout.some(i=>i.id===s.id)).map(s=>({...s,id:'spell:'+s.id,spellId:s.id,type:'spell',level:1,requiresReplacement:game.spellLoadout.filter(i=>byId.get(i.id)?.category===s.category).length>=SPELL_CAPACITY[s.category]}));
+}
+export function applySpellOffer(game,offer,replaceId=null){
+ const item=game.spellLoadout.find(s=>s.id===offer.spellId);
+ if(!item)return chooseSpell(game,offer.spellId,replaceId);
+ if(!offer.upgradeKind||!spellUpgradeKinds(byId.get(item.id),item,game).includes(offer.upgradeKind))return {ok:false};
+ return {ok:applyStatUpgrade(game,item,offer)};
+}
+export function chooseSpell(game,id,replaceId=null){initSpellState(game);id=id.replace(/^spell:/,'');const s=byId.get(id);if(!s)return {ok:false};const current=game.spellLoadout.find(v=>v.id===id);if(current){if(current.rank>=5)return {ok:false};current.rank++;return {ok:true};}const same=game.spellLoadout.filter(v=>byId.get(v.id)?.category===s.category);if(same.length>=SPELL_CAPACITY[s.category]){const replaced=same.find(v=>v.id===replaceId);if(!replaced)return {ok:false,requiresReplacement:true,replacements:same.map(v=>({...byId.get(v.id),rank:v.rank}))};game.spellLoadout.splice(game.spellLoadout.indexOf(replaced),1);game.pendingSpellSupers=game.pendingSpellSupers.filter(p=>p.spellId!==replaced.id);game.spellFields=game.spellFields.filter(f=>f.kind!==replaced.id);game.projectiles=game.projectiles.filter(p=>p.spellId!==replaced.id);}game.spellLoadout.push({id,rank:1,cooldown:0,active:false});return {ok:true};}
+const active=(g,id)=>g.spellLoadout?.find(i=>i.id===id&&i.active);
+export function spellResistanceBonus(g,element){let value=0;for(const i of g.spellLoadout||[]){if(!i.active)continue;const r=effectiveSpellRank(g,i);if(i.id==='reactive-armor')value+=element==='Physical'?(15+r)*spellTuning(i,g).damage:-5;if(['protection','arch-protection'].includes(i.id)&&element==='Physical')value+=(8+r)*spellTuning(i,g).damage;}return value;}
+export function spellDamageBonus(g,weapon=false){let value=0;for(const id of weapon?['strength','bless']:['cunning','bless']){const i=active(g,id);if(i)value+=(.08+effectiveSpellRank(g,i)*.02)*spellTuning(i,g).damage;}return value;}
+export function spellMovementMultiplier(g){const i=active(g,'agility')||active(g,'bless');return i?1+(.08+effectiveSpellRank(g,i)*.02)*spellTuning(i,g).damage:1;}
+export function spellEnemyMovementMultiplier(g,e){return e.spellParalyzedUntil>g.time?0:e.spellSlowedUntil>g.time?.75:1;}
+export function spellEnemyDamageMultiplier(g,e){return e.spellWeakenedUntil>g.time?.8:1;}
+export function spellInvisible(g){return !!active(g,'invisibility');}
+export const DIRECT_SPELL_DAMAGE=Object.freeze({'magic-arrow':.8,fireball:1.4,lightning:1.3,'energy-bolt':2,'mind-blast':1.6,'flame-strike':2.5,explosion:1.7,'chain-lightning':1.2,'meteor-swarm':1.2});
+export function spellDamageAtRank(g,rank=1){return (g.baseDamage??g.damage??25)*(1+(rank-1)*.25);}
+export function spellCooldown(id,rank=1,item=null,game=null){const s=byId.get(id);return s?recovery(s,item||{id,rank},game):0;}
+const recovery=(s,i,g=null)=>Math.max(.5,s.cooldown*(1-(effectiveSpellRank(g,i)-1)*.065)/spellTuning(i,g).haste);
+export function spellHud(g){initSpellState(g);return [...g.spellLoadout,...(g.weaponSpell?[g.weaponSpell]:[])].map(i=>({...byId.get(i.id),...i,spellId:i.id,id:i.weaponGranted?'weapon:'+i.id:i.id,name:byId.get(i.id).name+(i.weaponGranted?' · Weapon':''),duration:recovery(byId.get(i.id),i,g),ready:i.cooldown<=0,type:i.weaponGranted?'weapon-spell':'spell'}));}
+function effect(g,p,id,radius=30,life=.7){g.effect?.(p.x,p.y,radius,'#d2b9ff',id,life);}
+export function tryReflectSpell(g,attacker,damage,element,context={}){if(!attacker||attacker.hp<=0||context.reflected||['melee','poison-dot','breath'].includes(context.kind)||context.proc||element==='Physical')return false;const i=active(g,'magic-reflection');if(!i||!(i.activeRemaining>0)||!(i.reflectionCharges>0))return false;const circle=clamp(context.circle||byId.get(context.spellId)?.circle||1,1,8);const reflected=i.reflectionCharges>=circle;i.reflectionCharges=Math.max(0,i.reflectionCharges-circle);if(!i.reflectionCharges){i.active=false;i.activeRemaining=0;}if(!reflected)return false;if(!context.deferDamage){g.hurtEnemy(attacker,damage,false,element);effect(g,attacker,context.spellId||'magic-reflection');}effect(g,g.player,'magic-reflection');return true;}
+export const SPELL_SPLASH_RADIUS=56;
+export function spellImpact(g,target,damage,id,element,radius=SPELL_SPLASH_RADIUS){const center={x:target.x,y:target.y};g.hurtEnemy(target,damage,false,element);effect(g,center,id);for(const e of g.enemies)if(e!==target&&e.hp>0&&dist(e,center)<=radius+(e.radius||0)){g.hurtEnemy(e,damage*.6,false,element);effect(g,e,id,22,.45);}}
+const nearbyTargets=(g,target,area=1)=>g.enemies.filter(e=>e.hp>0&&!(e.arrival>0)&&(e===target||dist(e,target)<=SPELL_SPLASH_RADIUS*area+(e.radius||0)));
+function shot(g,target,damage,id,element,tuning={area:1},offset=0){const p=g.player,a=Math.atan2(target.y-p.y,target.x-p.x)+offset,speed=id==='fireball'?330:420;g.projectiles.push({id:g.nextId++,x:p.x,y:p.y,vx:Math.cos(a)*speed,vy:Math.sin(a)*speed,radius:7,damage,life:2.2,maxLife:2.2,hostile:false,hits:[],pierce:0,kind:id,spellId:id,element,splashRadius:SPELL_SPLASH_RADIUS*tuning.area,proc:true});}
+function field(g,s,i,p,damage,extra={}){const t=spellTuning(i,g),rank=effectiveSpellRank(g,i);g.spellFields.push({x:p.x,y:p.y,angle:Math.atan2(p.y-g.player.y,p.x-g.player.x)+Math.PI/2,radius:(80+rank*10)*t.area,width:17*t.area,life:(5+rank)*t.duration,tick:0,damage,kind:s.id,element:s.element,...extra});if(g.spellFields.length>128)g.spellFields.splice(0,g.spellFields.length-128);}
+export const SUMMON_SPELL_BODIES={'blade-spirits':574,'summon-creature':211,'energy-vortex':164,'air-elemental':13,'earth-elemental':14,'fire-elemental':15,'water-elemental':16,'summon-daemon':10};
+function cast(g,i,s,target){const rank=effectiveSpellRank(g,i),p=g.player,t=spellTuning(i,g),scale=(1+(rank-1)*.25)*t.damage,damage=spellDamageAtRank(g,rank)*t.damage,id=s.id;g.audioCue?.(id);
+ if(['heal','greater-heal'].includes(id)){p.hp=Math.min(p.maxHp,p.hp+(id==='heal'?18:42)*scale);effect(g,p,id);}
+ else if(['cure','arch-cure'].includes(id)){p.poison=null;p.poisonUntil=0;effect(g,p,id);}
+ else if(defensive.has(id)&&id!=='teleport'){i.active=true;i.activeRemaining=id==='magic-reflection'?35+(rank-1)*5:id==='invisibility'?3+rank:25+rank*5;i.activeRemaining*=t.duration;if(id==='magic-reflection')i.reflectionCharges=Math.min(600,Math.round((8+rank*2)*t.damage));effect(g,p,id);}
+ else if(id==='teleport'){const a=Math.atan2(p.y-target.y,p.x-target.x),dest={x:p.x+Math.cos(a)*140*t.damage,y:p.y+Math.sin(a)*140*t.damage};if(g.canStand?g.canStand(dest.x,dest.y,p.radius):!g.isPassable||g.isPassable(dest.x,dest.y,g.time)){effect(g,p,id);p.x=dest.x;p.y=dest.y;effect(g,p,id);}}
+ else if(['magic-arrow','fireball','energy-bolt'].includes(id)){for(let n=0;n<t.count;n++)shot(g,target,damage*DIRECT_SPELL_DAMAGE[id],id,s.element,t,(n-(t.count-1)/2)*.16);}
+ else if(['fire-field','poison-field','paralyze-field','energy-field','wall-of-stone'].includes(id)){for(let n=0;n<t.count;n++)field(g,s,i,{x:target.x+(n-(t.count-1)/2)*45,y:target.y},damage*.22,{poisonDuration:8*t.duration});}
+ else if(SUMMON_SPELL_BODIES[id]){g.spellFields=g.spellFields.filter(f=>f.kind!==id);for(let n=0;n<t.count;n++)field(g,s,i,{x:p.x+(n-(t.count-1)/2)*22,y:p.y},damage*.45,{body:SUMMON_SPELL_BODIES[id],hue:id==='air-elemental'?0x4001:0,summon:true,life:(18+rank*3)*t.duration,radius:40,splashRadius:24*t.area,angle:0});effect(g,p,id);}
+ else if(id==='poison'){for(const e of nearbyTargets(g,target,t.area)){e.spellPoisonUntil=g.time+(6+rank*2)*t.duration;e.spellPoisonDamage=damage*.16;e.spellPoisonTick=0;effect(g,e,id);}}
+ else if(id==='paralyze'){for(const e of nearbyTargets(g,target,t.area)){e.spellParalyzedUntil=g.time+Math.min(e.boss?1:8,(1.5+rank*.5)*t.duration);effect(g,e,id);}}
+ else if(id==='feeblemind'){
+  const victims=g.enemies.filter(e=>e.hp>0&&e.behavior?.caster&&dist(e,target)<=(190+rank*15)*t.area),owners=new Set(victims.map(e=>e.id));
+  for(const e of victims){e.spellSilencedUntil=g.time+(3+rank)*t.duration;e.castClock=Math.max(e.castClock||0,(3+rank)*t.duration);effect(g,e,id);}
+  const cancelled=(g.pendingEnemyCasts||[]).filter(c=>owners.has(c.ownerId));
+  g.pendingEnemyCasts=(g.pendingEnemyCasts||[]).filter(c=>!owners.has(c.ownerId));
+  if(g.effects)g.effects=g.effects.filter(e=>!(e.kind==='enemy-cast'&&cancelled.some(c=>e.castId===c.id||(e.castId===undefined&&e.spellId===c.spellId&&e.x===c.x&&e.y===c.y))));
+ }
+ else if(['clumsy','weaken','curse','mass-curse'].includes(id)){const victims=id==='mass-curse'?g.enemies.filter(e=>e.hp>0&&dist(e,target)<160*t.area):nearbyTargets(g,target,t.area);for(const e of victims){const until=g.time+(12+rank*3)*t.duration;if(['clumsy','curse','mass-curse'].includes(id))e.spellSlowedUntil=until;if(['weaken','curse','mass-curse'].includes(id))e.spellWeakenedUntil=until;if(['feeblemind','curse','mass-curse'].includes(id)){e.castClock=Math.max(e.castClock||0,(3+rank)*t.duration);}effect(g,e,id);}}
+ else if(['explosion','mind-blast'].includes(id))field(g,s,i,target,damage*DIRECT_SPELL_DAMAGE[id],{life:id==='explosion'?2.8:1,delay:true,targetId:target.id,radius:0,splashRadius:SPELL_SPLASH_RADIUS*t.area});
+ else if(['chain-lightning','meteor-swarm','earthquake'].includes(id)){
+  const center=id==='earthquake'?p:target,radius=((id==='earthquake'?200:130)+rank*15)*t.area;
+  const victims=id==='chain-lightning'?chainTargets(g,target,4+rank+t.targets):g.enemies.filter(e=>e.hp>0&&dist(e,center)<radius).slice(0,id==='earthquake'?100:Math.min(48,Math.ceil((4+rank)*t.area*t.area)));
+  if(id==='earthquake')effect(g,p,id,radius,1.1);
+  for(const e of victims){
+   if(id==='meteor-swarm'){field(g,s,i,e,damage*DIRECT_SPELL_DAMAGE[id],{life:.65,delay:true,targetId:e.id,radius:0,areaImpact:true});effect(g,e,id,42,.95);}
+   else {g.hurtEnemy(e,id==='earthquake'?clamp(e.hp/2,15,100)*scale:damage*DIRECT_SPELL_DAMAGE[id],false,s.element);if(id!=='earthquake')effect(g,e,id);}
+  }
+ }
+ else {spellImpact(g,target,damage*(id==='harm'?(dist(p,target)<90?1.2:.6):DIRECT_SPELL_DAMAGE[id]),id,s.element,SPELL_SPLASH_RADIUS*t.area);}
+}
+export function chainTargets(g,first,count){const targets=[first];while(targets.length<count){const last=targets.at(-1),next=g.enemies.filter(e=>e.hp>0&&!(e.arrival>0)&&!targets.includes(e)&&dist(last,e)<=180&&(!g.clearSight||g.clearSight(last,e))).sort((a,b)=>dist(a,last)-dist(b,last))[0];if(!next)break;targets.push(next);}return targets;}
+function contains(f,x,y,radius=0){const dx=x-f.x,dy=y-f.y,ux=Math.cos(f.angle),uy=Math.sin(f.angle);return Math.abs(dx*ux+dy*uy)<f.radius+radius&&Math.abs(dx*-uy+dy*ux)<(f.width||17)+radius;}
+export function spellBlocksMovement(g,x,y,radius=0){return (g.spellFields||[]).some(f=>f.life>0&&['energy-field','wall-of-stone'].includes(f.kind)&&contains(f,x,y,radius));}
+export function tickSpellSystem(g,dt){initSpellState(g);const p=g.player;g.weaponSpellClock=Math.max(0,(g.weaponSpellClock||0)-dt);const weapon=g.weaponSpell;for(const i of [...g.spellLoadout,...(weapon?[weapon]:[])]){const s=byId.get(i.id);if(!s)continue;if(!i.weaponGranted)i.cooldown=Math.max(0,i.cooldown-dt);if(i.activeRemaining!==undefined){i.activeRemaining=Math.max(0,i.activeRemaining-dt);if(!i.activeRemaining)i.active=false;}if(i.cooldown>0||i.active)continue;if(s.category==='offense'&&spellInvisible(g))continue;if(['heal','greater-heal'].includes(s.id)&&p.hp>=p.maxHp-(s.id==='heal'?12:25))continue;if(['cure','arch-cure'].includes(s.id)&&!(p.poisonUntil>g.time))continue;let target=g.nearest?.(p,s.id==='harm'?150:600);if(s.id==='feeblemind')target=g.enemies.find(e=>e.hp>0&&e.behavior?.caster&&dist(e,p)<600);if((s.category==='offense'||s.id==='teleport')&&!target)continue;if(s.id==='teleport'&&dist(p,target)>120)continue;cast(g,i,s,target);i.cooldown=recovery(s,i,g);if(i.weaponGranted)g.weaponSpellClock=i.cooldown;}
+ for(const e of g.enemies)for(const [prefix,element,interval,visual]of [['spellPoison','Poison',2,'poison'],['spellBurn','Fire',1,'fireball']]){
+  if(e.hp<=0||!(e[prefix+'Until']>g.time))continue;
+  e[prefix+'Tick']=(e[prefix+'Tick']||0)-dt;
+  if(e[prefix+'Tick']<=0){e[prefix+'Tick']=interval;g.hurtEnemy(e,e[prefix+'Damage']||1,false,element,true);effect(g,e,visual);}
+ }
+ for(const f of g.spellFields){f.life-=dt;f.tick-=dt;if(f.life<=0){const target=g.enemies.find(e=>e.id===f.targetId&&e.hp>0);if(f.delay&&target){if(f.areaImpact){g.hurtEnemy(target,f.damage,false,f.element);effect(g,target,'explosion',35,.4);}else spellImpact(g,target,f.damage,f.kind,f.element,f.splashRadius||SPELL_SPLASH_RADIUS);}continue;}if(f.delay||f.tick>0)continue;f.tick=.5;
+ if(f.summon){const target=g.nearest?.(f,260);if(target){const d=dist(f,target)||1,travel=Math.min(d,95*.5),x=f.x+(target.x-f.x)/d*travel,y=f.y+(target.y-f.y)/d*travel;f.dx=(target.x-f.x)/d;f.dy=(target.y-f.y)/d;if(g.canStand?g.canStand(x,y,12):!g.isPassable||g.isPassable(x,y,g.time)){f.x=x;f.y=y;}if(dist(f,target)<70)spellImpact(g,target,f.damage,f.kind,f.kind==='fire-elemental'?'Fire':f.kind==='water-elemental'?'Cold':'Physical',f.splashRadius||24);}continue;}
+ const kind=f.kind||'fire-field';for(const e of g.enemies){if(e.hp<=0||!contains(f,e.x,e.y,e.radius))continue;if(kind==='fire-field')g.hurtEnemy(e,f.damage,false,'Fire');if(kind==='poison-field'&&!(e.spellPoisonUntil>g.time+2)){e.spellPoisonUntil=g.time+(f.poisonDuration||8);e.spellPoisonDamage=f.damage*.7;e.spellPoisonTick=0;}if(kind==='paralyze-field'&&!(e.spellFieldImmunityUntil>g.time)){e.spellParalyzedUntil=g.time+(e.boss?1:2);e.spellFieldImmunityUntil=g.time+4;}}
+ for(let n=-2;n<=2;n++){effect(g,{x:f.x+Math.cos(f.angle)*n*f.radius/2,y:f.y+Math.sin(f.angle)*n*f.radius/2},kind,22,.55);const visual=g.effects?.at(-1);if(visual?.kind===kind)visual.angle=f.angle;}
+ }g.spellFields=g.spellFields.filter(f=>f.life>0);
+}
+export function validSpellState(g){if(!validUpgradeState(g))return false;if(g.spellLoadout!==undefined){if(!Array.isArray(g.spellLoadout)||g.spellLoadout.length>SPELL_CAPACITY.offense+SPELL_CAPACITY.defense)return false;const seen=new Set(),counts={offense:0,defense:0};for(const i of g.spellLoadout){const s=byId.get(i?.id)||MAGERY_BOOK.find(s=>s.id===i?.id&&RETIRED_SPELLS.has(s.id));if(!s||seen.has(i.id)||!Number.isInteger(i.rank)||i.rank<1||i.rank>5||!Number.isFinite(i.cooldown)||i.cooldown<0||i.cooldown>3600||typeof i.active!=='boolean')return false;for(const k of ['activeRemaining','reflectionCharges'])if(i[k]!==undefined&&(!Number.isFinite(i[k])||i[k]<0||i[k]>600))return false;seen.add(i.id);if(++counts[s.category]>SPELL_CAPACITY[s.category])return false;}}if(g.spellFields!==undefined&&(!Array.isArray(g.spellFields)||g.spellFields.length>128||g.spellFields.some(f=>!f||['x','y','angle','radius','life','tick','damage'].some(k=>!Number.isFinite(f[k]))||f.life>600||f.radius>1000||f.damage<0||f.kind!==undefined&&!byId.has(f.kind)&&!RETIRED_SPELLS.has(f.kind)||['targetId','body','dx','dy','restoreMana','width','splashRadius','poisonDuration'].some(k=>f[k]!==undefined&&!Number.isFinite(f[k])))))return false;for(const e of g.enemies||[])for(const k of ['spellSilencedUntil','spellParalyzedUntil','spellSlowedUntil','spellWeakenedUntil','spellPoisonUntil','spellPoisonDamage','spellPoisonTick','spellBurnUntil','spellBurnDamage','spellBurnTick','spellFieldImmunityUntil'])if(e[k]!==undefined&&(!Number.isFinite(e[k])||Math.abs(e[k])>1e7))return false;return true;}

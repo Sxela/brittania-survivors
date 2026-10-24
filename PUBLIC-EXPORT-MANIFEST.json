@@ -1,0 +1,826 @@
+{
+  "version": 1,
+  "mode": "source-only",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 130,
+      "sha256": "6a7a845a9c157e94fd9ce952c1b78819e56c76a3557abcbd8f0abd93c33f1914"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "bytes": 962,
+      "sha256": "7b5c1c9458a61699cdb172800d08bb5e3d5fe563190034b4fe5bdfce9541735a"
+    },
+    {
+      "path": ".github/workflows/release.yml",
+      "bytes": 3575,
+      "sha256": "1ebf2fd3dd5d5ba3f7fc5449e247ba0e432e24614a82e1b53c15b9661ce10878"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 156,
+      "sha256": "dac129ebb708dc684873caf7dc28c1431c9d4765eb25104bff82e9c77d1d4907"
+    },
+    {
+      "path": "desktop/main.cjs",
+      "bytes": 1442,
+      "sha256": "907324f295b502685f6a92208acac7e406af371dca953199e7ccd083be2c5651"
+    },
+    {
+      "path": "docs/asset-setup.md",
+      "bytes": 3719,
+      "sha256": "3b1d5122d62ba1bb6eb46d6549fc4b31e52a3fc4577b29dfa7c807809bf13d90"
+    },
+    {
+      "path": "docs/britannia-playtesting-and-balance-log.md",
+      "bytes": 24102,
+      "sha256": "21ddd89363c3293608e8bb22f16096f8995153901429f55af1b9dd137a8fb5fe"
+    },
+    {
+      "path": "docs/britannia-survivors-reference.md",
+      "bytes": 12570,
+      "sha256": "387dd3270f8f4a8174e3fbb14f645ea6789bc35074d96c67e5231a5ca7aa0e7d"
+    },
+    {
+      "path": "docs/game-to-survivors-mechanics.md",
+      "bytes": 42577,
+      "sha256": "38facc47347371d7b9a6a456a4b358c9109c54f45783b295e9927b9dd178a89e"
+    },
+    {
+      "path": "docs/nostalgic-ui-workflow.md",
+      "bytes": 17074,
+      "sha256": "b655fad6ab7e4c6cdebc86bcc9832b6f7d5ec371fe1f25807658c167c83d34aa"
+    },
+    {
+      "path": "docs/playtesting-and-balance-log.md",
+      "bytes": 13206,
+      "sha256": "7867a851ba1c137d1dc9c9fcb4622dff7a3befdb1c4c56695d05a9d8d0588b7f"
+    },
+    {
+      "path": "docs/promo-video-workflow.md",
+      "bytes": 15473,
+      "sha256": "35b3156e04451fd71b4ca2396955075aa07c3d59913721e017f2252d7e173dd7"
+    },
+    {
+      "path": "electron-builder.json",
+      "bytes": 825,
+      "sha256": "8ac9fa89688f081865962668a02c01e9beb273ac717f1bb264ebfc93770c79cb"
+    },
+    {
+      "path": "game/actor-placement.mjs",
+      "bytes": 243,
+      "sha256": "091066b473cb4eee7b9d87d73f536ab88fa82863a61ae18c1355c21a7faad708"
+    },
+    {
+      "path": "game/app.mjs",
+      "bytes": 86181,
+      "sha256": "87772c47fb30d0e34238120b25e3cd38435a43b6186b39d00d3d98b379d70fa0"
+    },
+    {
+      "path": "game/area-route.mjs",
+      "bytes": 1681,
+      "sha256": "d5206f53971692b5080eee75d2521e52c29179b442a21516f0ffe5bcaeec43d5"
+    },
+    {
+      "path": "game/audio.mjs",
+      "bytes": 3958,
+      "sha256": "02cc7e8726e2a568a950d5c2b611d1a0b4b0545b65c988f8adacce674dc7b5e0"
+    },
+    {
+      "path": "game/biome-terrain.mjs",
+      "bytes": 4493,
+      "sha256": "f290ea3bafdbc316dce66c2ab4ce2198da2e921c7f00d8bd1cfcc1fdc55289ef"
+    },
+    {
+      "path": "game/build-stats.mjs",
+      "bytes": 8063,
+      "sha256": "93e1b5ddc917f530326a3cfc763523e7d6eecc6f9353ce843ef6708ca50d4e8e"
+    },
+    {
+      "path": "game/camp-ui.mjs",
+      "bytes": 2622,
+      "sha256": "74db87540ee3bfc6278450160f5249fac1bc1f80ea8a5aeab7c8e6ae43853d85"
+    },
+    {
+      "path": "game/choice-draw.mjs",
+      "bytes": 695,
+      "sha256": "b3d706d67d08f3c5d5a7408f82d9d9de99381ba35cb6db8fa6be6fc2aeb7c3ad"
+    },
+    {
+      "path": "game/classic-effects.mjs",
+      "bytes": 4281,
+      "sha256": "7380777e8dad3c65ad3286e620ca4e55d130f5127c5c2e8ebd232d476ea905d8"
+    },
+    {
+      "path": "game/combat-types.mjs",
+      "bytes": 6041,
+      "sha256": "cc077d3fb4edce8624f71c9d16eb685b12315830675cae00238950620d0e1d76"
+    },
+    {
+      "path": "game/core.mjs",
+      "bytes": 93286,
+      "sha256": "69d36cd9f81cf58eb80ecb967436ae6ff608f8b3b0afe8ea40cb16f5eb1460d0"
+    },
+    {
+      "path": "game/data/areas.json",
+      "bytes": 36004,
+      "sha256": "07552792334e60ebc506c38415586f7c70c4aa7c8b5f38929ae6119e23495f58"
+    },
+    {
+      "path": "game/data/catalog.json",
+      "bytes": 3332434,
+      "sha256": "0531a5a43d564a2cbc0eb059721ff48d2eefa7bb6b14a5fd790add173d3995da"
+    },
+    {
+      "path": "game/data/enemy-equipment.json",
+      "bytes": 70250,
+      "sha256": "101c9aa9a7656bcc03bcde3d68756bb3300221f7426ae89e249cbd47e26e90f7"
+    },
+    {
+      "path": "game/effects.mjs",
+      "bytes": 3908,
+      "sha256": "f8ee34e86d20c87690b06de6bbbe56a645a57a5366cfddfa0ed5615df5ba02aa"
+    },
+    {
+      "path": "game/enemy-equipment.mjs",
+      "bytes": 2361,
+      "sha256": "ad1b26fa070d13b020216c90ce3b95de0c7e5dbf922a6fc88347f2cc39a61506"
+    },
+    {
+      "path": "game/equipment.mjs",
+      "bytes": 10233,
+      "sha256": "ff17b772e086f6c083b8cdf04026a8e625894f552d1edce715b59bc8900c1d35"
+    },
+    {
+      "path": "game/general-mechanics.mjs",
+      "bytes": 2675,
+      "sha256": "765cf22064702a8674398927bd7d8f2b8653801606ec015df24b48f5cf94e533"
+    },
+    {
+      "path": "game/guidance.mjs",
+      "bytes": 2820,
+      "sha256": "36cc1375cf39e6ebd8a50edcba936baeea7ec7e59fe2f2b2b1081461061c0825"
+    },
+    {
+      "path": "game/hues.mjs",
+      "bytes": 1220,
+      "sha256": "bcb118777745d7500f4dfbb9735295ee54e4c0e55234c533e6462d6dbcc6ba8d"
+    },
+    {
+      "path": "game/index.html",
+      "bytes": 6018,
+      "sha256": "6f01b504b71e02be6eb31b493618556ffb471b3cd563632ef17f18a1b001f950"
+    },
+    {
+      "path": "game/inventory.mjs",
+      "bytes": 22372,
+      "sha256": "e94a7ba75172c255dae3ac2214441280bb2f897a819f6523a78ea5c6b40ded84"
+    },
+    {
+      "path": "game/item-overlay.mjs",
+      "bytes": 1924,
+      "sha256": "00d716d7a36c1031132c9a9a88da73ad96ddef6c17beb5e6c38484ffbb2a6a82"
+    },
+    {
+      "path": "game/location-height.mjs",
+      "bytes": 4869,
+      "sha256": "10b05df0330bb5509973eb312bd7311176ddfb0198a21f0dad93b7195c8be2ef"
+    },
+    {
+      "path": "game/location-map.mjs",
+      "bytes": 14268,
+      "sha256": "f4ea3234d41e0dea106f87f9cbfb2f3396fdef321fc7056f38612b1b43717303"
+    },
+    {
+      "path": "game/loot-chests.mjs",
+      "bytes": 877,
+      "sha256": "b542044644e75a061c0e9faab4e473fc3e1bd834849b08816ae82aed6f976ec4"
+    },
+    {
+      "path": "game/map-navigation.mjs",
+      "bytes": 5872,
+      "sha256": "cb7fe177bf50d0fe0c62da14c64803cc8c712aa2fb28ca0eac06df39142610a8"
+    },
+    {
+      "path": "game/map-regions.mjs",
+      "bytes": 17709,
+      "sha256": "12e75612ee867cd87fb3c9384c7b8c270a3c0922b6d1d2b6bc409a202b4e2473"
+    },
+    {
+      "path": "game/minimap.mjs",
+      "bytes": 4797,
+      "sha256": "463385c8c5afbd99b2d3747155cf4c56fd93834ef8d60d67a2f91e57c00008d2"
+    },
+    {
+      "path": "game/mining.mjs",
+      "bytes": 2686,
+      "sha256": "a938d52af5e6546605e449f1eacf563f9e9cc0ccf4cfcda48f863ee2f250debd"
+    },
+    {
+      "path": "game/mobile.mjs",
+      "bytes": 483,
+      "sha256": "7fa42316d4fcc6ebbf43615693f798b798a83f0f3231dddba1619c8b2fc22300"
+    },
+    {
+      "path": "game/monster-behavior.mjs",
+      "bytes": 8325,
+      "sha256": "e488ad4bbf2fcd9176f891110cec10aa809b19d21c38582900cf12c1425e2f0c"
+    },
+    {
+      "path": "game/monster-source-data.mjs",
+      "bytes": 39568,
+      "sha256": "9fdb0591512e8374a5231253ade8080260f2ddb85e0133519e4ebf47f6a7f5dd"
+    },
+    {
+      "path": "game/monster-stats.mjs",
+      "bytes": 1559,
+      "sha256": "f768011858d493be832bbc3fdc6b6ebd664fdd9ad7defc2874b84534386da9d8"
+    },
+    {
+      "path": "game/movable-hud.mjs",
+      "bytes": 4447,
+      "sha256": "dd99072b6624fa22dec196309fb6ec16188094e901dcab1fd88f8c6f84ae9c2e"
+    },
+    {
+      "path": "game/navigation.mjs",
+      "bytes": 2256,
+      "sha256": "c5fa24cf3d194e2c29d4b5be7ef3340c0df412272f189a9722cbc22245e05103"
+    },
+    {
+      "path": "game/pathfinding.mjs",
+      "bytes": 2663,
+      "sha256": "61bf0bb601ca3a03f55461d46ad9bcbe674517281c589d08358d0b486d3bf4e5"
+    },
+    {
+      "path": "game/presentation.mjs",
+      "bytes": 892,
+      "sha256": "3674887f794726a14d7dc803da9c60906c30852446baf596e4166d010fdea445"
+    },
+    {
+      "path": "game/progression.mjs",
+      "bytes": 4096,
+      "sha256": "c7846ba33e44f7580ef89fb9ae8389399e0b2aebfe896eeb328bc8836e22a7ef"
+    },
+    {
+      "path": "game/reward-rules.mjs",
+      "bytes": 1385,
+      "sha256": "76b806f5c912035097172e30d9594dd796490086559074f68daa9e576066cb60"
+    },
+    {
+      "path": "game/route-maps.mjs",
+      "bytes": 1574,
+      "sha256": "43d4380abc02782b0979ac28adee4a8f7b7230a6488d5e2ff3140d3c6ae6163a"
+    },
+    {
+      "path": "game/spell-levels.mjs",
+      "bytes": 3427,
+      "sha256": "38697e3ea10c85a4ee0659e28182aba9378e65fe6ddebb96c80819e0b705ed0f"
+    },
+    {
+      "path": "game/spell-preview.mjs",
+      "bytes": 8079,
+      "sha256": "3d665f2c1187c8dbe2ad7a3999b5ede5ec9d48a71735b418932ea05c20e804b1"
+    },
+    {
+      "path": "game/spell-system.mjs",
+      "bytes": 26184,
+      "sha256": "36e0b1964d2d8f007b316c48599a12502128ba51f7216d9a9e6b8c6103600ecd"
+    },
+    {
+      "path": "game/spell-upgrades.mjs",
+      "bytes": 13313,
+      "sha256": "853ee3283922eacc5ea1a856c0b934aeb113ec599f05a0c02280dc67aeeb9dca"
+    },
+    {
+      "path": "game/static-placement.mjs",
+      "bytes": 1159,
+      "sha256": "b048b1d2e43751230aead4dff23f4a29b01b2b526fab43660fa445a5afcd3989"
+    },
+    {
+      "path": "game/style.css",
+      "bytes": 57186,
+      "sha256": "278533f5f8018efd8833c9fd8f8cd8fdca4f0962d411cc1b7f8984cc55fc8e27"
+    },
+    {
+      "path": "game/weapon-traits.mjs",
+      "bytes": 1540,
+      "sha256": "1629d9d1889395599520796a7f4dd5a0a911b5571c7865a89064cb12fa86a3d4"
+    },
+    {
+      "path": "game/world-appearance.mjs",
+      "bytes": 6662,
+      "sha256": "22aab8538599095cf54bd49e14b76f581f42729473f1f0a4cfdfc72aaca184b6"
+    },
+    {
+      "path": "game/world-layers.mjs",
+      "bytes": 1691,
+      "sha256": "1da2b0eaf85aaa426bad0bf07745030375581ceece1f9347654af1d09caceac4"
+    },
+    {
+      "path": "game/zone-pacing.mjs",
+      "bytes": 2115,
+      "sha256": "bf74374da5436e9e28045742ff5700b1db51aa103fc2f90b738a64fb1ee34a43"
+    },
+    {
+      "path": "game/zone-progression.mjs",
+      "bytes": 2750,
+      "sha256": "06b47343313be053a404fd49b4bb2a1ccf3623efb0688600b2abdd3035c74b21"
+    },
+    {
+      "path": "game/zone-run.mjs",
+      "bytes": 15456,
+      "sha256": "aa73e704c85b95bffdd90b97d66ff74c3499111f3bfafb343520c4ac5f71c87b"
+    },
+    {
+      "path": "package-lock.json",
+      "bytes": 121935,
+      "sha256": "4cfb48978523c906112b242be3721a8c409b142979eab159ac7fca9642320716"
+    },
+    {
+      "path": "package.json",
+      "bytes": 785,
+      "sha256": "e96e8eb0d4dade355af0024e711b6c36f81102bb61d9175eae407cd42d24c756"
+    },
+    {
+      "path": "README.md",
+      "bytes": 4520,
+      "sha256": "a898392eb26784f503b3179e75a941b79d9eb920694e5dd46fd79f67d5bf5c57"
+    },
+    {
+      "path": "requirements-assets.txt",
+      "bytes": 15,
+      "sha256": "570c9387510a35edf1e287600993944ebc8ee5af602c809cf00cd57e2b723779"
+    },
+    {
+      "path": "Start-Survivors-Desktop.cmd",
+      "bytes": 52,
+      "sha256": "4f7193b9d07e2d5dc04539811caabe116463a2dff0ae7e87375fe6cf8817d76a"
+    },
+    {
+      "path": "Start-Survivors-Mobile.cmd",
+      "bytes": 147,
+      "sha256": "4e779b493c6746f0808e4841c464308d3b4e59003be41ceb9e372751e2c44779"
+    },
+    {
+      "path": "Start-Survivors.cmd",
+      "bytes": 53,
+      "sha256": "4660507d69a4a938569475af6075d9cb822562c749e1b33054f952ad403cee71"
+    },
+    {
+      "path": "tests/balance-safety.test.mjs",
+      "bytes": 4213,
+      "sha256": "41fb8905021f1e9ac2cc78ff2a85af7cb7e425983f3da4b3788f008f7dd8f432"
+    },
+    {
+      "path": "tests/biome-terrain.test.mjs",
+      "bytes": 3113,
+      "sha256": "ce0241fa2a80e62e59f6fe52487d03b5ac4e2275172edb0ef4a684d66c83ecab"
+    },
+    {
+      "path": "tests/browser-smoke.cjs",
+      "bytes": 2695,
+      "sha256": "dce72e093157efe0028dd69d4ce0feb39c532019b7ad971932c994ddaea3b7b9"
+    },
+    {
+      "path": "tests/build-stats.test.mjs",
+      "bytes": 3495,
+      "sha256": "ba5e46bc4485287f19a3fb8115a5f7e85f1cd6354777aaa5ac6e3a69886b4106"
+    },
+    {
+      "path": "tests/class-weapons.test.mjs",
+      "bytes": 8159,
+      "sha256": "ecd695a42d636b2087ec76f6c63a479e6b528f16f43b5bbb852162295fcec091"
+    },
+    {
+      "path": "tests/combat-types.test.mjs",
+      "bytes": 4166,
+      "sha256": "fa7de0f71b58808e67c88e624cfeee7508ec0fa8804533c1fc82fc7d13fa94e0"
+    },
+    {
+      "path": "tests/core.test.mjs",
+      "bytes": 12105,
+      "sha256": "1d6537df4c78863ca06acd76329e5e22847ec09abc3d435757957c27420aeb68"
+    },
+    {
+      "path": "tests/desktop-release.test.mjs",
+      "bytes": 6046,
+      "sha256": "3e1e2a573b7bc8229c2f17cb0fa4ccf618e315433d8842f7b25f98761ebf2b66"
+    },
+    {
+      "path": "tests/elemental-attacks.test.mjs",
+      "bytes": 4217,
+      "sha256": "d3601722557a5a3aff50689da1337b6adefce841ead6397a42cbe48a51794eec"
+    },
+    {
+      "path": "tests/enemy-casting.test.mjs",
+      "bytes": 8673,
+      "sha256": "368a709e00736c713d72eb1e4d28be99ebed3f55a449b2179bba57322c9c987f"
+    },
+    {
+      "path": "tests/equipment-loot.test.mjs",
+      "bytes": 9933,
+      "sha256": "f8c7f9c66d017c0fc50d179fe4eba5834d32858ec7a489670a1b7d1cc04c7b95"
+    },
+    {
+      "path": "tests/full-roster.test.mjs",
+      "bytes": 7815,
+      "sha256": "047b70e88c925986a6851faf974f5372507f01525fc6d9be66d7f235624e0f09"
+    },
+    {
+      "path": "tests/full-spellbook.test.mjs",
+      "bytes": 2909,
+      "sha256": "218664e1ce467fa3a32d09050b2a04e3bc04a4e5cbe9e19762b3f2a95dc6691d"
+    },
+    {
+      "path": "tests/general-mechanics.test.mjs",
+      "bytes": 12737,
+      "sha256": "0a93e06d3a56d338a56fb2065568bc2de0a0aabed62f66869cf68dbc40138a95"
+    },
+    {
+      "path": "tests/interaction-navigation.test.mjs",
+      "bytes": 2873,
+      "sha256": "abb4e09fd308242c223bf6cc2af57cf9b27f71ed67b7c0dc6962f458d1ece0ba"
+    },
+    {
+      "path": "tests/jump.test.mjs",
+      "bytes": 1736,
+      "sha256": "faa1d302bd9ec47b913689933705e606e4c8a4bba065ac4a59a6f606487f7d75"
+    },
+    {
+      "path": "tests/location-height.test.mjs",
+      "bytes": 5595,
+      "sha256": "0303bc55778b15820fe0b2b8e067fde336b8d09ad851c5e91c4640ecec2191c7"
+    },
+    {
+      "path": "tests/loot-chests.test.mjs",
+      "bytes": 4428,
+      "sha256": "bc163474aef87dbfaa4ca702541b039449b959ff5d59dd4a850fc1f019db3da5"
+    },
+    {
+      "path": "tests/magery-completeness.test.mjs",
+      "bytes": 8259,
+      "sha256": "d067083d0cc192cdad56e217da4dd8661897a73e11f9568c9fbb0d9092dca945"
+    },
+    {
+      "path": "tests/mining-shop.test.mjs",
+      "bytes": 3896,
+      "sha256": "3b493bbd6ea812d5dfaed25b2e374cdbdb395d528662c9969ffe020f9aad4876"
+    },
+    {
+      "path": "tests/monster-stats.test.mjs",
+      "bytes": 3952,
+      "sha256": "a5416eb8004a7de268132e8905e3d4fcebc587dcd3aad6dc226a37a16b0269a1"
+    },
+    {
+      "path": "tests/navigation-map.test.mjs",
+      "bytes": 2658,
+      "sha256": "4cab20dfe67d5486d6b82451d98ba7fdf93a9a474b1f67aae81467ee04219524"
+    },
+    {
+      "path": "tests/navigation.test.mjs",
+      "bytes": 2356,
+      "sha256": "f02c05c05bbfa522790e8b5343ec5900ce51be51d1de073f200ced9e8c622c9d"
+    },
+    {
+      "path": "tests/new-creatures.test.mjs",
+      "bytes": 2107,
+      "sha256": "a4b003253f6ea45f4c023de0857940aec2d80f3ac926c8b8dfd9befce5d5251f"
+    },
+    {
+      "path": "tests/no-mana.test.mjs",
+      "bytes": 2001,
+      "sha256": "b3930aae2e150bbb3f02be6989dae7953b699484ccd074d2608680e5f1d4556e"
+    },
+    {
+      "path": "tests/presentation.test.mjs",
+      "bytes": 1865,
+      "sha256": "7976808d24dbca9d025ddcc5a5878e42c7c9d52c0296023c35ed495725fea32f"
+    },
+    {
+      "path": "tests/primary-stats.test.mjs",
+      "bytes": 3642,
+      "sha256": "9a7f6c4644aaa8b6afdd94d81eb9ef6a8ff67016b6b111c0d8c543bc9968f7bc"
+    },
+    {
+      "path": "tests/progression.test.mjs",
+      "bytes": 6124,
+      "sha256": "2e5f1e6466953240be2ca25ff3fb715f583403b1bcc0ecd3d20c8f74f17f209b"
+    },
+    {
+      "path": "tests/reward-balance.test.mjs",
+      "bytes": 7239,
+      "sha256": "21b9eba9c0d08c6e4f0cb7937d506710b7a44ce1cc163e6f88cb68e54bd56383"
+    },
+    {
+      "path": "tests/route-maps.test.mjs",
+      "bytes": 2779,
+      "sha256": "e11c75aeb0b0a1d1cc5fbb9c0c9eaf31944ece1825978307dc82a03ac10148b1"
+    },
+    {
+      "path": "tests/slot-comparison.test.mjs",
+      "bytes": 2262,
+      "sha256": "a4a3dce27447fa703ff2a91b4064a0c2917eac04cc689273b5f2f7ac841abfe6"
+    },
+    {
+      "path": "tests/spell-integration.test.mjs",
+      "bytes": 6387,
+      "sha256": "c933eefe3cfb2649f0c095ce88ecfec897acb638eceda2cd5d712e4de2b09d67"
+    },
+    {
+      "path": "tests/spell-learning.test.mjs",
+      "bytes": 6661,
+      "sha256": "b494ebf5b04be4e38b1e3182af4f1dadba0d8122e3a549befe06183c3600138b"
+    },
+    {
+      "path": "tests/spell-levels.test.mjs",
+      "bytes": 7974,
+      "sha256": "452f653f4ece2410d4837a6bcfec817dfd085f9647c4d39d3ec214c36a4badbb"
+    },
+    {
+      "path": "tests/spell-preview.test.mjs",
+      "bytes": 3267,
+      "sha256": "b3069e6c569e5c43c27d3bee47296a318a213d5621161ffdd6b913d67e888f75"
+    },
+    {
+      "path": "tests/spell-upgrades.test.mjs",
+      "bytes": 6709,
+      "sha256": "aba339e8e5a8b0ae1ba67830bd6e92427b103c5a72cb9bbc8ce53102d00c8d36"
+    },
+    {
+      "path": "tests/static-placement.test.mjs",
+      "bytes": 2920,
+      "sha256": "b4fcbf9c00dcf07ae6634a0b95480dd9c32c27977a57044c4a5940eb69eb5234"
+    },
+    {
+      "path": "tests/timed-zones.test.mjs",
+      "bytes": 11672,
+      "sha256": "0526b97a22e18fd5e93fb68c6af73529f409a284e0ff789f11f7913be52d3694"
+    },
+    {
+      "path": "tests/upgrade-math.test.mjs",
+      "bytes": 4703,
+      "sha256": "8eb5d817429893abff9c7d9ccea87d6d8c3cfdbbb625d8b3785207cb4369af96"
+    },
+    {
+      "path": "tests/wave-champions.test.mjs",
+      "bytes": 4351,
+      "sha256": "30c30518266c403759cd31a0fd3a349924a286a822e1ef23512f2d41ccb43a2f"
+    },
+    {
+      "path": "tests/world-layers.test.mjs",
+      "bytes": 3528,
+      "sha256": "3d30cc4782ed3b0b55c0b1a926337807092ab7a968b32137a3c46e3ed1390ac9"
+    },
+    {
+      "path": "tests/zone-progression.test.mjs",
+      "bytes": 3869,
+      "sha256": "9030e131d099dda27611b7d8bbea97a315937aadb51250850019fe856762ad6b"
+    },
+    {
+      "path": "tests/zone-run.test.mjs",
+      "bytes": 8905,
+      "sha256": "50f54bc060e16b4b9434cdd8fbd1eb56915a65551fa951dcab97a7133199fd8e"
+    },
+    {
+      "path": "tools/asset-recipe.json",
+      "bytes": 1178642,
+      "sha256": "eb1ba087ef625bbf51d8752c5a3e58343341b6bd7f18f0cc129562116968384f"
+    },
+    {
+      "path": "tools/audit-desktop.mjs",
+      "bytes": 1463,
+      "sha256": "69a33665283a0c97c69acb10dd188b2c32ca14c26e88531075dbab02bc8ee92d"
+    },
+    {
+      "path": "tools/balance-telemetry.mjs",
+      "bytes": 1011,
+      "sha256": "bfff3d05828394fd54dd3918318faa82cd182dbe461728fb094dbc17e63da266"
+    },
+    {
+      "path": "tools/build-desktop.mjs",
+      "bytes": 2012,
+      "sha256": "a6fe04a3786d92df86c87ecb806b8aa26becc8286cf1896d6d0eeb59bb9293a1"
+    },
+    {
+      "path": "tools/build-mobile.mjs",
+      "bytes": 1067,
+      "sha256": "055b674b4fb8aac60eec2d625c0985fbfb8455932332b8b5a77fbf638cfe3430"
+    },
+    {
+      "path": "tools/classic_animation.py",
+      "bytes": 13044,
+      "sha256": "6deceef343bd55e41b050aa38e2d0f38e23d2ccc2a6233700db933d6c74a628b"
+    },
+    {
+      "path": "tools/classic_archive.py",
+      "bytes": 2873,
+      "sha256": "503e2edb62be4a21d052d13a9a2323448f1bed1f3565a547407b6ad4fec07214"
+    },
+    {
+      "path": "tools/classic_compression.py",
+      "bytes": 2767,
+      "sha256": "f3e9e93e696ae7954011bca60851c420d6f83077a795fc0c5d55470d3b092497"
+    },
+    {
+      "path": "tools/classic_data.py",
+      "bytes": 6608,
+      "sha256": "a4c2af71736d70e9d1c0e7b8d66a6bf64182a6eae11edcbff185f5383bac0440"
+    },
+    {
+      "path": "tools/classic_enemy_layers.py",
+      "bytes": 4849,
+      "sha256": "600146b62d07a9cd7f611cf7ce7e5b960f1c91e1126084d6def652d3e93980ed"
+    },
+    {
+      "path": "tools/classic_font.py",
+      "bytes": 4058,
+      "sha256": "4eac91b828345973d08b3dcf44544850ec1b5f60d4bdb0526046add9791b21d5"
+    },
+    {
+      "path": "tools/classic_map_metrics.py",
+      "bytes": 3063,
+      "sha256": "f390909f535793a393a697f24f4c4938f431644d9f8c8a1e36c6a84a63add482"
+    },
+    {
+      "path": "tools/classic_paths.py",
+      "bytes": 279,
+      "sha256": "5972473c566534692b3343ac3c2e4f74cfebf7bf5bf3de7f5b88541a35dd1656"
+    },
+    {
+      "path": "tools/classic_sound_roles.py",
+      "bytes": 3057,
+      "sha256": "5e63c0868d18b712f4267fad8b1bd452a91a14c5062b73acdaf6ba211e1270fe"
+    },
+    {
+      "path": "tools/client_bodymap.py",
+      "bytes": 3163,
+      "sha256": "4a80bc9f35e15bd2dc749c9b3bb01a4bf275e500727c73126e1b0281ddf982f1"
+    },
+    {
+      "path": "tools/collect-release.mjs",
+      "bytes": 5772,
+      "sha256": "c8234b7acc604e10835ccdfe15450c72acecb52235083f6db51bb7e8d0b7f232"
+    },
+    {
+      "path": "tools/desktop-target.mjs",
+      "bytes": 753,
+      "sha256": "3989bd3d409b649427604dac0e467dcee7f568db1445fb3d2e241efdfd7d1b45"
+    },
+    {
+      "path": "tools/export_native_locations.py",
+      "bytes": 21167,
+      "sha256": "ea0d15d7d6b2fbc05b62336a2c678ad1faf11ed4e9edf1eea0d83c52a21a3b7d"
+    },
+    {
+      "path": "tools/export_zone_maps.py",
+      "bytes": 16300,
+      "sha256": "c070b0da166c0e5f5ad3a13ad946d030455ac16b8a9258f06d153ffba7488924"
+    },
+    {
+      "path": "tools/extract_classic_actors.py",
+      "bytes": 23824,
+      "sha256": "ee3940df9ee15d8c942137f3526eca0843481e6f24fe2f801f15d6be485d13c6"
+    },
+    {
+      "path": "tools/extract_classic_audio.py",
+      "bytes": 3281,
+      "sha256": "99a48850dd322e8025fdad6d6d80b828fa7bd862952866cb6c7aed2603b15159"
+    },
+    {
+      "path": "tools/extract_classic_effects.py",
+      "bytes": 7736,
+      "sha256": "12ac64b93c7bf3a4465acf4383a0b5093612cec109e467eba2ded2a391b58de6"
+    },
+    {
+      "path": "tools/extract_classic_equipment.py",
+      "bytes": 8950,
+      "sha256": "a42a0811517a1b747863e389f1c335d6b6d54f66a52ada1c0d805923fb77a4df"
+    },
+    {
+      "path": "tools/extract_classic_hud.py",
+      "bytes": 2002,
+      "sha256": "b5b32c647f3879f153fc78305830c0952d93b5ac1174e2ae1973f067a8c42a03"
+    },
+    {
+      "path": "tools/extract_classic_maps.py",
+      "bytes": 8572,
+      "sha256": "eeb5ef1c507edce96de1a40c1b8c77c185858bcf5a81bbea5ba5e1abadb7f8ab"
+    },
+    {
+      "path": "tools/extract_classic_menu.py",
+      "bytes": 3567,
+      "sha256": "79897cd9e43cde17aaf0029527858885c6b3d5dd32ea878f79502c86de8c2767"
+    },
+    {
+      "path": "tools/extract_classic_minimap.py",
+      "bytes": 3973,
+      "sha256": "d409334cf2101321a2862f74e6d52edce2f31b25201cb04648454f37d9f05cf5"
+    },
+    {
+      "path": "tools/extract_classic_summons.py",
+      "bytes": 5781,
+      "sha256": "326696a987470398d14fbbbd944517704cab7739e3d9ebed58d398685c28eef0"
+    },
+    {
+      "path": "tools/extract_classic_ui.py",
+      "bytes": 6685,
+      "sha256": "44346e1fb290bfdfcca1143c977245e25822800ad226e51d6381146a33219637"
+    },
+    {
+      "path": "tools/extract_paperdoll_controls.py",
+      "bytes": 1991,
+      "sha256": "9379719a6c670d8b58b3cad535f9ba19ed76c77114b5d5b8a0b706226f278670"
+    },
+    {
+      "path": "tools/location_backdrop.py",
+      "bytes": 5772,
+      "sha256": "a64564a51c1dbb6c7dbeaf29996f4f214c986930576ca1bd42a4c761fb81096c"
+    },
+    {
+      "path": "tools/location_bounds.py",
+      "bytes": 889,
+      "sha256": "8b68c18a80a04cc56be4a8ced4b095a8f0fe576eec9aae0a7c46e749e10e651b"
+    },
+    {
+      "path": "tools/location_collision.py",
+      "bytes": 6440,
+      "sha256": "591f5c0ffca4ead4b5c7cb8b1840c90e7acbf01db8a62ce0b66960ac9cc8b4cb"
+    },
+    {
+      "path": "tools/location_decorations.py",
+      "bytes": 9954,
+      "sha256": "515c4708a1ba42aed4165a92d493efac182afd4b4e991501c9c78176e7389f2d"
+    },
+    {
+      "path": "tools/location_floor_repairs.py",
+      "bytes": 6415,
+      "sha256": "358537df3d1bc19bad83018d90f7ea7c63f9eca67e4e9e70d194c78164abb358"
+    },
+    {
+      "path": "tools/prepare_ground_patches.py",
+      "bytes": 2031,
+      "sha256": "6143abef7f96fb032fd1cb3f2a47bedfa8def5dbe828b689236387a54c447e24"
+    },
+    {
+      "path": "tools/prepare-release.cjs",
+      "bytes": 2135,
+      "sha256": "b1bb50c56ef0b8b44d46597553a3c652d66265f663f97224c829bce655abb8ba"
+    },
+    {
+      "path": "tools/run-electron.cjs",
+      "bytes": 705,
+      "sha256": "e660448e73254049ec45a352d7a49543965901252016c8af19646900ab3f5008"
+    },
+    {
+      "path": "tools/serve.mjs",
+      "bytes": 2788,
+      "sha256": "f7baee190244f50c31966c120d77265bb34191659c5d4d8955a3ff61fa6935ea"
+    },
+    {
+      "path": "tools/setup-assets.py",
+      "bytes": 12058,
+      "sha256": "83ad30e37548a54163dc333bd264abdd3dd73e52cb6e859ed8977659b4a7aeec"
+    },
+    {
+      "path": "tools/simulate-balance.mjs",
+      "bytes": 15572,
+      "sha256": "ce5ecc82927b2fecd851247bd1713bde8aa6b6a4f158b8ec6970bd3da0443558"
+    },
+    {
+      "path": "tools/stage-desktop.mjs",
+      "bytes": 9139,
+      "sha256": "82a109fdcc0004e2bdd7441009b7b273b42fc01a23dc567555400cd52340b603"
+    },
+    {
+      "path": "tools/stage-source-desktop.mjs",
+      "bytes": 3007,
+      "sha256": "36fd0fda3880e5a74cc9b68ffa43393011d8b09f63e47e5e2c38809a963eca88"
+    },
+    {
+      "path": "tools/start-browser.mjs",
+      "bytes": 512,
+      "sha256": "3641b7e7b3d2b6395857cfa4d8dbdb985440e5d8d7fa3374a1289abac92b118a"
+    },
+    {
+      "path": "tools/start-mobile.mjs",
+      "bytes": 817,
+      "sha256": "58bd7a1e54c0dc6964a3b690ac98279b89657d80f9aeb642c720ac58929ab74a"
+    },
+    {
+      "path": "tools/test_setup_assets.py",
+      "bytes": 1732,
+      "sha256": "bff9c917746d6d6b40963fc974da6ec79d07f5395fd6193210979b14dd6e7573"
+    },
+    {
+      "path": "tools/test-ci.mjs",
+      "bytes": 1422,
+      "sha256": "c96614ce28c520c37ad484baa632e1647754f97d11f90ffa7551cc682cca9cd7"
+    },
+    {
+      "path": "tools/verify-release.mjs",
+      "bytes": 2865,
+      "sha256": "35b1c798ae9721238fb271c5744027be668c3a8bbd78c9659856c87f8f81955a"
+    }
+  ]
+}

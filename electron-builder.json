@@ -1,0 +1,41 @@
+{
+  "appId": "fan.britannia.survivors",
+  "productName": "Britannia Survivors",
+  "executableName": "BritanniaSurvivors",
+  "directories": {
+    "output": "dist/releases"
+  },
+  "npmRebuild": false,
+  "publish": null,
+  "win": {
+    "target": [
+      {
+        "target": "zip",
+        "arch": [
+          "x64"
+        ]
+      }
+    ],
+    "signAndEditExecutable": false,
+    "artifactName": "Britannia-Survivors-win-x64.${ext}"
+  },
+  "linux": {
+    "target": [
+      {
+        "target": "AppImage",
+        "arch": [
+          "x64"
+        ]
+      },
+      {
+        "target": "tar.gz",
+        "arch": [
+          "x64"
+        ]
+      }
+    ],
+    "category": "Game",
+    "executableName": "britannia-survivors",
+    "artifactName": "Britannia-Survivors-linux-x64.${ext}"
+  }
+}
