@@ -29,8 +29,8 @@
     },
     {
       "path": "docs/asset-setup.md",
-      "bytes": 3719,
-      "sha256": "3b1d5122d62ba1bb6eb46d6549fc4b31e52a3fc4577b29dfa7c807809bf13d90"
+      "bytes": 4994,
+      "sha256": "b9c478ca96cb3732b8b4fab584aa40588f93d7c88b34f9c917ef7d82db7282cf"
     },
     {
       "path": "docs/britannia-playtesting-and-balance-log.md",
@@ -74,13 +74,28 @@
     },
     {
       "path": "game/app.mjs",
-      "bytes": 89105,
-      "sha256": "89949cf1c10b8927a56c53559990590986502f391a388fa3f5821e27a93ffe1f"
+      "bytes": 89893,
+      "sha256": "b088e1696057c09e02bf50d61ed97e7f19a1f651c67e81a1a94680c686a36f86"
     },
     {
       "path": "game/area-route.mjs",
       "bytes": 1681,
       "sha256": "d5206f53971692b5080eee75d2521e52c29179b442a21516f0ffe5bcaeec43d5"
+    },
+    {
+      "path": "game/asset-cache-policy.mjs",
+      "bytes": 537,
+      "sha256": "de779a4eb1c56bd0addc81179d86068903e32842c81b052c69ac0f2f95890514"
+    },
+    {
+      "path": "game/asset-cache-worker.js",
+      "bytes": 3681,
+      "sha256": "de67ae3a2a5d34ec0efab11fda123053baac30dd27c20c1301a845eaa236100b"
+    },
+    {
+      "path": "game/asset-cache.mjs",
+      "bytes": 2407,
+      "sha256": "c167bcc220c1d3b29373cbc13d3d1e8ae050d59e3ae90b8708264c9b01cb7a94"
     },
     {
       "path": "game/asset-loading.mjs",
@@ -174,8 +189,8 @@
     },
     {
       "path": "game/index.html",
-      "bytes": 7326,
-      "sha256": "4598bc37841d922ef5eae5bb8af42120b359c24fc0eae357e2ba7364f5aab3f9"
+      "bytes": 7416,
+      "sha256": "652c17b641e899d967b7722cf810e4fd183934444f3458da66365f2c24567427"
     },
     {
       "path": "game/inventory.mjs",
@@ -354,8 +369,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 4843,
-      "sha256": "1afc53c3a229c4fe4dcf96129d350af4cf632fb248f48a7fea787033f368212b"
+      "bytes": 5277,
+      "sha256": "4ce7663b80fd5944f257940057146af4b43c2e7d9f2705e232f2051be02252a5"
     },
     {
       "path": "requirements-assets.txt",
@@ -376,6 +391,16 @@
       "path": "Start-Survivors.cmd",
       "bytes": 53,
       "sha256": "4660507d69a4a938569475af6075d9cb822562c749e1b33054f952ad403cee71"
+    },
+    {
+      "path": "tests/asset-cache.browser.cjs",
+      "bytes": 5870,
+      "sha256": "2c7de9d9b8e3bf923a5010cdf14a3a502348bf639b3e741714f4117bc6bccbdb"
+    },
+    {
+      "path": "tests/asset-cache.test.mjs",
+      "bytes": 1409,
+      "sha256": "b18989f6985ff275abb1cfe3bcf702a42ca56ccd795246beadfe4e4d40c6b6b8"
     },
     {
       "path": "tests/asset-loading.test.mjs",
@@ -464,8 +489,8 @@
     },
     {
       "path": "tests/loading-screen.browser.cjs",
-      "bytes": 6874,
-      "sha256": "699cd4b8c866bb25118a56fbf3778ff022d1e57cafab65527c74b0ff9366ed93"
+      "bytes": 7278,
+      "sha256": "99d96106cd2828a4397fd2fff1c858a8564cd0137434b2cbe04e45f6dbb79590"
     },
     {
       "path": "tests/loading-screen.test.mjs",
@@ -799,8 +824,8 @@
     },
     {
       "path": "tools/serve.mjs",
-      "bytes": 2788,
-      "sha256": "f7baee190244f50c31966c120d77265bb34191659c5d4d8955a3ff61fa6935ea"
+      "bytes": 3534,
+      "sha256": "6a0a50cad4eed7e104ba42f8a2318079853a264ec83c8b733900e2e31f775aec"
     },
     {
       "path": "tools/setup-assets.py",
@@ -814,13 +839,13 @@
     },
     {
       "path": "tools/stage-desktop.mjs",
-      "bytes": 9139,
-      "sha256": "82a109fdcc0004e2bdd7441009b7b273b42fc01a23dc567555400cd52340b603"
+      "bytes": 9292,
+      "sha256": "f0a418d8d02e9860f74dab3523e727ee264343008c99cf1f3c2c3a210b86660e"
     },
     {
       "path": "tools/stage-source-desktop.mjs",
-      "bytes": 3007,
-      "sha256": "36fd0fda3880e5a74cc9b68ffa43393011d8b09f63e47e5e2c38809a963eca88"
+      "bytes": 3010,
+      "sha256": "388162a33bc65646e681fe1ccee471b2c5659b380b868217f132d22403599371"
     },
     {
       "path": "tools/start-browser.mjs",

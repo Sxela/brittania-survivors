@@ -33,6 +33,12 @@ area data and completed artwork files. Failed startup loads show a Retry button.
 Assets loaded during play, in inventories or shops, and on first use of audio,
 spells or creatures show a compact progress bar while controls remain usable.
 
+On HTTPS or localhost, downloaded assets persist in the browser between page loads.
+Only needed files are cached; the entire client is never downloaded in advance.
+Changing the deployed asset bundle refreshes the cache; code-only updates reuse it.
+Options → Clear downloaded assets removes this cache while preserving saved games.
+Browser storage limits and eviction still apply; unavailable storage falls back to downloads.
+
 ## Controls
 
 Click to move; hold the right mouse button to steer; WASD or arrow keys also move. Space jumps through intervening walls onto clear ground. I opens the backpack, B opens the trader, and Escape pauses. Attacks cast automatically. Drag equipment onto the paperdoll; select an item for actions and comparisons. Touch controls include Dash, Bag and Shop buttons.

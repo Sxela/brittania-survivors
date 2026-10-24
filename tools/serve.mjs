@@ -1,6 +1,7 @@
 import http from "node:http";
 import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
+import {createHash} from 'node:crypto';
 import { fileURLToPath } from "node:url";
 const root = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -26,6 +27,12 @@ export const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, "http://localhost");
     if(url.pathname==='/favicon.ico'){res.writeHead(204);res.end();return;}
     const pathname=decodeURIComponent(url.pathname);
+    if(pathname==='/asset-cache-version.json'){
+      // Extraction receipts and manifest stamps change on a local asset rebuild.
+      const stamps=await Promise.all(['setup-report.json','manifest.json','ui/manifest.json','effects/manifest.json','audio/manifest.json','mobile-locations/manifest.json','world-equipment/manifest.json'].map(async name=>{try{const info=await stat(path.join(assetsRoot,name));return [name,info.size,info.mtimeMs];}catch{return [name,null];}}));
+      const version=createHash('sha256').update(JSON.stringify(stamps)).digest('hex');
+      res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify({version}));return;
+    }
     if(pathname==='/'||pathname==='/index.html'){
       try{await stat(path.join(assetsRoot,'mobile-locations/manifest.json'));}
       catch{

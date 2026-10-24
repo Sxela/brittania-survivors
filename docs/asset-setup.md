@@ -66,3 +66,24 @@ Keep generated assets, client files, screenshots and recordings out of public
 commits and releases. This setup does not erase assets already published in Git
 history, Git LFS, release attachments, or hosting caches; those require separate
 cleanup if a repository previously distributed them.
+
+## Browser downloads and storage
+
+HTTPS and localhost builds keep downloaded assets in persistent browser Cache
+Storage, including area data, artwork, fonts and audio. Only assets actually used
+are cached. Code and gameplay configuration remain fresh from the server.
+The worker retains about 1,024 downloaded files, pruning older entries in batches;
+the browser's storage quota and eviction policy also apply. If storage is denied
+or fills up, the game continues downloading resources normally.
+
+Options → Clear downloaded assets clears this game's asset cache without touching
+saved runs, progress, settings or another application's storage. This is also
+useful after manually editing extracted images without regenerating manifests.
+Local extraction rebuilds change the cache identity; a hosted deployment uses
+the asset bundle SHA-256 so code-only deployments reuse existing downloads.
+Ordinary HTTP phone testing over a LAN address cannot use service workers; use
+HTTPS for persistent caching on phones.
+
+See the browser [Cache API documentation](https://developer.mozilla.org/en-US/docs/Web/API/Cache)
+for storage lifetime and quota behavior. This caches downloaded resources, not a
+complete offline installation; previously unvisited areas still need a connection.

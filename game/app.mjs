@@ -31,6 +31,7 @@ import { OriginalEffects } from "./classic-effects.mjs";
 import { attachMovableHud } from './movable-hud.mjs';
 import {createLoadingScreen,fetchLoadingJson,paintLoadingScreen} from './loading-screen.mjs';
 import {trackAsset,loadAssetJson,showBackgroundLoading} from './asset-loading.mjs';
+import {assetCacheState,clearAssetCache} from './asset-cache.mjs';
 showBackgroundLoading(document);
 const assetLoading=createLoadingScreen(document);
 assetLoading.begin('Loading sound and interface');
@@ -490,6 +491,10 @@ function openOptions(inRun=!!game&&!campMode){
   $('option-hud-reset').onclick=()=>movableHud.reset();
   $('option-export').onclick=exportProgress;$('option-import').onclick=importProgress;
   $('option-reset').onclick=()=>{save();mainMenu();campRoot.querySelector('[data-camp="reset"]').click();};
+  const cacheButton=document.createElement('button');cacheButton.id='option-clear-assets';cacheButton.textContent='Clear downloaded assets';cacheButton.disabled=!assetCacheState.enabled;
+  const cacheStatus=document.createElement('p');cacheStatus.className='fine';cacheStatus.role='status';cacheStatus.textContent=assetCacheState.reason;
+  cacheButton.onclick=async()=>{cacheButton.disabled=true;try{await clearAssetCache();cacheStatus.textContent='Downloaded assets cleared. Saves kept. Assets download again when needed.';}catch(error){cacheStatus.textContent=error.message;}finally{cacheButton.disabled=false;}};
+  $('dialog').querySelector('.options-actions').append(cacheButton);cacheButton.after(cacheStatus);
   if(touchDevice()||forceMobile){const button=document.createElement('button');button.id='option-zoom';button.textContent='World zoom: '+Math.round(mobileZoom*100)+'%';button.onclick=()=>{mobileZoom=mobileZoom===1?1.5:mobileZoom===1.5?2:1;localStorage.setItem('britannia-mobile-zoom',String(mobileZoom));resize();button.textContent='World zoom: '+Math.round(mobileZoom*100)+'%';};$('dialog').querySelector('.options-actions').append(button);}
   $('options-back').onclick=()=>{if(inRun){resume();pause();}else returnCamp();};
 }

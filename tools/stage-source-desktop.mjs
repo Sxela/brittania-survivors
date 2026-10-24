@@ -13,7 +13,7 @@ await mkdir(destination,{recursive:false});
 const target=await stageRuntime(path.join(root,'node_modules/electron/dist'),destination);
 const app=path.join(destination,'resources/app');await mkdir(app,{recursive:true});
 for(const name of await readdir(path.join(root,'game'))){
- if(!/\.(?:mjs|html|css)$/.test(name))continue;
+ if(!/\.(?:mjs|js|html|css)$/.test(name))continue;
  await cp(path.join(root,'game',name),path.join(app,'game',name),{recursive:true});
 }
 await mkdir(path.join(app,'game/data'),{recursive:true});

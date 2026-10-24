@@ -8,9 +8,10 @@ const root=path.resolve(__dirname,'../game');
 app.setPath('userData',path.resolve(__dirname,'../.cache/loading-screen-browser'));
 app.commandLine.appendSwitch('disable-gpu');
 app.on('window-all-closed',()=>{});
-let areaMode='slow',bootFailure=false;
+let areaMode='slow',bootFailure=false,assetRevision=0;
 const server=http.createServer((req,res)=>{
   const name=decodeURIComponent(new URL(req.url,'http://localhost').pathname);
+  if(name==='/asset-cache-version.json'){res.setHeader('Content-Type','application/json');res.end(JSON.stringify({version:assetRevision.toString(16).padStart(64,'0')}));return;}
   if(name==='/__loading-probe.json'){setTimeout(()=>{res.writeHead(200,{'content-type':'application/json'});res.end('{"ok":true}');},1500);return;}
   if(name==='/__loading-probe.png'){setTimeout(()=>{res.writeHead(503);res.end();},1500);return;}
   if(name==='/favicon.ico'){res.writeHead(204);res.end();return;}
@@ -20,7 +21,7 @@ const server=http.createServer((req,res)=>{
   const file=path.resolve(root,'.'+(name==='/'?'/index.html':name));
   if(!file.startsWith(root+path.sep)||!fs.existsSync(file)){res.writeHead(404);res.end();return;}
   const send=()=>{
-    const types={'.mjs':'text/javascript','.html':'text/html','.json':'application/json','.css':'text/css','.png':'image/png','.ttf':'font/ttf'};
+    const types={'.mjs':'text/javascript','.js':'text/javascript','.html':'text/html','.json':'application/json','.css':'text/css','.png':'image/png','.ttf':'font/ttf'};
     res.writeHead(200,{'content-type':types[path.extname(file)]||'application/octet-stream','content-length':fs.statSync(file).size,'cache-control':'no-store'});
     fs.createReadStream(file).pipe(res);
   };
@@ -36,9 +37,11 @@ app.whenReady().then(async()=>{
   const url='http://127.0.0.1:'+server.address().port;
   try{
     for(const [width,height,mobile] of [[1280,900,false],[390,844,true]]){
+      assetRevision++;
       const win=new BrowserWindow({width,height,show:false,webPreferences:{backgroundThrottling:false,offscreen:true}});
       await win.loadURL(url+(mobile?'/?mobile=1':''));
       await waitFor(win,'!!window.britannia');
+      assert.equal(await win.webContents.executeJavaScript('import("/asset-cache.mjs").then(m=>m.assetCacheState.enabled)'),true);
       assert.equal(await win.webContents.executeJavaScript('document.getElementById("asset-loading").hidden'),true);
       await win.webContents.executeJavaScript(`window.loadingSamples=[];new MutationObserver(()=>{const p=document.querySelector('#asset-loading-progress');window.loadingSamples.push({label:document.querySelector('#asset-loading-label').textContent,detail:document.querySelector('#asset-loading-detail').textContent,value:p.value});}).observe(document.querySelector('#asset-loading'),{subtree:true,attributes:true,childList:true,characterData:true});window.startPromise=window.britannia.start();true`);
       await waitFor(win,'!document.getElementById("asset-loading").hidden && document.getElementById("asset-loading-label").textContent.includes(" data")');
@@ -62,12 +65,12 @@ app.whenReady().then(async()=>{
       await win.webContents.executeJavaScript('window.probe.src="/__loading-probe.png?replacement=1";true');
       await win.webContents.executeJavaScript('window.probe.remove();true');
       await waitFor(win,'document.getElementById("background-loading").hidden');
-      areaMode='fail';await win.reload();await waitFor(win,'!!window.britannia');
+      areaMode='fail';assetRevision++;await win.reload();await waitFor(win,'!!window.britannia');
       await win.webContents.executeJavaScript('window.britannia.start()');
       assert.equal(await win.webContents.executeJavaScript('document.getElementById("asset-loading").hidden && !document.getElementById("start").disabled && document.getElementById("menu-message").textContent.includes("HTTP 503")'),true);
       areaMode='slow';win.destroy();console.log('Loading UI passed: '+width+'x'+height);
     }
-    bootFailure=true;
+    bootFailure=true;assetRevision++;
     const win=new BrowserWindow({show:false,webPreferences:{backgroundThrottling:false}});
     await win.loadURL(url);
     await waitFor(win,'!document.getElementById("asset-loading-retry").hidden');

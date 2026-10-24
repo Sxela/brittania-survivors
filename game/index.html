@@ -134,6 +134,8 @@
       </footer>
     </main>
     <script type="module">
+      import {setupAssetCache} from './asset-cache.mjs';
+      await setupAssetCache();
       import('./app.mjs').catch(error=>{
         document.getElementById('asset-loading').hidden=false;
         document.getElementById('asset-loading').setAttribute('aria-busy','false');
