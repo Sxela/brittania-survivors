@@ -74,8 +74,8 @@
     },
     {
       "path": "game/app.mjs",
-      "bytes": 86181,
-      "sha256": "87772c47fb30d0e34238120b25e3cd38435a43b6186b39d00d3d98b379d70fa0"
+      "bytes": 87490,
+      "sha256": "7b4512865b2d88441c0a73570eed510efe0299fa4d716b21dca6545b4cfdd56c"
     },
     {
       "path": "game/area-route.mjs",
@@ -139,8 +139,8 @@
     },
     {
       "path": "game/effects.mjs",
-      "bytes": 3908,
-      "sha256": "f8ee34e86d20c87690b06de6bbbe56a645a57a5366cfddfa0ed5615df5ba02aa"
+      "bytes": 3930,
+      "sha256": "a9cc98055f66f7b3d703b5077ab12addbddb4b706ef2f355e2d028222ea04dd6"
     },
     {
       "path": "game/enemy-equipment.mjs",
@@ -169,8 +169,8 @@
     },
     {
       "path": "game/index.html",
-      "bytes": 6018,
-      "sha256": "6f01b504b71e02be6eb31b493618556ffb471b3cd563632ef17f18a1b001f950"
+      "bytes": 7079,
+      "sha256": "193e513954393aa8c91ea74185535c4c41ed6156914bb4463d24ca6ae5cb7369"
     },
     {
       "path": "game/inventory.mjs",
@@ -181,6 +181,11 @@
       "path": "game/item-overlay.mjs",
       "bytes": 1924,
       "sha256": "00d716d7a36c1031132c9a9a88da73ad96ddef6c17beb5e6c38484ffbb2a6a82"
+    },
+    {
+      "path": "game/loading-screen.mjs",
+      "bytes": 2240,
+      "sha256": "0509888f48e496b2aa57aab2d2e54a7e3e4bd6d235c5de52d033bdefe93a6691"
     },
     {
       "path": "game/location-height.mjs",
@@ -299,8 +304,8 @@
     },
     {
       "path": "game/style.css",
-      "bytes": 57186,
-      "sha256": "278533f5f8018efd8833c9fd8f8cd8fdca4f0962d411cc1b7f8984cc55fc8e27"
+      "bytes": 57937,
+      "sha256": "ced5a380cd5e67d1c0f2eea4cc309d51a0ac55a338642f8bae955fafe95b4ea7"
     },
     {
       "path": "game/weapon-traits.mjs",
@@ -344,8 +349,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 4520,
-      "sha256": "a898392eb26784f503b3179e75a941b79d9eb920694e5dd46fd79f67d5bf5c57"
+      "bytes": 4684,
+      "sha256": "b2f32d8faa5d867ac459c16405437746d4aa906be0cce8e7daad5e20cb1af752"
     },
     {
       "path": "requirements-assets.txt",
@@ -446,6 +451,16 @@
       "path": "tests/jump.test.mjs",
       "bytes": 1736,
       "sha256": "faa1d302bd9ec47b913689933705e606e4c8a4bba065ac4a59a6f606487f7d75"
+    },
+    {
+      "path": "tests/loading-screen.browser.cjs",
+      "bytes": 5198,
+      "sha256": "21349bdd1af74ac24e33aeda284d1fb1d47112bc64cc4a653ad775bc5abfabc8"
+    },
+    {
+      "path": "tests/loading-screen.test.mjs",
+      "bytes": 1415,
+      "sha256": "cf52d77a4159a27d4529259bf60ef1aaa98065042e05605fa997589cde5654ca"
     },
     {
       "path": "tests/location-height.test.mjs",

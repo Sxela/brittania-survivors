@@ -28,6 +28,9 @@ Use Node.js 24 and Python 3.11 or newer. See [complete setup instructions](docs/
 
 After setup use `npm run desktop` for a desktop window, or `npm run mobile` for phones on the same Wi-Fi. Mobile uses portrait UI, 150% default world zoom, tap-to-move and hold-to-steer.
 
+Startup and area transitions show asset-loading progress, including downloaded
+area data and completed artwork files. Failed startup loads show a Retry button.
+
 ## Controls
 
 Click to move; hold the right mouse button to steer; WASD or arrow keys also move. Space jumps through intervening walls onto clear ground. I opens the backpack, B opens the trader, and Escape pauses. Attacks cast automatically. Drag equipment onto the paperdoll; select an item for actions and comparisons. Touch controls include Dash, Bag and Shop buttons.

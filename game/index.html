@@ -10,6 +10,14 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body class="menu-scene">
+    <section id="asset-loading" aria-busy="true" aria-labelledby="asset-loading-label">
+      <div class="asset-loading-card">
+        <h2 id="asset-loading-label" role="status" aria-live="polite">Loading game assets</h2>
+        <progress id="asset-loading-progress" aria-labelledby="asset-loading-label"></progress>
+        <p id="asset-loading-detail">Preparing your journey…</p>
+        <button id="asset-loading-retry" hidden onclick="location.reload()">Retry</button>
+      </div>
+    </section>
     <main id="app">
       <header>
         <div class="brand">
@@ -121,6 +129,16 @@
         ><span>LOCAL BUILD <b>0.9.18 · Classic</b></span>
       </footer>
     </main>
-    <script type="module" src="app.mjs"></script>
+    <script type="module">
+      import('./app.mjs').catch(error=>{
+        document.getElementById('asset-loading').hidden=false;
+        document.getElementById('asset-loading').setAttribute('aria-busy','false');
+        document.getElementById('asset-loading-label').textContent='Could not load game assets';
+        document.getElementById('asset-loading-detail').textContent=error.message;
+        document.getElementById('asset-loading-progress').hidden=true;
+        document.getElementById('asset-loading-retry').hidden=false;
+        console.error(error);
+      });
+    </script>
   </body>
 </html>

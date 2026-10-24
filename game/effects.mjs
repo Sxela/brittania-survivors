@@ -1,6 +1,6 @@
 export class OriginalEffects {
   constructor(ctx,manifest){this.ctx=ctx;this.manifest=manifest;this.images=new Map();this.drawCounts={};this.framesSeen=new Set();this.birth=new WeakMap();}
-  async load(){await Promise.all(Object.values(this.manifest.effects).map(async a=>{if(this.images.has(a.src))return;const im=new Image();im.src=a.src;await im.decode();this.images.set(a.src,im);}));}
+  async load(onLoaded=()=>{}){await Promise.all(Object.values(this.manifest.effects).map(async a=>{if(!this.images.has(a.src)){const im=new Image();im.src=a.src;await im.decode();this.images.set(a.src,im);}onLoaded();}));}
   sprite(role,x,y,{age=0,angle=0,width,height,scale=1,alpha=1}={}){
     const a=this.manifest.effects[role];if(!a)return false;
     const im=this.images.get(a.src);if(!im)return false;

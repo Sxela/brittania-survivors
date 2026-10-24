@@ -29,6 +29,9 @@ import {createLocationMap,relocateLocationSave} from './location-map.mjs';
 import { pickupGuides, championGuides, lastEnemyGuides } from "./guidance.mjs";
 import { OriginalEffects } from "./classic-effects.mjs";
 import { attachMovableHud } from './movable-hud.mjs';
+import {createLoadingScreen,fetchLoadingJson,paintLoadingScreen} from './loading-screen.mjs';
+const assetLoading=createLoadingScreen(document);
+assetLoading.begin('Loading sound and interface');
 const forceMobile=new URLSearchParams(location.search).get('mobile')==='1';
 const touchDevice=()=>navigator.maxTouchPoints>0||matchMedia('(pointer:coarse)').matches;
 const mobileClient=mobilePresentation({width:innerWidth,height:innerHeight,touch:touchDevice(),forced:forceMobile}).mobile;
@@ -46,9 +49,12 @@ const $ = (id) => document.getElementById(id),
 const movableHud=attachMovableHud($('hud'));
 await Promise.all(['UOText','UOTitle','UOSubtitle'].map(font=>document.fonts.load('16px '+font)));
 await document.fonts.ready;
+assetLoading.begin('Loading spell effects');
 const effectsManifest=await fetch("./assets/effects/manifest.json").then(r=>r.json());
 const spellEffects=new OriginalEffects(ctx,effectsManifest);
-await spellEffects.load();
+assetLoading.begin('Loading spell effects',Object.keys(effectsManifest.effects).length);
+await spellEffects.load(()=>assetLoading.advance());
+assetLoading.begin('Loading game data');
 const catalog = await fetch("./data/catalog.json").then((r) => {
   if (!r.ok) throw Error("Run the server extraction first");
   return r.json();
@@ -58,12 +64,14 @@ const areaCatalog=await fetch('./data/areas.json').then(r=>r.json());
 catalog.areas=areaCatalog.areas;delete catalog.areaCount;
 catalog.zoneMode=true;
 const radarManifest=await fetch('./assets/classic-minimap/manifest.json').then(r=>r.json()),radarImages={};
-await Promise.all(Object.entries(radarManifest.images).map(async([key,entry])=>{const image=new Image();image.src=entry.src;await image.decode();radarImages[key]=image;}));
+assetLoading.begin('Loading minimap artwork',Object.keys(radarManifest.images).length);
+await Promise.all(Object.entries(radarManifest.images).map(async([key,entry])=>{const image=new Image();image.src=entry.src;await image.decode();radarImages[key]=image;assetLoading.advance();}));
 let nativeMinimap=createNativeMinimap(radarManifest,radarImages);
 let manifest = { images: {}, animations: {} },
   images = {};
 try {
   manifest = await fetch("./assets/manifest.json").then((r) => r.json());
+  assetLoading.begin('Loading interface artwork',Object.keys(manifest.images||{}).length);
   await Promise.all(
     Object.entries(manifest.images || {}).map(async ([key, entry]) => {
       const img = new Image();
@@ -71,13 +79,14 @@ try {
       try {
         await img.decode();
         images[key] = img;
-      } catch {}
+      } catch {} finally {assetLoading.advance();}
     }),
   );
 } catch {
   $("loading").textContent =
     "Client art unavailable. Run python tools/extract_client.py to recover it.";
 }
+assetLoading.begin('Loading world manifests');
 const summonManifest=await fetch('./assets/classic-summons/manifest.json').then(r=>r.json());
 manifest.animations={...manifest.animations,...summonManifest.animations};
 let huePalettes = {};
@@ -94,18 +103,23 @@ let mobileAreaCache=null;
 async function nativeArea(area){
  if(mobileAreaCache?.regions[0]?.areaId===area.id){mobileAreaCache.regions[0].runFacet=area.facet;return mobileAreaCache;}
  const entry=originalLocations.areas[area.id];if(!entry)throw Error('Native location unavailable: '+area.name);
- const response=await fetch(entry.src);if(!response.ok)throw Error('Native location could not be loaded');mobileAreaCache=await response.json();mobileAreaCache.regions[0].runFacet=area.facet;return mobileAreaCache;
+ mobileAreaCache=await fetchLoadingJson(entry.src,(loaded,total)=>assetLoading.bytes(loaded,total));mobileAreaCache.regions[0].runFacet=area.facet;return mobileAreaCache;
 }
 let mapManifest=legacyMapManifest,mapImages={},mapRegions=createMapRegions(mapManifest,mapImages,{palettes:huePalettes}),mapLoading=false;
 let activeBiomeStage=0;
 async function attachMap(newRun=false,mapState=null){
+  assetLoading.begin('Loading '+(game.currentArea()?.name||'area')+' data');
+  await paintLoadingScreen();
   if(!game.zoneRun&&game.areaRoute?.length&&!areaMapManifest)areaMapManifest=await fetch('./assets/zone-maps/manifest.json').then(r=>r.json());
   const selected=game.zoneRun?await nativeArea(game.currentArea()):game.areaRoute?.length?routeMapManifest(areaMapManifest,game.areaRoute,game.duration):legacyMapManifest;
   if(game.zoneRun)selected.images['tree-stump']=uiManifest.images['scenery/tree-stump'];
   const loaded={};
+  assetLoading.begin('Loading area artwork',Object.keys(selected.images).length);
   // Explicit bitmap decoding also works while the native window is offscreen.
   // Detached HTML image decode promises can stall after a viewport resize.
-  await Promise.all(Object.entries(selected.images).map(async([key,entry])=>{const response=await fetch(entry.src);if(!response.ok)throw Error('Area artwork could not be loaded');loaded[key]=await createImageBitmap(await response.blob());}));
+  await Promise.all(Object.entries(selected.images).map(async([key,entry])=>{const response=await fetch(entry.src);if(!response.ok)throw Error('Area artwork could not be loaded');loaded[key]=await createImageBitmap(await response.blob());assetLoading.advance();}));
+  assetLoading.begin('Preparing terrain and paths');
+  await paintLoadingScreen();
   for(const image of Object.values(mapImages))image.close?.();
   mapManifest=selected;mapImages=loaded;mapRegions=game.zoneRun?createLocationMap(selected,loaded,{palettes:huePalettes,areaId:game.currentArea().id}):createMapRegions(selected,loaded,{palettes:huePalettes});
   nativeMinimap=game.areaRoute?.length?createNativeMinimap({...radarManifest,regions:selected.regions.map(r=>({id:r.id,image:r.radar}))},{...radarImages,...loaded}):createNativeMinimap(radarManifest,radarImages);
@@ -201,7 +215,7 @@ async function completeZoneTravel(){
   game.status='paused';navigation.cancel();zoneShopDismissed='';announce('Travelling through the moongate...');
   await attachMap(true);game.status='playing';soundtrack.play('gate-travel');hud();resume();announce(game.currentArea().name);
  }catch(error){game=Game.restore(runtimeCatalog,state);await attachMap(false,map);zoneSpellShop();announce('The next area could not be loaded: '+error.message);console.error(error);}
- finally{mapLoading=false;save();}
+ finally{assetLoading.hide();mapLoading=false;save();}
 }
 $('zone-action').onclick=()=>{if(game?.zoneRun?.phase==='spellshop')zoneSpellShop();else enterMoongate();};
 const worldManifest=await fetch('./assets/world-equipment/manifest.json').then(r=>r.json());
@@ -310,7 +324,9 @@ const warmBodies = [
     .filter((m) => (m.adaptation?.tier ?? 1) <= 1)
     .flatMap((m) => m.bodyIds || [m.body]),
 ];
-await Promise.all([...new Set(warmBodies)].slice(0, 48).map(loadSprite));
+const initialBodies=[...new Set(warmBodies)].slice(0,48);
+assetLoading.begin('Loading character artwork',initialBodies.length);
+await Promise.all(initialBodies.map(async body=>{await loadSprite(body);assetLoading.advance();}));
 // Every discovered creature remains reachable, including explicitly reported art gaps.
 const runtimeCatalog = catalog;
 const hueFrames = new Map();
@@ -524,6 +540,8 @@ async function start({saved=null,seed}={}) {
   pendingChestId=null;lastChestTap=null;
   const previousGame=game;
   try {
+  assetLoading.begin(saved?'Loading saved journey':'Preparing new journey');
+  await paintLoadingScreen();
   campMode=false;
   zoneShopDismissed='';
   game=saved?Game.restore(runtimeCatalog,saved.state):createProgressRun(runtimeCatalog,profile,{archetype:selected,seed});
@@ -533,7 +551,8 @@ async function start({saved=null,seed}={}) {
   game.status=status==='paused'?'playing':status;
   if(!saved){profile.stash=null;persistProgress();}
   soundtrack.setScene('playing');
-  worldAppearance.warm(game);
+  assetLoading.begin('Loading equipment artwork');
+  await worldAppearance.warm(game);
   lootFeed.length=0;
   screen = "game";
   navigation.cancel();
@@ -551,7 +570,7 @@ async function start({saved=null,seed}={}) {
   hud();
   if(!showSuperUpgrade()&&saved&&game.status==='levelup')levelup();
   }catch(error){game=previousGame;announce('The journey could not be loaded: '+error.message);console.error(error);}
-  finally{mapLoading=false;$('start').disabled=false;$('continue').disabled=false;}
+  finally{assetLoading.hide();mapLoading=false;$('start').disabled=false;$('continue').disabled=false;}
 }
 $("start").onclick = start;
 const AUTOSAVE_SECONDS=2;let lastAutosave=-Infinity;
@@ -1492,3 +1511,4 @@ window.britannia = {
 };
 resize();
 requestAnimationFrame(loop);
+assetLoading.hide();
