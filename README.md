@@ -32,6 +32,8 @@ Startup and area transitions show asset-loading progress, including downloaded
 area data and completed artwork files. Failed startup loads show a Retry button.
 Assets loaded during play, in inventories or shops, and on first use of audio,
 spells or creatures show a compact progress bar while controls remain usable.
+Menu artwork keeps its original proportions, with compact text and tiled panel
+textures. Gear and Shop share one tab bar; item actions follow the selection.
 
 On HTTPS or localhost, downloaded assets persist in the browser between page loads.
 Only needed files are cached; the entire client is never downloaded in advance.

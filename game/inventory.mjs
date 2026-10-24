@@ -53,7 +53,7 @@ function equipmentTooltip(game, hint, blocked=()=>false) {
 export function renderShopWindow({ root, game, ui, onBuy, onClose, onRestock, embedded=false }) {
   if(!embedded){clearEquipmentWindow();controller=new AbortController();}
   const signal=controller.signal;
-  root.innerHTML=`<div class="eyebrow">A FRIEND AMONG THE TREES</div><h2>The wandering trader</h2><p>Spend your gold on supplies. You carry <strong>${game.player.gold}</strong> gold.</p><div class="items">${(game.shop||[]).map((item,i)=>`<div class="item shop-item" data-shop-item="${i}"><div class="shop-item-heading"><button class="pack-item" aria-label="${esc(item.name)}" type="button">${itemArtwork(ui,item)}</button><strong>${esc(item.name)}</strong></div><small>${esc(SLOT_LABELS[item.slot]||(item.slot==='potion'?'Potion':item.slot)||'Supplies')}</small><button data-buy="${i}" ${game.player.gold<(item.price||item.cost||0)?'disabled':''}>Buy &middot; ${item.price||item.cost||0} gold</button></div>`).join('')}</div><div class="dialog-actions"><button data-restock ${game.player.gold<game.restockPrice?'disabled':''}>Refresh stock - ${game.restockPrice} gold</button>${embedded?'':'<button id="close-dialog">Return <kbd>B</kbd></button>'}</div>`;
+  root.innerHTML=`<div class="eyebrow">A FRIEND AMONG THE TREES</div><h2>The wandering trader</h2>${embedded?'':`<p>You carry <strong>${game.player.gold}</strong> gold.</p>`}<div class="items">${(game.shop||[]).map((item,i)=>`<div class="item shop-item" data-shop-item="${i}"><div class="shop-item-heading"><button class="pack-item" aria-label="${esc(item.name)}" type="button">${itemArtwork(ui,item)}</button><strong>${esc(item.name)}</strong></div><small>${esc(SLOT_LABELS[item.slot]||(item.slot==='potion'?'Potion':item.slot)||'Supplies')}</small><button data-buy="${i}" ${game.player.gold<(item.price||item.cost||0)?'disabled':''}>Buy &middot; ${item.price||item.cost||0} gold</button></div>`).join('')}</div><div class="dialog-actions"><button data-restock ${game.player.gold<game.restockPrice?'disabled':''}>Refresh stock - ${game.restockPrice} gold</button>${embedded?'':'<button id="close-dialog">Return <kbd>B</kbd></button>'}</div>`;
   const {showTooltip,hideTooltip}=equipmentTooltip(game,'Buy to add this item to your backpack');
   root.querySelectorAll('[data-shop-item]').forEach(card=>{
     const index=Number(card.dataset.shopItem),item=game.shop[index];
@@ -89,7 +89,7 @@ export function renderEquipmentWindow({ root, game, ui, palettes={}, onChange, o
   const previousScroll=Number(root.dataset.packScroll)||0;
   root.classList.add("equipment-window");
   root.innerHTML = `<div class="inventory-toolbar"><div class="inventory-tabs" role="tablist" aria-label="Inventory"><button id="gear-tab" role="tab" aria-controls="gear-content">Gear</button><button id="shop-tab" role="tab" aria-controls="equipment-shop" ${onBuy?'':'disabled'}>Shop</button></div><strong>${game.player.gold} gold</strong><button id="close-dialog">Close</button></div>
-    <div id="gear-content" role="tabpanel"><div class="mobile-inventory-switch"><button data-mobile-inventory="bag">Bag</button><button data-mobile-inventory="doll">Doll</button></div>
+    <div id="gear-content" role="tabpanel"><div class="mobile-inventory-switch" role="group" aria-label="Equipment view"><button data-mobile-inventory="bag">Bag</button><button data-mobile-inventory="doll">Character</button></div>
     <div class="equipment-workspace">
       <section class="paperdoll-window" aria-label="Paperdoll">
         <h3>${esc(game.archetype === 'mage' ? 'Magician' : game.archetype === 'warrior' ? 'Warrior' : 'Ranger')}</h3>
@@ -97,21 +97,17 @@ export function renderEquipmentWindow({ root, game, ui, palettes={}, onChange, o
           <img class="paperdoll-frame" src="${image('equipment/paperdoll-background')}" alt="">
           <canvas id="equipment-doll" width="${dollWidth}" height="${dollHeight}" aria-label="Character wearing equipped items"></canvas>
           ${(ui.equipment.slotOrder||Object.keys(ui.equipment.slots)).map(name=>slot(name,SLOT_LABELS[name]||name)).join('')}
-          <div class="paperdoll-controls" aria-label="Equipment controls">
-            <button id="paperdoll-backpack">Backpack</button>
-            <button id="inventory-shop-jump" ${onBuy?'':'disabled'}>Shop</button>
-          </div>
           <span class="paperdoll-name">${esc(game.player.level ? 'Level ' + game.player.level : 'Adventurer')}</span>
         </div>
       </section>
       <section class="backpack-window" aria-label="Backpack">
-        <h3>Backpack <small>${game.player.gold} gold</small></h3>
+        <h3>Backpack</h3>
         <div class="leather-backpack" data-drop="pack" aria-label="Drop equipped items here to put them in your backpack">
           <img class="backpack-art" src="${image('equipment/backpack')}" alt="">
           <div class="backpack-items">${game.inventory.map((item,i) => equipped(item) ? '' : itemButton(item,i)).join('')}</div>
         </div>
         <div class="backpack-tools"><p class="equipment-help">${document.body.classList.contains('touch-device')?'Tap for stats / Drag to equip':'Drag to equip / Hover to compare'}</p><button id="inventory-trash" data-drop="trash" type="button" aria-label="Discard selected item or drag an item here" title="Drag an item here to discard it"><img src="${image('inventory/trash')}" alt="Trash"><span>Trash</span></button></div>
-        <div class="equipment-selection" aria-live="polite"><span id="selected-item-name">Select an item</span><button id="equip-selected" disabled>Equip</button><button id="unequip-selected" disabled>Unequip</button><button id="sell-selected" disabled>Sell</button></div>
+        <div class="equipment-selection" aria-live="polite"><span id="selected-item-name">Select an item</span><button id="equip-selected" disabled hidden>Equip</button><button id="unequip-selected" disabled hidden>Unequip</button><button id="sell-selected" disabled hidden>Sell</button></div>
       </section>
 
     </div>
@@ -128,6 +124,9 @@ export function renderEquipmentWindow({ root, game, ui, palettes={}, onChange, o
     selectedUid = item.uid;root.dataset.selectedItem=String(item.uid);
     root.querySelectorAll('[data-item]').forEach(button=>button.classList.toggle('selected-item',Number(button.dataset.item)===item.uid));
     root.querySelector('#equip-selected').disabled=equipped(item);
+    root.querySelector('#equip-selected').hidden=equipped(item);
+    root.querySelector('#unequip-selected').hidden=!equipped(item);
+    root.querySelector('#sell-selected').hidden=equipped(item);
     root.querySelector('#selected-item-name').textContent = item.name;
     const sell = root.querySelector('#sell-selected');
     root.querySelector('#unequip-selected').disabled=!equipped(item);
@@ -144,11 +143,14 @@ export function renderEquipmentWindow({ root, game, ui, palettes={}, onChange, o
   };
   root.querySelector('#gear-tab').onclick=()=>root.setInventoryTab('gear');
   root.querySelector('#shop-tab').onclick=()=>root.setInventoryTab('shop');
-  root.querySelectorAll('[data-mobile-inventory]').forEach(button=>button.onclick=()=>{root.dataset.mobileInventoryView=button.dataset.mobileInventory;});
-  root.querySelector('#paperdoll-backpack').onclick=()=>{root.dataset.mobileInventoryView='bag';root.querySelector('.backpack-window').scrollIntoView({block:'start',behavior:'smooth'});};
+  const showEquipmentView=view=>{
+    root.dataset.mobileInventoryView=view;
+    root.querySelectorAll('[data-mobile-inventory]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.mobileInventory===view)));
+  };
+  root.querySelectorAll('[data-mobile-inventory]').forEach(button=>button.onclick=()=>showEquipmentView(button.dataset.mobileInventory));
+  showEquipmentView(root.dataset.mobileInventoryView);
   root.querySelector('#autosell-toggle').onclick=()=>{game.autosell={off:'inferior',inferior:'common',common:'off'}[game.autosell];game.cleanupInventory?.();onChange();};
   root.querySelector('#autoequip-toggle').onclick=()=>{game.autoequip=!game.autoequip;if(game.autoequip)game.autoEquipInventory?.();onChange();};
-  root.querySelector('#inventory-shop-jump').onclick=()=>root.setInventoryTab('shop');
   root.querySelector('#body-toggle').onclick=()=>{game.player.sex=game.player.sex==='female'?'male':'female';for(const item of game.wornItems)if((game.player.sex==='male'&&item.allowMale===false)||(game.player.sex==='female'&&item.allowFemale===false))game.equipment[item.slot]=null;game.refreshEquipmentStats();onChange();};
   root.querySelector('#equip-selected').onclick=()=>{const index=game.inventory.findIndex(item=>item.uid===selectedUid);if(game.equip(index))onChange();};
   root.querySelector('#unequip-selected').onclick=()=>{

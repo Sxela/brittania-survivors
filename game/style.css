@@ -307,16 +307,14 @@ h1 em { font-style: normal; color: var(--gold); font-size: .8em; }
 #menu .eyebrow { color:#fff; }
 #menu .intro { margin:8px 0 12px; }
 #menu .rule { margin:12px 0 10px; }
-#menu button { border-width:13px 11px 10px;border-image:url("assets/classic-ui/menu/button-normal.png") 13 11 10 fill / 13px 11px 10px;background:none;min-height:38px; }
-#menu button:hover,#menu button:focus-visible { border-image-source:url("assets/classic-ui/menu/button-hover.png"); }
-#menu button:active,#menu button.selected { border-image-source:url("assets/classic-ui/menu/button-pressed.png"); }
+#menu button { border:0;border-image:none;min-height:44px; }
+#menu button:hover,#menu button:focus-visible { filter:brightness(1.2); }
+#menu button:active,#menu button.selected { filter:brightness(.9); }
 #menu .class-card { padding:8px 3px; }
 #menu .class-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
 #menu .class-card { min-width:0;overflow-wrap:anywhere; }
 #menu .class-card.selected { outline:1px solid var(--gold);outline-offset:-4px; }
-#menu #start { border-width:12px 28px 20px;border-image:url("assets/classic-ui/menu/start-normal.png") 12 28 20 fill / 12px 28px 20px;min-height:59px;margin-top:12px; }
-#menu #start:hover,#menu #start:focus-visible { border-image-source:url("assets/classic-ui/menu/start-hover.png"); }
-#menu #start:active { border-image-source:url("assets/classic-ui/menu/start-pressed.png"); }
+#menu #start { margin-top:12px; }
 #menu .fine { margin:10px 0;color:#fff; }
 #menu #loading:empty { display:none; }
 #asset-loading { position:fixed;inset:0;z-index:2000;display:grid;place-items:center;padding:16px;background:#100e0be8; }
@@ -451,13 +449,10 @@ h1 em { font-style: normal; color: var(--gold); font-size: .8em; }
 .doll-slot .pack-item { padding:3px; }
 .doll-slot .pack-item:hover,.doll-slot .pack-item:active,.doll-slot .pack-item:focus-visible { background:none; }
 .doll-slot:has(.pack-item:hover),.doll-slot:has(.pack-item:focus-visible) { outline:1px solid var(--gold);outline-offset:-1px; }
-#dialog.equipment-window button:not(.pack-item) { border:solid transparent;border-width:5px 11px;border-image:url("assets/classic-ui/paperdoll/button.png") 5 11 fill / 5px 11px;background:none;min-height:30px;padding:2px 8px;color:#fff;text-shadow:1px 1px #101820; }
+#dialog.equipment-window button:not(.pack-item) { border:0;border-image:none;min-height:44px;padding:10px 14px;font:12px/1.25 UOText;color:#fff;text-shadow:1px 1px #101820; }
 #dialog.equipment-window button:not(.pack-item):hover,#dialog.equipment-window button:not(.pack-item):focus-visible { filter:brightness(1.25); }
 #dialog.equipment-window button:not(.pack-item):active { filter:brightness(.85); }
 .paperdoll-stage { container-type:inline-size;container-name:paperdoll; }
-.paperdoll-controls { position:absolute;left:70%;top:22%;width:27%;height:55%;display:grid;grid-template-rows:repeat(6,minmax(0,1fr));gap:clamp(3px,1.6cqw,5px); }
-#dialog.equipment-window .paperdoll-controls button { padding:0 1px;min-width:0;min-height:0;border-width:clamp(3px,1.6cqw,5px) clamp(7px,3.5cqw,11px);border-image-width:clamp(3px,1.6cqw,5px) clamp(7px,3.5cqw,11px);font:clamp(7px,3.2cqw,10px)/1.05 UOText; }
-.paperdoll-controls small { display:block;font:clamp(6px,2.9cqw,9px)/1 UOText;color:#ffec9b; }
 #zone-action { pointer-events:auto;display:block;max-width:100%;min-height:28px;margin-top:5px;padding:4px 12px;font:12px UOText; }
 
 /* Compact native UI: artwork is decorative; all controls remain live UO gumps. */
@@ -471,10 +466,8 @@ body.menu-scene #overlay { background:linear-gradient(90deg,#0007,transparent 75
 #menu[data-view="home"] { width:min(370px,100%);background:#0005;border-image:url("assets/classic-ui/inner-frame.png") 4 / 4px; }
 #menu[data-view="home"] .menu-ornaments { display:none; }
 #home-actions { display:flex;flex-direction:column;gap:12px; }
-#home-actions button,#menu-back,#menu-back-home { font:20px UOText;min-height:44px; }
-#menu #home-actions button:not(#continue) { border-width:5px 11px;border-image:url("assets/classic-ui/paperdoll/button.png") 5 11 fill / 5px 11px; }
-#menu #continue,#menu #start { border-image:url("assets/classic-ui/menu/start-normal.png") 12 28 20 fill / 12px 28px 20px;border-width:12px 28px 20px;min-height:59px;margin:0; }
-#menu #continue:hover,#menu #start:hover { border-image-source:url("assets/classic-ui/menu/start-hover.png"); }
+#home-actions button,#menu-back,#menu-back-home { font:14px/1.25 UOText;min-height:44px; }
+#menu #continue,#menu #start { border:0;border-image:none;min-height:44px;margin:0; }
 #saved-summary { display:block;color:#f0dfb4;font:14px UOText; }
 #saved-summary:empty { display:none; }
 #difficulty-controls { margin:16px 0; }
@@ -508,7 +501,6 @@ body.menu-scene #overlay { background:linear-gradient(90deg,#0007,transparent 75
 .inventory-tabs button[aria-selected="true"] { color:var(--gold)!important;filter:brightness(1.2); }
 .equipment-workspace { grid-template-columns:minmax(240px,310px) minmax(260px,1fr) minmax(260px,300px);gap:12px; }
 .paperdoll-stage { width:100%;max-width:340px; }
-.paperdoll-controls { grid-template-rows:repeat(2,minmax(0,1fr));height:17%;top:24%; }
 .leather-backpack { width:min(100%,390px); }
 .equipment-compare { align-self:stretch;min-height:350px;margin-top:14px;border:6px solid transparent;border-image:url("assets/classic-ui/inner-frame.png") 4 / 4px; }
 #dialog .equipment-compare p { color:var(--muted);text-align:center;font:15px UOText; }
@@ -637,7 +629,7 @@ body.mobile-layout #dialog .choices,body.mobile-layout #dialog .items { grid-tem
 body.mobile-layout #dialog .choice { padding:8px;font-size:14px; }
 body.mobile-layout #dialog .choice small { font-size:12px;line-height:1.35; }
 body.mobile-layout #dialog .dialog-actions { flex-wrap:wrap;gap:6px; }
-body.mobile-layout #dialog button:not(.pack-item):not(.choice):not(.paperdoll-controls button) { min-height:44px; }
+body.mobile-layout #dialog button:not(.pack-item):not(.choice) { min-height:44px; }
 body.mobile-layout .inventory-toolbar { top:-6px;font-size:12px; }
 body.mobile-layout .mobile-inventory-switch { display:flex;gap:6px;margin:6px 0; }
 body.mobile-layout .mobile-inventory-switch button { flex:1; }
@@ -672,7 +664,7 @@ body:not(.mobile-layout) #dialog .choices:has([data-super]) { grid-template-colu
 }
 
 article.choice { display:flex;flex-direction:column;gap:6px;cursor:default; }
-.choice .choice-action { margin-top:auto;width:100%;min-height:40px;border:solid transparent;border-width:5px 11px;border-image:url("assets/classic-ui/paperdoll/button.png") 5 11 fill / 5px 11px;background:none;padding:5px 8px;color:#fff;cursor:pointer; }
+.choice .choice-action { margin-top:auto;width:100%;min-height:44px;border:0;border-image:none;padding:10px 14px;color:#fff;cursor:pointer; }
 .choice .choice-action:disabled { opacity:.5;cursor:default; }
 
 @media (min-width:1100px) {
@@ -731,3 +723,45 @@ body.mobile-layout #zone-time-track { top:6px;height:6px; }
 
 .stats-heading { position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:12px;background:url("assets/classic-ui/window-background.png") center / 100% 100%;padding:4px 0; }
 .stats-heading h2 { margin:4px 0; }
+
+/* Whole button artwork keeps its native 110:17 ratio, independent of the
+   larger click target. Repeating panel textures tile instead of stretching. */
+#menu button:not(.class-card),#dialog button:not(.pack-item):not(.choice) {
+  border:0;border-image:none;
+  background:url("assets/classic-ui/paperdoll/button.png") center / 100% auto no-repeat;
+  aspect-ratio:auto;min-height:44px;min-width:0;max-width:min(100%,280px);width:max-content;
+  padding:10px 18px;font:12px/1.25 UOText;text-shadow:1px 1px #101820;
+}
+#menu #home-actions button,#menu #start,#menu #continue,#menu #menu-back,#menu #menu-back-home {
+  width:min(100%,286px);align-self:center;margin-inline:auto;font-size:14px;
+}
+#dialog .dialog-actions button { min-width:min(140px,100%); }
+#dialog .choices .choice .choice-action { width:100%; }
+#dialog.equipment-window { width:min(940px,100%); }
+#dialog .inventory-toolbar { gap:8px; }
+#dialog .inventory-tabs { gap:6px; }
+#dialog.equipment-window .inventory-tabs button,#dialog #close-dialog { min-width:82px;padding-inline:10px;font-size:11px; }
+#dialog.equipment-window .inventory-toolbar { display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px; }
+#dialog.equipment-window .inventory-toolbar strong { white-space:nowrap;font-size:12px; }
+#dialog.equipment-window .inventory-tabs button { width:0;min-width:54px;max-width:96px;flex:1; }
+#dialog #close-dialog { width:82px; }
+#dialog.equipment-window .mobile-inventory-switch button { width:0;min-width:0; }
+#dialog .inventory-tabs button[aria-selected="true"],#dialog [data-mobile-inventory][aria-pressed="true"] { outline:1px solid var(--gold);outline-offset:-4px; }
+#dialog #inventory-trash { background:none;aspect-ratio:auto;min-width:72px;padding:2px 6px; }
+#dialog.equipment-window .equipment-settings button { min-width:140px; }
+#dialog.equipment-window .equipment-selection button { width:120px; }
+#dialog .equipment-settings small { display:inline;font-size:11px; }
+#dialog img,#menu img { object-fit:contain;flex-shrink:0; }
+#dialog .bestiary-card canvas { width:min(160px,100%);height:auto;aspect-ratio:4 / 3; }
+#menu .class-card,.panel,.choice,.item,.bestiary-card,.inventory-toolbar,.shop-wallet,.aos-properties,.stats-heading {
+  background-size:auto;background-repeat:repeat;border-image-repeat:round;
+}
+#menu .class-card { background-image:url("assets/classic-ui/window-background.png");border:4px solid transparent;border-image:url("assets/classic-ui/inner-frame.png") 4 / 4px round; }
+#dialog .choice strong { font-size:17px; }
+#dialog .choice small,#dialog .choice .spell-preview { font-size:12px;line-height:1.3;margin-top:4px; }
+#dialog .choice-icon { width:36px;height:36px;margin:2px 0 4px; }
+#dialog .shop-wallet strong { font-size:18px; }
+#dialog .shop-item-heading strong { font-size:14px; }
+#dialog .item > small { margin:4px 0;font-size:12px; }
+#dialog button[hidden] { display:none; }
+.volume-control input::-webkit-slider-thumb,.volume-control input::-moz-range-thumb { background-size:contain;background-repeat:no-repeat; }

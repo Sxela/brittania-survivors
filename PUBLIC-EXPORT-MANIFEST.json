@@ -74,8 +74,8 @@
     },
     {
       "path": "game/app.mjs",
-      "bytes": 89893,
-      "sha256": "b088e1696057c09e02bf50d61ed97e7f19a1f651c67e81a1a94680c686a36f86"
+      "bytes": 89753,
+      "sha256": "1fe4f678f0a21602db0fbb43454aa1541a46a104d2d091df9004d602e38cf54f"
     },
     {
       "path": "game/area-route.mjs",
@@ -194,8 +194,8 @@
     },
     {
       "path": "game/inventory.mjs",
-      "bytes": 22457,
-      "sha256": "b47472cf1465ebc32ed3cbbb27f820bdd9ca46890a9729d4e5a5af6593cb4c0d"
+      "bytes": 22433,
+      "sha256": "47d704d13047362361ea2e177d819636d647e43050be88c1b68950b638e10b26"
     },
     {
       "path": "game/item-overlay.mjs",
@@ -324,8 +324,8 @@
     },
     {
       "path": "game/style.css",
-      "bytes": 58417,
-      "sha256": "e487ebfec2b35c0c519425313f3574647cee90e6592a9190fc6e1961e8185c14"
+      "bytes": 59753,
+      "sha256": "ba41ac244f2ff064decd58945d864b3f97a5bddcf39aeb51d9c84b865ebcf672"
     },
     {
       "path": "game/weapon-traits.mjs",
@@ -369,8 +369,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 5277,
-      "sha256": "4ce7663b80fd5944f257940057146af4b43c2e7d9f2705e232f2051be02252a5"
+      "bytes": 5436,
+      "sha256": "d256a0339bc3c985a2036ec1f90ef99152e2ca8aac84b8289728adfc4c2d75d5"
     },
     {
       "path": "requirements-assets.txt",
@@ -511,6 +511,11 @@
       "path": "tests/magery-completeness.test.mjs",
       "bytes": 8259,
       "sha256": "d067083d0cc192cdad56e217da4dd8661897a73e11f9568c9fbb0d9092dca945"
+    },
+    {
+      "path": "tests/menu-ui.browser.cjs",
+      "bytes": 5925,
+      "sha256": "63400ede1cadb50b790bb34cc02b6e389bd79276c5d5bbbf14614320349154ab"
     },
     {
       "path": "tests/mining-shop.test.mjs",
