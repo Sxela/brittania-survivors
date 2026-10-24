@@ -32,6 +32,7 @@ import { attachMovableHud } from './movable-hud.mjs';
 import {createLoadingScreen,fetchLoadingJson,paintLoadingScreen} from './loading-screen.mjs';
 import {trackAsset,loadAssetJson,showBackgroundLoading} from './asset-loading.mjs';
 import {assetCacheState,clearAssetCache} from './asset-cache.mjs';
+import {MapAssetStore} from './map-asset-store.mjs';
 showBackgroundLoading(document);
 const assetLoading=createLoadingScreen(document);
 assetLoading.begin('Loading sound and interface');
@@ -98,7 +99,8 @@ try {
 } catch {}
 const legacyMapManifest=await loadAssetJson('./assets/maps/manifest.json');
 let areaMapManifest=null;
-const originalLocations=await loadAssetJson('./assets/mobile-locations/manifest.json');
+const locationIndex=await loadAssetJson('./assets/mobile-locations/manifest.json');
+const originalLocations=locationIndex.optimizedIndex?await loadAssetJson(locationIndex.optimizedIndex.src):locationIndex;
 let mobileAreaCache=null;
 async function nativeArea(area){
  if(mobileAreaCache?.regions[0]?.areaId===area.id){mobileAreaCache.regions[0].runFacet=area.facet;return mobileAreaCache;}
@@ -106,6 +108,7 @@ async function nativeArea(area){
  mobileAreaCache=await trackAsset('Area data',()=>fetchLoadingJson(entry.src,(loaded,total)=>assetLoading.bytes(loaded,total)));mobileAreaCache.regions[0].runFacet=area.facet;return mobileAreaCache;
 }
 let mapManifest=legacyMapManifest,mapImages={},mapRegions=createMapRegions(mapManifest,mapImages,{palettes:huePalettes}),mapLoading=false;
+let mapAssetStore=null;
 let activeBiomeStage=0;
 async function attachMap(newRun=false,mapState=null){
   assetLoading.begin('Loading '+(game.currentArea()?.name||'area')+' data');
@@ -113,19 +116,27 @@ async function attachMap(newRun=false,mapState=null){
   if(!game.zoneRun&&game.areaRoute?.length&&!areaMapManifest)areaMapManifest=await loadAssetJson('./assets/zone-maps/manifest.json');
   const selected=game.zoneRun?await nativeArea(game.currentArea()):game.areaRoute?.length?routeMapManifest(areaMapManifest,game.areaRoute,game.duration):legacyMapManifest;
   if(game.zoneRun)selected.images['tree-stump']=uiManifest.images['scenery/tree-stump'];
-  const loaded={};
-  assetLoading.begin('Loading area artwork',Object.keys(selected.images).length);
-  // Explicit bitmap decoding also works while the native window is offscreen.
-  // Detached HTML image decode promises can stall after a viewport resize.
-  await Promise.all(Object.entries(selected.images).map(([key,entry])=>trackAsset('Area artwork',async()=>{const response=await fetch(entry.src);if(!response.ok)throw Error('Area artwork could not be loaded');loaded[key]=await createImageBitmap(await response.blob());assetLoading.advance();})));
   assetLoading.begin('Preparing terrain and paths');
   await paintLoadingScreen();
-  for(const image of Object.values(mapImages))image.close?.();
-  mapManifest=selected;mapImages=loaded;mapRegions=game.zoneRun?createLocationMap(selected,loaded,{palettes:huePalettes,areaId:game.currentArea().id}):createMapRegions(selected,loaded,{palettes:huePalettes});
+  const nextStore=game.zoneRun?new MapAssetStore(selected,{maxBytes:(mobileClient?96:160)*1024*1024,margin:mobileClient?256:384,concurrency:mobileClient?4:6,
+    onError:()=>announce('Terrain download failed. Retrying…')}):null;
+  const loaded=nextStore?nextStore.images:{};
+  try{
+    if(!nextStore){
+      assetLoading.begin('Loading area artwork',Object.keys(selected.images).length);
+      await Promise.all(Object.entries(selected.images).map(([key,entry])=>trackAsset('Area artwork',async()=>{const response=await fetch(entry.src);if(!response.ok)throw Error('Area artwork could not be loaded');loaded[key]=await createImageBitmap(await response.blob());assetLoading.advance();})));
+    }
+    const nextRegions=game.zoneRun?createLocationMap(selected,loaded,{palettes:huePalettes,areaId:game.currentArea().id,assetStore:nextStore}):createMapRegions(selected,loaded,{palettes:huePalettes});
+    if(newRun){nextRegions.reset();const start=nextRegions.nearestPlayable(selected.regions[0].spawn.x,selected.regions[0].spawn.y,0),dx=start.x-game.player.x,dy=start.y-game.player.y;game.player.x=start.x;game.player.y=start.y;for(const enemy of game.enemies){enemy.x+=dx;enemy.y+=dy;}}
+    else {if(game.zoneRun)relocateLocationSave(game,mapState,selected.regions[0]);nextRegions.restore(mapState||[]);}
+    if(nextStore)await nextStore.preload(playerCamera(game.player,view,nextRegions.elevationAt(game.player.x,game.player.y,game.time)),view.w,view.h,(done,total)=>{
+      if(done===0)assetLoading.begin('Loading area artwork',total);else assetLoading.advance();
+    });
+    if(mapAssetStore)mapAssetStore.dispose();else for(const image of Object.values(mapImages))image.close?.();
+    mapAssetStore=nextStore;mapManifest=selected;mapImages=loaded;mapRegions=nextRegions;
+  }catch(error){nextStore?.dispose();if(!nextStore)for(const image of Object.values(loaded))image.close?.();throw error;}
   nativeMinimap=game.areaRoute?.length?createNativeMinimap({...radarManifest,regions:selected.regions.map(r=>({id:r.id,image:r.radar}))},{...radarImages,...loaded}):createNativeMinimap(radarManifest,radarImages);
   activeBiomeStage=mapRegions.stageAt(game.time);
-  if(newRun){mapRegions.reset();const start=mapRegions.nearestPlayable(mapManifest.regions[0].spawn.x,mapManifest.regions[0].spawn.y,0),dx=start.x-game.player.x,dy=start.y-game.player.y;game.player.x=start.x;game.player.y=start.y;for(const enemy of game.enemies){enemy.x+=dx;enemy.y+=dy;}}
-  else {if(game.zoneRun)relocateLocationSave(game,mapState,selected.regions[0]);mapRegions.restore(mapState||[]);}
   mapRegions.update(playerCamera(game.player,view,mapRegions.elevationAt(game.player.x,game.player.y,game.time)),view.w,view.h,game.time,[game.player,...game.enemies,...game.pickups,...game.corpses,...game.spellFields.filter(f=>f.summon)]);
   game.elevationAt=(x,y,time)=>mapRegions.elevationAt(x,y,time);
   game.isPassable=(x,y,time)=>mapRegions.isPlayable(x,y,time);game.nearestPassable=(x,y,time)=>mapRegions.nearestPlayable(x,y,time);
@@ -136,7 +147,7 @@ async function attachMap(newRun=false,mapState=null){
   if(game.zoneRun){
     const key=game.currentArea().id+':'+game.zoneRun.index;
     if(game.oreAreaKey!==key){const r=selected.regions[0],cells=r.mainPassable||[],points=[];
-      for(let i=0;i<Math.min(180,cells.length);i++){const cell=cells[Math.floor(i*cells.length/Math.min(180,cells.length))],p=mapPoint(Math.floor(cell/r.height)+.5,cell%r.height+.5);
+      for(let i=0;i<Math.min(1200,cells.length);i++){const cell=cells[Math.floor(i*cells.length/Math.min(1200,cells.length))],p=mapPoint(Math.floor(cell/r.height)+.5,cell%r.height+.5);
         if([[-22,0],[22,0],[0,-22],[0,22],[0,0]].every(([x,y])=>game.canStand(p.x+x,p.y+y,18)))points.push(p);
       }placeGoldOre(game,points,key);
     }
@@ -226,7 +237,7 @@ function dropImage(kind,item){const art=kind==='gold'?uiManifest.equipment.items
 const abilityImages=new Map();
 function abilityImage(src){if(!abilityImages.has(src)){const image=new Image();image.src=src;abilityImages.set(src,image);trackAsset('Spell icons',()=>image.decode()).catch(()=>{});}const image=abilityImages.get(src);return image.complete&&image.naturalWidth?image:null;}
 function powerupIcon(id){return 'assets/classic-ui/abilities/spells/'+({haste:'agility',shield:'protection',magnet:'telekinesis','heal-percent':'greater-heal'}[id]||'heal')+'.png';}
-function drawDrop(drop,camera){
+function drawDrop(drop,camera,showOreHint=false){
   const x=drop.x-camera.x,y=drop.y-camera.y-entityElevation(drop,mapRegions,game?.time||0)*Z_SCALE;
   if(x< -80||x>view.w+80||y< -120||y>view.h+80)return;
   if(drop.kind==='loot'){
@@ -239,14 +250,14 @@ function drawDrop(drop,camera){
     const icon=abilityImage(powerupIcon(drop.kind));if(icon)ctx.drawImage(icon,x-14,y-28,28,28);
     ctx.font='12px UOText';ctx.textAlign='center';ctx.fillStyle='#fff0a0';ctx.fillText(POWERUPS[drop.kind].name,x,y-35);return;
   }
-  const art=drop.kind==='loot'?uiManifest.images['loot/chest']:drop.kind==='ore'?uiManifest.images['resources/gold-ore']:dropImage(drop.kind,drop.item);if(!art)return;
+  const art=drop.kind==='loot'?uiManifest.images['loot/chest']:drop.kind==='ore'?(uiManifest.images['resources/gold-rock-'+(drop.rockVariant||0)]||uiManifest.images['resources/gold-ore']):dropImage(drop.kind,drop.item);if(!art)return;
   const scale=Math.min(1.25,(['ore','loot'].includes(drop.kind)?52:36)/art.width,(['ore','loot'].includes(drop.kind)?60:40)/art.height),def={src:art.src,cellWidth:art.width,cellHeight:art.height,framesPerDirection:1,anchorX:art.width/2,anchorY:art.height};
   worldAppearance.sprite(def,x,y,{row:0,mirror:false},0,drop.kind==='ore'?0x8A5:drop.kind==='loot'?0:drop.item?.hue||0,scale);
   if(drop.kind==='loot'&&Math.hypot(drop.x-game.player.x,drop.y-game.player.y)<150){
     ctx.save();ctx.font='12px UOText';ctx.textAlign='center';ctx.strokeStyle='#151108';ctx.lineWidth=3;ctx.fillStyle='#edcc7a';const label='Loot chest / walk over to open';ctx.strokeText(label,x,y-70);ctx.fillText(label,x,y-70);ctx.restore();
   }
-  if(drop.kind==='ore'&&Math.hypot(drop.x-game.player.x,drop.y-game.player.y)<90){
-    ctx.save();ctx.textAlign='center';ctx.font='12px UOText';ctx.strokeStyle='#151108';ctx.lineWidth=3;ctx.fillStyle='#eed078';const label=drop.mining?'Mining gold / '+drop.strikes+' strikes left':'Gold ore / stand close to mine';ctx.strokeText(label,x,y-58);ctx.fillText(label,x,y-58);
+  if(drop.kind==='ore'&&showOreHint){
+    ctx.save();ctx.textAlign='center';ctx.font='12px UOText';ctx.strokeStyle='#151108';ctx.lineWidth=3;ctx.fillStyle='#eed078';const label=drop.mining?'Mining gold / '+(drop.hp??1)+' HP':'Gold ore / move close to mine';ctx.strokeText(label,x,y-58);ctx.fillText(label,x,y-58);
     if(drop.mining){ctx.fillStyle='#211c14';ctx.fillRect(x-25,y-52,50,5);ctx.fillStyle='#e3bc65';ctx.fillRect(x-24,y-51,48*drop.progress/MINING_STRIKE_SECONDS,3);}ctx.restore();
   }
 }
@@ -1329,9 +1340,11 @@ function draw() {
   ground(camera);
   const objects=mapRegions.decorations(camera,view.w,view.h,game?.time||0,game?.player).map(item=>({y:item.y,draw:()=>item.draw(ctx,camera)}));
   if (game) {
+    let oreHint=null,oreDistance=90;
+    for(const ore of game.pickups)if(ore.kind==='ore'&&!ore.collected){const d=Math.hypot(ore.x-p.x,ore.y-p.y);if(d<oreDistance){oreHint=ore;oreDistance=d;}if(ore.mining){oreHint=ore;break;}}
     for(const corpse of game.corpses||[])objects.push({y:actorDepth(corpse,mapRegions,game.time),draw:()=>worldAppearance.corpse(corpse,{x:camera.x,y:camera.y+entityElevation(corpse,mapRegions,game.time)*Z_SCALE})});
     for (const a of game.pickups) {
-      if(a.kind!=="xp"){objects.push({y:actorDepth(a,mapRegions,game.time),draw:()=>drawDrop(a,camera)});continue;}
+      if(a.kind!=="xp"){objects.push({y:actorDepth(a,mapRegions,game.time),draw:()=>drawDrop(a,camera,a===oreHint)});continue;}
       objects.push({y:actorDepth(a,mapRegions,game.time),draw:()=>{
       const x = a.x - camera.x,
         y = a.y - camera.y-entityElevation(a,mapRegions,game.time)*Z_SCALE;
@@ -1423,7 +1436,7 @@ function loop(now) {
         touch.y + pathInput.y;
     game.setViewport?.(view.w, view.h);
     framePhase('navigation');
-    game.update(dt, { x, y });
+    if(!mapRegions.loadingGround)game.update(dt, { x, y });
     // Autosave on active time so pauses and menus do not repeat writes.
     if(game.status==="playing"&&Math.abs(game.time-lastAutosave)>=AUTOSAVE_SECONDS){lastAutosave=game.time;save();}
     if(pendingChestId!==null){

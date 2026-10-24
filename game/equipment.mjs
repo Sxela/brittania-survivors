@@ -54,7 +54,8 @@ export function propertyRows(item){
   }
   for(const [k,v]of Object.entries(attributesOf(item)))if(v&&!/^Resist(?:Physical|Elemental)Flat$/.test(k))rows.push({key:'aos:'+k,label:/^Resist(?:Physical|Elemental)Bonus$/.test(k)?k.includes('Physical')?'Physical resistance bonus (% of class base)':'Elemental resistance bonus (% of class base)':/^(?:Physical|Elemental)DamageFlat$/.test(k)?k.replace('DamageFlat',' damage (flat points)'):/^(?:Physical|Elemental)Damage$/.test(k)?k.replace('Damage',' damage bonus (% of class base)'):AOS_LABELS[k]||k.replace(/([a-z])([A-Z])/g,'$1 $2'),value:v});
   for(const [id,levels]of Object.entries(itemSpellLevels(item)))rows.push({key:'spellLevels:'+id,label:id.replace(/(^|-)([a-z])/g,(m,d,c)=>(d?' ':'')+c.toUpperCase())+' levels',value:levels,note:'+'+levels+' effective rank'});
-  for(const skill of item?.skillBonuses||[])if(skill.value)rows.push({key:'skill:'+skill.skill,label:skill.skill==='EvalInt'?'Evaluating Intelligence':skill.skill.replace(/([a-z])([A-Z])/g,'$1 $2'),value:skill.value,note:['Magery','EvalInt'].includes(skill.skill)?'+'+Number((skill.value/SCHOOL_POINTS_PER_RANK).toFixed(2))+' rank to all spells':'No effect in this game'});
+  if(item&&(/pickaxe/i.test(item.id||item.name||'')||[0xe85,0xe86].includes(item.itemId)))rows.push({key:'mining-tool',label:'Mining tool',value:25,note:'+25% ore gold and 20% faster mining while equipped'});
+  for(const skill of item?.skillBonuses||[])if(skill.value)rows.push({key:'skill:'+skill.skill,label:skill.skill==='EvalInt'?'Evaluating Intelligence':skill.skill.replace(/([a-z])([A-Z])/g,'$1 $2'),value:skill.value,note:['Magery','EvalInt'].includes(skill.skill)?'+'+Number((skill.value/SCHOOL_POINTS_PER_RANK).toFixed(2))+' rank to all spells':skill.skill==='Mining'?'Faster ore mining':'No effect in this game'});
   return rows;
 }
 

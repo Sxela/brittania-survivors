@@ -116,7 +116,7 @@ def extract(client=DEFAULT_CLASSIC, out=ROOT/'game/assets/classic-actors', audit
             errors[str(body)] = str(error)
     for sex, body in [('male', 400), ('female', 401)]:
         world['playerBases'][sex] = {}
-        for mode, action in [('walk', 0), ('walkArmed', 1)]:
+        for mode, action in [('walk', 0), ('walkArmed', 1), ('mine', 11)]:
             world['playerBases'][sex][mode] = sheet(body, action, 'players')
     equipment_ids = item_animation_ids(client)
     wanted_items = {}
@@ -126,6 +126,7 @@ def extract(client=DEFAULT_CLASSIC, out=ROOT/'game/assets/classic-actors', audit
                 wanted_items.setdefault(int(iid), item)
         if item.get('itemId') is not None:
             wanted_items.setdefault(int(item['itemId']), item)
+    wanted_items.setdefault(0xe86, {'id':'pickaxe','slot':'weapon'})
     for iid, item in sorted(wanted_items.items()):
         graphic = equipment_ids.get(iid, 0)
         record = {'itemId': iid, 'catalogId': item['id'], 'slot': item.get('slot'),
@@ -137,7 +138,7 @@ def extract(client=DEFAULT_CLASSIC, out=ROOT/'game/assets/classic-actors', audit
         for sex, player in [('male', 400), ('female', 401)]:
             mapped, _, hue = animations.equipment.get((player, graphic), (graphic, 0, 0))
             layers = {}
-            for mode, action in [('walk', 0), ('walkArmed', 1)]:
+            for mode, action in [('walk', 0), ('walkArmed', 1), ('mine', 11)]:
                 try:
                     layer = sheet(mapped, action, 'layers', aligned_bottom=world['playerBases'][sex][mode]['nativeBounds'][3])
                     layer['alignedPlayerBodyId'] = player

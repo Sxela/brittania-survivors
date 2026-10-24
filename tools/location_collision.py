@@ -120,7 +120,7 @@ def normalize_region(region, data):
     spawn = min(main, key=lambda i: ((i//h-sx)**2+(i%h-sy)**2, i))
     ax, ay = spawn//h+.5, spawn%h+.5
     old_main = set(region.get('mainPassable', []))
-    region.update(walkZ=walk, mainPassable=sorted(main), blocked=sorted(set(range(w*h))-main),
+    region.update(walkZ=walk, physicalPassable=sorted(passable), mainPassable=sorted(main), blocked=sorted(set(range(w*h))-main),
                   spawn={'x': (ax-ay)*22, 'y': (ax+ay)*22, 'tileX': spawn//h, 'tileY': spawn%h},
                   connectedRatio=len(main)/len(tiles), movementBounds='connected-native-section')
     return {'cells': w*h, 'physicalPassable': len(passable), 'reachable': len(main),

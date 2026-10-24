@@ -3,7 +3,7 @@
 @font-face { font-family: UOSubtitle; src: url("assets/classic-ui/fonts/uo-subtitle.ttf") format("truetype"); font-display: block; }
 :root { color-scheme: dark; --gold: #fad53f; --muted: #b6bac3; --cream: #fff; }
 * { box-sizing: border-box; }
-body { margin: 0; background: #080d13 url("assets/classic-ui/window-background.png") center / 100% 100%; color: var(--cream); font-family: UOText; font-size: 15px; }
+body { margin: 0; background: #080d13 url("assets/classic-ui/window-texture.png") center / 100% 100%; color: var(--cream); font-family: UOText; font-size: 15px; }
 button, input { font: inherit; color: inherit; }
 button { cursor: pointer; border: 12px solid transparent; border-image: url("assets/classic-ui/button-normal.png") 12 fill / 12px / 0 stretch; background: none; padding: 0 8px; min-height: 34px; line-height: 1.2; }
 button:hover, button:focus-visible { border-image-source: url("assets/classic-ui/button-hover.png"); color: var(--gold); }
@@ -25,7 +25,7 @@ header { height: 78px; display: flex; align-items: center; justify-content: spac
 .vignette { display: none; }
 footer { height: 32px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--muted); gap: 10px; }
 footer b { font-weight: normal; color: white; }
-.panel, .menu { border: solid transparent; border-width: 12px; border-image: url("assets/classic-ui/window-frame.png") 12 fill / 12px; background: url("assets/classic-ui/window-background.png") center / 100% 100%; background-clip: padding-box; }
+.panel, .menu { border: solid transparent; border-width: 12px; border-image: url("assets/classic-ui/window-frame.png") 12 fill / 12px; background: url("assets/classic-ui/window-texture.png") center / 100% 100%; background-clip: padding-box; }
 .hidden { display: none !important; }
 .hero-card { display: flex; align-items: center; gap: 8px; padding: 2px 0; min-width: 245px; }
 #hero-icon { width: 34px; flex-shrink: 0; }
@@ -64,7 +64,7 @@ h1 em { font-style: normal; color: var(--gold); font-size: .8em; }
 .intro { font-size: 16px; line-height: 1.5; color: #d9dce3; }
 .rule { margin: 20px 0 12px; padding-top: 10px; background: url("assets/classic-ui/divider.png") top center / 100% 5px no-repeat; font-size: 13px; color: var(--gold); }
 .class-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
-.class-card { padding: 8px 3px; border-image: url("assets/classic-ui/inner-frame.png") 4 / 4px; background: url("assets/classic-ui/window-background.png") center / 100% 100%; }
+.class-card { padding: 8px 3px; border-image: url("assets/classic-ui/inner-frame.png") 4 / 4px; background: url("assets/classic-ui/window-texture.png") center / 100% 100%; }
 .class-card.selected { color: var(--gold); }
 .class-icon { display: block; height: 38px; }
 .class-icon img { width: 32px; height: 32px; object-fit: contain; }
@@ -77,12 +77,12 @@ h1 em { font-style: normal; color: var(--gold); font-size: .8em; }
 #dialog h2 { font: 32px UOTitle; margin: 0 0 10px; color: var(--gold); }
 #dialog p { font-size: 15px; line-height: 1.5; color: #d2d7df; }
 .choices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
-.choice { text-align: left; padding: 12px 5px; border-image: url("assets/classic-ui/inner-frame.png") 4 / 4px; background: url("assets/classic-ui/window-background.png") center / 100% 100%; }
+.choice { text-align: left; padding: 12px 5px; border-image: url("assets/classic-ui/inner-frame.png") 4 / 4px; background: url("assets/classic-ui/window-texture.png") center / 100% 100%; }
 .choice strong { display: block; color: var(--gold); font: 20px UOSubtitle; }
 .choice small { display: block; font-size: 14px; line-height: 1.4; margin-top: 12px; }
 .dialog-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
 .items { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-.item, .bestiary-card, .equipment span { border: 10px solid transparent; border-image: url("assets/classic-ui/inner-frame.png") 4 / 4px; padding: 8px; background: url("assets/classic-ui/window-background.png") center / 100% 100%; }
+.item, .bestiary-card, .equipment span { border: 10px solid transparent; border-image: url("assets/classic-ui/inner-frame.png") 4 / 4px; padding: 8px; background: url("assets/classic-ui/window-texture.png") center / 100% 100%; }
 .item strong { font: 18px UOSubtitle; color: var(--gold); }
 .item p { margin: 6px 0; }
 .item button { font-size: 14px; }
@@ -97,7 +97,7 @@ h1 em { font-style: normal; color: var(--gold); font-size: .8em; }
 .bestiary-card small { display: block; font-size: 13px; color: var(--muted); margin: 7px 0; }
 .bestiary-card button { font-size: 13px; padding: 0 2px; }
 .bestiary-pagination { font-size: 14px; align-self: center; }
-#bestiary-search { width: 100%; padding: 5px 8px; border: 10px solid transparent; border-image: url("assets/classic-ui/inner-frame.png") 4 / 4px; background: url("assets/classic-ui/window-background.png") center / 100% 100%; font: 16px UOText; }
+#bestiary-search { width: 100%; padding: 5px 8px; border: 10px solid transparent; border-image: url("assets/classic-ui/inner-frame.png") 4 / 4px; background: url("assets/classic-ui/window-texture.png") center / 100% 100%; font: 16px UOText; }
 ::-webkit-scrollbar { width: 14px; height: 14px; }
 ::-webkit-scrollbar-track { background: url("assets/classic-ui/scroll-track.png") center / 100% 100%; }
 ::-webkit-scrollbar-thumb { background: url("assets/classic-ui/scroll-thumb.png") center / 100% 100%; }
@@ -180,13 +180,13 @@ h1 em { font-style: normal; color: var(--gold); font-size: .8em; }
 .equipment-settings button { font-size:13px; }
 #equipment-tooltip { max-height:80vh;overflow:auto; }
 #equipment-tooltip .artifact { color:#f4bb68; }
-.pickup-notice { display:flex;align-items:center;gap:8px;min-height:36px;margin:3px 0;padding:5px 10px;background:url("assets/classic-ui/window-background.png") center / 100% 100%;border:7px solid transparent;border-image:url("assets/classic-ui/inner-frame.png") 4 / 7px;font:15px UOText; }
+.pickup-notice { display:flex;align-items:center;gap:8px;min-height:36px;margin:3px 0;padding:5px 10px;background:url("assets/classic-ui/window-texture.png") center / 100% 100%;border:7px solid transparent;border-image:url("assets/classic-ui/inner-frame.png") 4 / 7px;font:15px UOText; }
 .pickup-notice img { width:30px;height:30px;object-fit:contain; }
 .pickup-notice.artifact { color:#f4bb68; }.pickup-notice.rare{color:#e9d56e;}.pickup-notice.magic{color:#9ebcff;}.pickup-notice.autosell b,.pickup-notice.gold{color:var(--gold);}
 @media(max-width:800px){.pickup-notice{font-size:12px;min-height:30px;padding:2px;}.pickup-notice img{width:22px;height:24px;}}
 
 .paperdoll-name small { display:block;font:12px UOText;margin-top:3px; }
-.aos-properties { border: 10px solid transparent; border-image: url("assets/classic-ui/inner-frame.png") 4 / 4px; background: url("assets/classic-ui/properties-background.png") center / 100% 100%; color: #272016; }
+.aos-properties { border: 10px solid transparent; border-image: url("assets/classic-ui/inner-frame.png") 4 / 4px; background: url("assets/classic-ui/properties-texture.png") center / 100% 100%; color: #272016; }
 #equipment-tooltip.aos-properties { width: min(410px,calc(100vw - 16px)); padding: 8px; }
 .aos-property-list { text-align: center; font: 15px/1.4 UOText; padding-bottom: 10px; }
 .aos-property-list > strong { display:block;color:#573713;font:20px UOText; }
@@ -210,7 +210,7 @@ h1 em { font-style: normal; color: var(--gold); font-size: .8em; }
 #skills { flex-wrap:wrap; }
 #dash-status { text-align:center;font-size:12px;color:var(--gold);margin:3px 0; }
 #active-buffs { display:flex;justify-content:center;flex-wrap:wrap;gap:8px; }
-#active-buffs span { display:flex;align-items:center;background:url("assets/classic-ui/properties-background.png") center / 100% 100%;padding:2px 6px;font-size:12px; }
+#active-buffs span { display:flex;align-items:center;background:url("assets/classic-ui/properties-texture.png") center / 100% 100%;padding:2px 6px;font-size:12px; }
 #active-buffs img { width:22px;height:22px;margin-right:5px; }
 @media(max-width:800px){#equipment-shop .items{grid-template-columns:1fr;}.menu{max-height:100%;overflow:auto;}.hero-card{width:135px;}.action-bar{gap:4px;}#skills .skill{width:30px;height:30px;}#active-buffs{gap:3px;}#active-buffs span{font-size:10px;}}
 
@@ -495,7 +495,7 @@ body.menu-scene #overlay { background:linear-gradient(90deg,#0007,transparent 75
 .hud-locked #skills .skill { cursor:default; }
 #dash-status { text-align:left; }
 #dialog.equipment-window { width:min(1180px,100%);padding:12px 16px; }
-.inventory-toolbar { display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;position:sticky;top:-12px;z-index:2;background:url("assets/classic-ui/window-background.png") center / cover;padding:8px 0; }
+.inventory-toolbar { display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;position:sticky;top:-12px;z-index:2;background:url("assets/classic-ui/window-texture.png") center / cover;padding:8px 0; }
 .inventory-toolbar strong { color:var(--gold);font:16px UOText; }
 .inventory-tabs { display:flex;gap:8px; }
 .inventory-tabs button[aria-selected="true"] { color:var(--gold)!important;filter:brightness(1.2); }
@@ -677,13 +677,13 @@ article.choice { display:flex;flex-direction:column;gap:6px;cursor:default; }
 #shop-button { position:relative; }
 #shop-button img { height:calc(100% - 12px); }
 #hud-gold { position:absolute;left:50%;bottom:0;transform:translateX(-50%);font:13px UOText;color:#ffe17c;white-space:nowrap;text-shadow:1px 1px #000,-1px -1px #000,1px -1px #000,-1px 1px #000;pointer-events:none; }
-.shop-wallet { position:sticky;top:-8px;z-index:2;display:flex;align-items:center;gap:12px;padding:6px 10px;margin:6px 0 12px;background:url("assets/classic-ui/window-background.png") center / 100% 100%; }
+.shop-wallet { position:sticky;top:-8px;z-index:2;display:flex;align-items:center;gap:12px;padding:6px 10px;margin:6px 0 12px;background:url("assets/classic-ui/window-texture.png") center / 100% 100%; }
 .shop-wallet img { width:38px;height:32px;object-fit:contain;image-rendering:pixelated; }
 .shop-wallet strong { color:var(--gold);font-size:23px; }
 .shop-wallet small { margin-left:auto; }
 
 #zone-timeline { position:relative;height:30px;margin:6px 12px 0; }
-#zone-time-track { position:absolute;inset:9px 0 auto;height:8px;background:url("assets/classic-ui/window-background.png");outline:1px solid #695a36; }
+#zone-time-track { position:absolute;inset:9px 0 auto;height:8px;background:url("assets/classic-ui/window-texture.png");outline:1px solid #695a36; }
 #zone-time-fill { display:block;height:100%;width:0;background:#bd983e; }
 #zone-time-events { position:absolute;inset:0; }
 .time-event { position:absolute;top:1px;transform:translateX(-50%);width:24px;height:24px;image-rendering:pixelated; }
@@ -696,8 +696,8 @@ body.mobile-layout #zone-time-track { top:6px;height:6px; }
 .volume-control { display:block;margin:12px 0 20px; }
 .volume-control > span { display:flex;justify-content:space-between;gap:12px;color:var(--gold); }
 .volume-control input { appearance:none;-webkit-appearance:none;display:block;width:100%;height:36px;margin:4px 0;background:transparent;cursor:pointer;touch-action:pan-y; }
-.volume-control input::-webkit-slider-runnable-track { height:10px;background:url("assets/classic-ui/window-background.png");border:2px solid #887a50; }
-.volume-control input::-moz-range-track { height:6px;background:url("assets/classic-ui/window-background.png");border:2px solid #887a50; }
+.volume-control input::-webkit-slider-runnable-track { height:10px;background:url("assets/classic-ui/window-texture.png");border:2px solid #887a50; }
+.volume-control input::-moz-range-track { height:6px;background:url("assets/classic-ui/window-texture.png");border:2px solid #887a50; }
 .volume-control input::-webkit-slider-thumb { appearance:none;-webkit-appearance:none;width:24px;height:26px;margin-top:-10px;background:url("assets/classic-ui/button-normal.png") center / 100% 100%; }
 .volume-control input::-moz-range-thumb { width:24px;height:26px;border:0;border-radius:0;background:url("assets/classic-ui/button-normal.png") center / 100% 100%; }
 
@@ -721,47 +721,82 @@ body.mobile-layout #zone-time-track { top:6px;height:6px; }
 .spell-details-close { float:right;min-height:30px;padding:3px 8px;font:14px UOText; }
 @media(max-width:600px){.build-stats,.build-spells { grid-template-columns:minmax(0,1fr);gap:12px; }.build-stat-table { font-size:14px; }#stats-button { font-size:12px;min-height:28px;padding:2px 5px; }}
 
-.stats-heading { position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:12px;background:url("assets/classic-ui/window-background.png") center / 100% 100%;padding:4px 0; }
+.stats-heading { position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:12px;background:url("assets/classic-ui/window-texture.png") center / 100% 100%;padding:4px 0; }
 .stats-heading h2 { margin:4px 0; }
 
-/* Whole button artwork keeps its native 110:17 ratio, independent of the
-   larger click target. Repeating panel textures tile instead of stretching. */
-#menu button:not(.class-card),#dialog button:not(.pack-item):not(.choice) {
+/* Three horizontal pieces retain the complete native end caps. Stretch the
+   middle once so its bevel and blue texture have no repeated joins. */
+#menu button:not(.class-card),#dialog button:not(.pack-item):not(.choice),#pause,#stats-button,#spell-details button,#equipment-tooltip button {
   border:0;border-image:none;
-  background:url("assets/classic-ui/paperdoll/button.png") center / 100% auto no-repeat;
-  aspect-ratio:auto;min-height:44px;min-width:0;max-width:min(100%,280px);width:max-content;
-  padding:10px 18px;font:12px/1.25 UOText;text-shadow:1px 1px #101820;
+  position:relative;isolation:isolate;background:none;
+  display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;
+  aspect-ratio:auto;height:58px;min-height:58px;min-width:0;max-width:min(100%,280px);width:max-content;
+  padding:10px 22px;font:16px/1.25 UOText;text-shadow:1px 1px #101820;
+}
+#menu button:not(.class-card)::before,#dialog button:not(.pack-item):not(.choice)::before,#pause::before,#stats-button::before,#spell-details button::before,#equipment-tooltip button::before {
+  content:"";position:absolute;z-index:-1;pointer-events:none;inset:11px 0;box-sizing:border-box;
+  border-style:solid;border-color:transparent;border-width:0 34px;
+  border-image:url("assets/classic-ui/paperdoll/button.png") 0 16 fill / 0 34px / 0 stretch;
 }
 #menu #home-actions button,#menu #start,#menu #continue,#menu #menu-back,#menu #menu-back-home {
-  width:min(100%,286px);align-self:center;margin-inline:auto;font-size:14px;
+  width:min(100%,279px);max-width:min(100%,279px);height:58px;min-height:58px;align-self:center;margin-inline:auto;margin-block:0;font-size:16px;
 }
-#dialog .dialog-actions button { min-width:min(140px,100%); }
+#menu #home-actions button::before,#menu #start::before,#menu #continue::before,#menu #menu-back::before,#menu #menu-back-home::before {
+  border:0;border-image:none;
+  background:url("assets/classic-ui/paperdoll/button.png") center / 100% 100% no-repeat;
+}
+#dialog .dialog-actions { align-items:center; }
+#dialog .dialog-actions button { min-width:min(140px,100%);margin-block:0; }
 #dialog .choices .choice .choice-action { width:100%; }
 #dialog.equipment-window { width:min(940px,100%); }
 #dialog .inventory-toolbar { gap:8px; }
 #dialog .inventory-tabs { gap:6px; }
-#dialog.equipment-window .inventory-tabs button,#dialog #close-dialog { min-width:82px;padding-inline:10px;font-size:11px; }
+#dialog.equipment-window .inventory-tabs button,#dialog #close-dialog { min-width:100px;padding-inline:10px;font-size:16px; }
 #dialog.equipment-window .inventory-toolbar { display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px; }
 #dialog.equipment-window .inventory-toolbar strong { white-space:nowrap;font-size:12px; }
-#dialog.equipment-window .inventory-tabs button { width:0;min-width:54px;max-width:96px;flex:1; }
-#dialog #close-dialog { width:82px; }
+#dialog.equipment-window .inventory-tabs button { width:0;min-width:78px;max-width:120px;flex:1; }
+#dialog #close-dialog { width:100px; }
 #dialog.equipment-window .mobile-inventory-switch button { width:0;min-width:0; }
-#dialog .inventory-tabs button[aria-selected="true"],#dialog [data-mobile-inventory][aria-pressed="true"] { outline:1px solid var(--gold);outline-offset:-4px; }
+#dialog .inventory-tabs button[aria-selected="true"],#dialog [data-mobile-inventory][aria-pressed="true"] { outline:none;color:var(--gold);filter:none; }
+#dialog .inventory-tabs button[aria-selected="true"]::before,#dialog [data-mobile-inventory][aria-pressed="true"]::before { filter:sepia(1) saturate(3) hue-rotate(8deg) brightness(1.15); }
 #dialog #inventory-trash { background:none;aspect-ratio:auto;min-width:72px;padding:2px 6px; }
+#dialog #inventory-trash::before { display:none; }
 #dialog.equipment-window .equipment-settings button { min-width:140px; }
 #dialog.equipment-window .equipment-selection button { width:120px; }
-#dialog .equipment-settings small { display:inline;font-size:11px; }
+#dialog .equipment-settings small { display:inline;font-size:16px; }
 #dialog img,#menu img { object-fit:contain;flex-shrink:0; }
 #dialog .bestiary-card canvas { width:min(160px,100%);height:auto;aspect-ratio:4 / 3; }
 #menu .class-card,.panel,.choice,.item,.bestiary-card,.inventory-toolbar,.shop-wallet,.aos-properties,.stats-heading {
   background-size:auto;background-repeat:repeat;border-image-repeat:round;
 }
-#menu .class-card { background-image:url("assets/classic-ui/window-background.png");border:4px solid transparent;border-image:url("assets/classic-ui/inner-frame.png") 4 / 4px round; }
+#menu .class-card { background-image:url("assets/classic-ui/window-texture.png");border:4px solid transparent;border-image:url("assets/classic-ui/inner-frame.png") 4 / 4px round; }
 #dialog .choice strong { font-size:17px; }
 #dialog .choice small,#dialog .choice .spell-preview { font-size:12px;line-height:1.3;margin-top:4px; }
 #dialog .choice-icon { width:36px;height:36px;margin:2px 0 4px; }
 #dialog .shop-wallet strong { font-size:18px; }
-#dialog .shop-item-heading strong { font-size:14px; }
+#dialog .shop-item-heading strong { font-size:16px; }
 #dialog .item > small { margin:4px 0;font-size:12px; }
 #dialog button[hidden] { display:none; }
 .volume-control input::-webkit-slider-thumb,.volume-control input::-moz-range-thumb { background-size:contain;background-repeat:no-repeat; }
+
+/* These textures contain only native interior pixels with mirrored seams. */
+body,.menu,.aos-properties,#active-buffs span,.stats-heading { background-size:auto;background-repeat:repeat; }
+
+/* Shared text control scale for menus, property panes and HUD text actions. */
+body.mobile-layout #pause { width:110px;height:58px;min-height:58px;font-size:16px;padding-inline:16px; }
+#pause kbd { display:none; }
+#stats-button { height:58px;min-height:58px;font-size:16px;padding-inline:22px; }
+.actions { flex-wrap:wrap; }
+.actions button.hud-shortcut,body.mobile-layout .actions button.hud-shortcut { width:58px;height:58px;min-height:58px; }
+#dialog p,#menu p { font-size:18px; }
+#dialog .fine,#menu .fine,#dialog .item > small,#dialog .choice small,#dialog .choice .spell-preview { font-size:16px;line-height:1.3; }
+#dialog .choice strong { font-size:22px; }
+#dialog .shop-item-heading strong,#dialog .inventory-toolbar strong { font-size:16px; }
+#dialog .equipment-settings small { font-size:14px; }
+#spell-details,#equipment-tooltip { font-size:18px; }
+@media(max-width:600px){
+ #dialog.equipment-window .inventory-toolbar { grid-template-columns:minmax(0,1fr) auto; }
+ #dialog.equipment-window .inventory-tabs { grid-column:1/-1; }
+ #dialog.equipment-window .inventory-tabs button { max-width:none; }
+ #dialog .dialog-actions button { min-width:0; }
+}

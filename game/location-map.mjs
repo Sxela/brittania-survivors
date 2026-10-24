@@ -19,22 +19,34 @@ export function relocateLocationSave(game,savedMap,region){
  return true;
 }
 
-export function createLocationMap(manifest,images,{palettes={},areaId,facet}={}){
+export function createLocationMap(manifest,images,{palettes={},areaId,facet,assetStore}={}){
  const regions=manifest?.regions||[];
  const region=regions.find(r=>(!areaId||r.areaId===areaId)&&(!facet||r.facet===facet||r.sourceFacet===facet))||regions.find(r=>r.areaId===areaId)||regions[0];
  if(!region)throw new Error('A native location is required');
- const width=region.width,height=region.height,blocked=new Set(region.blocked||[]);
+ const width=region.width,height=region.height;
+ // A clear floor behind a wall is a legal teleport landing, even if it is
+ // disconnected from the original spawn. Legacy banks retain their old bounds.
+ const physical=region.physicalPassable?new Set(region.physicalPassable.filter(i=>Number.isInteger(i)&&i>=0&&i<width*height)):null;
+ const blocked=new Set(physical?Array.from({length:width*height},(_,i)=>i).filter(i=>!physical.has(i)):region.blocked||[]);
  const validIndex=i=>Number.isInteger(i)&&i>=0&&i<width*height&&!blocked.has(i);
- let main=[...new Set(region.mainPassable||Array.from({length:width*height},(_,i)=>i))].filter(validIndex),playable=new Set(main);
+ let main=[...new Set(region.mainPassable||Array.from({length:width*height},(_,i)=>i))].filter(validIndex),playable=physical||new Set(main);
  const image=key=>images instanceof Map?images.get(key):images?.[key],hued=new Map();
+ let hueBytes=0;
  const inside=(a,b)=>a>=0&&b>=0&&a<width&&b<height;
  const indexAt=(x,y)=>{const {a,b}=mapCell(x,y);return inside(a,b)?a*height+b:-1;};
  const pointAt=i=>mapPoint(Math.floor(i/height)+.5,i%height+.5);
  const heights=locationHeights(region),elevationAt=heights.elevationAt,canTraverse=locationTraversal(region,heights,validIndex);
  const canOccupySegment=locationTraversal(region,heights,validIndex,{ignoreHeight:true});
  const connected=connectedLocationCells(region,main,canTraverse),reachable=new Set(connected);
- for(const i of main)if(!reachable.has(i)){blocked.add(i);playable.delete(i);}
+ if(!physical)for(const i of main)if(!reachable.has(i)){blocked.add(i);playable.delete(i);}
  main=connected;
+ let currentComponent=new Set(main);
+ function ensurePlayerComponent(player){
+  if(!physical||!player||currentComponent.has(indexAt(player.x,player.y))||!isPlayable(player.x,player.y))return;
+  const cell=mapCell(player.x,player.y);
+  main=connectedLocationCells({...region,spawn:{tileX:cell.a,tileY:cell.b}},[...physical],canTraverse);
+  currentComponent=new Set(main);indexSpawnCells();cachedGate=null;
+ }
  const placements=[...(region.statics||[]),...(region.backdropStatics||[])].map(item=>({item,placement:staticPlacement(mapPoint(item.x,item.y),item),floor:isFloorSurface(item)}));
  // Group connected upper surfaces so cutaway affects only the building
  // covering the character, along with furniture supported by those surfaces.
@@ -86,7 +98,8 @@ export function createLocationMap(manifest,images,{palettes={},areaId,facet}={})
  }
  function nearestPlayable(x,y,time=0,canOccupy=null){
   if(isPlayable(x,y)&&(!canOccupy||canOccupy(x,y)))return {x,y};
-  return nearest(x,y,main,canOccupy)||nearest(x,y,main)||{...(region.spawn||mapPoint(width/2,height/2))};
+  const cells=physical?[...physical]:main;
+  return nearest(x,y,cells,canOccupy)||nearest(x,y,cells)||{...(region.spawn||mapPoint(width/2,height/2))};
  }
  function nearestPassable(x,y){
   if(isPassable(x,y))return {x,y};
@@ -101,11 +114,15 @@ export function createLocationMap(manifest,images,{palettes={},areaId,facet}={})
  // Index spawn cells in projected screen space, including native elevation.
  // A large location never requires a full-map scan for each new monster.
  const spawnBuckets=new Map(),SPAWN_BUCKET=256;
+ function indexSpawnCells(){spawnBuckets.clear();
  for(const i of main){const p=pointAt(i),sy=p.y-elevationAt(p.x,p.y)*Z_SCALE;
   const key=Math.floor(p.x/SPAWN_BUCKET)+','+Math.floor(sy/SPAWN_BUCKET);
   if(!spawnBuckets.has(key))spawnBuckets.set(key,[]);spawnBuckets.get(key).push({...p,sy});
  }
+ }
+ indexSpawnCells();
  function randomSpawn(random=Math.random,player=region.spawn||{x:0,y:0},radius=12,boss=false,viewport={width:960,height:600}){
+  ensurePlayerComponent(player);
   if(!main.length)return null;
   const w=Math.max(1,viewport.width),h=Math.max(1,viewport.height),cy=player.y-elevationAt(player.x,player.y)*Z_SCALE;
   const side=Math.min(w*.2,Math.max(32,radius)),head=Math.min(h*.45,Math.max(boss?180:90,radius+30)),bottom=Math.min(h*.15,Math.max(32,radius*.5));
@@ -130,8 +147,9 @@ export function createLocationMap(manifest,images,{palettes={},areaId,facet}={})
  function gatePoint(player=null){
   const fixed=!player;if(fixed&&cachedGate)return {...cachedGate};
   player=player||region.spawn||mapPoint(width/2,height/2);
+  ensurePlayerComponent(player);
   const target={x:player.x+120,y:player.y};
-  const point=nearestPlayable(target.x,target.y,0,(x,y)=>canStand({x,y},16));
+  const point=nearest(target.x,target.y,main,(x,y)=>canStand({x,y},16))||nearest(target.x,target.y,main)||{...player};
   if(fixed)cachedGate=point;return {...point};
  }
  function drawGround(ctx,camera,w,h){
@@ -146,9 +164,13 @@ export function createLocationMap(manifest,images,{palettes={},areaId,facet}={})
  }
  function hueImage(key,value){
   const base=image(key),id=hueIdentity(value);if(!base||!id.id||!palettes[id.id]||typeof document==='undefined')return base;
-  const cacheKey=key+':'+value;if(hued.has(cacheKey))return hued.get(cacheKey);
-  const canvas=document.createElement('canvas');canvas.width=base.width;canvas.height=base.height;const g=canvas.getContext('2d');g.drawImage(base,0,0);
-  const pixels=g.getImageData(0,0,canvas.width,canvas.height);applyHue(pixels.data,palettes[id.id],id.partial);g.putImageData(pixels,0,0);hued.set(cacheKey,canvas);return canvas;
+  const cacheKey=key+':'+value;if(hued.has(cacheKey)){const cached=hued.get(cacheKey);hued.delete(cacheKey);hued.set(cacheKey,cached);return cached;}
+  const canvas=document.createElement('canvas');canvas.width=base.width;canvas.height=base.height;const g=canvas.getContext('2d');
+  if(base.bitmap)g.drawImage(base.bitmap,base.sx,base.sy,base.width,base.height,0,0,base.width,base.height);else g.drawImage(base,0,0);
+  const pixels=g.getImageData(0,0,canvas.width,canvas.height);applyHue(pixels.data,palettes[id.id],id.partial);g.putImageData(pixels,0,0);
+  const bytes=canvas.width*canvas.height*4;
+  if(bytes<=32*1024*1024){while(hueBytes+bytes>32*1024*1024&&hued.size){const oldest=hued.keys().next().value,entry=hued.get(oldest);hueBytes-=entry.width*entry.height*4;hued.delete(oldest);}hued.set(cacheKey,canvas);hueBytes+=bytes;}
+  return canvas;
  }
  function decorations(camera,w,h,time=0,hero=null){
   const result=[],heroZ=hero?elevationAt(hero.x,hero.y):0,heroY=hero?hero.y-heroZ*Z_SCALE:0;
@@ -183,8 +205,8 @@ export function createLocationMap(manifest,images,{palettes={},areaId,facet}={})
    const drawDepth=staticDepth(mapPoint(item.x,item.y),item,floor);
    result.push({x,y:drawDepth,item,region:region.name,draw(g,cam=camera){
     const drawArt=()=>{
-     if(flat){g.beginPath();g.moveTo(x-cam.x,y-cam.y);g.lineTo(x+22-cam.x,y+22-cam.y);g.lineTo(x-cam.x,y+44-cam.y);g.lineTo(x-22-cam.x,y+22-cam.y);g.closePath();g.clip();g.drawImage(im,left-cam.x,top-cam.y,44,44);}
-     else g.drawImage(im,0,0,Math.min(pw,im.width),Math.min(ph,im.height),left-cam.x,top-cam.y,pw,ph);
+     if(flat){g.beginPath();g.moveTo(x-cam.x,y-cam.y);g.lineTo(x+22-cam.x,y+22-cam.y);g.lineTo(x-cam.x,y+44-cam.y);g.lineTo(x-22-cam.x,y+22-cam.y);g.closePath();g.clip();if(im.bitmap)g.drawImage(im.bitmap,im.sx,im.sy,im.width,im.height,left-cam.x,top-cam.y,44,44);else g.drawImage(im,left-cam.x,top-cam.y,44,44);}
+     else g.drawImage(im.bitmap||im,im.sx||0,im.sy||0,Math.min(pw,im.width),Math.min(ph,im.height),left-cam.x,top-cam.y,pw,ph);
     };
     const reveal=obstructsCharacter(item,p,hero,heroZ,drawDepth)&&(!floor||item.z>heroZ+2);
     if(reveal){
@@ -199,10 +221,11 @@ export function createLocationMap(manifest,images,{palettes={},areaId,facet}={})
   return result;
  }
  const selectedManifest={...manifest,regions:[region]};
- return {manifest:selectedManifest,stageAt:()=>0,areaAt:()=>region.areaId,regionName:()=>region.name,update:()=>{},reset:()=>{},
+ return {manifest:selectedManifest,stageAt:()=>0,areaAt:()=>region.areaId,regionName:()=>region.name,update:(camera,w,h)=>assetStore?.update(camera,w,h),reset:()=>{},
   snapshot:()=>({version:4,areaId:region.areaId,origin:{sourceX:region.sourceX??0,sourceY:region.sourceY??0}}),restore:()=>{},
   isPassable,isPlayable,isSightPassable,nearestPassable,nearestPlayable,nearestMainPassable:nearestPlayable,
   elevationAt,canTraverse,canOccupySegment,screenElevationAt:(x,y)=>elevationAt(x,y)*Z_SCALE,drawGround,decorations,randomSpawn,gatePoint,
   nativeRadar:()=>({image:image(region.radar),originX:region.radarOriginX??height-1,originY:region.radarOriginY||0}),
-  get performanceStats(){return {groundBytes:0,groundHits:0,groundMisses:0,groundReadbacks:0,groundEntries:0};}};
+  get loadingGround(){return assetStore?.loadingGround||false;},
+  get performanceStats(){return {...(assetStore?.stats||{groundBytes:0,groundHits:0,groundMisses:0,groundReadbacks:0,groundEntries:0}),hueBytes};}};
 }

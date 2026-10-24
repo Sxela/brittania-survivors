@@ -5,6 +5,12 @@ export const dropsLootChest=enemy=>!!(enemy.boss||enemy.zoneBoss||enemy.captain|
 export const POWERUP_DROP_CHANCE=.004;
 export const HEAL_DROP_CHANCE=.04;
 export const GOLD_DROP_CHANCE=.12;
+export const ORDINARY_GOLD_RETAINED=.1;
+export function monsterGoldBase(game,enemy={},combatTime=null){
+ const zone=game.zoneRun,fraction=Math.min(1,(zone?.pressureElapsed||0)/Math.max(1,game.zonePlan?.bossAt||1));
+ const time=combatTime??(zone?((zone.index+fraction)/Math.max(1,game.areaRoute?.length||1)*game.duration):game.time);
+ return Math.max(1,Math.round((enemy.boss?15:enemy.captain||enemy.packChampion?6:2+Math.floor(time/180))*(game.difficulty==='hard'?1.5:1)*(game.zoneScale?.gold||1))+(game.zoneRun?.index||0));
+}
 export function bossSchedule(duration=600){
  const final=duration>15?duration-15:duration;
  return [...[120,240,360,480].filter(t=>t<final),final];

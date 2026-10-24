@@ -28,8 +28,12 @@ jobs:
       - run: npm run test:ci
       - name: Check local asset setup safety
         run: python -m unittest discover -s tools -p test_setup_assets.py
-      - name: Check local asset setup safety
-        run: python -m unittest discover -s tools -p test_setup_assets.py
+      - name: Install image optimization dependency
+        run: python -m pip install -r requirements-assets.txt
+      - name: Check lossless map optimization
+        run: python -m unittest discover -s tools -p test_optimize_map_assets.py
+      - name: Check seamless UI textures
+        run: python -m unittest discover -s tools -p test_ui_textures.py
       - name: Stage and audit resource-free desktop runtime
         run: |
           node tools/stage-source-desktop.mjs BritanniaSurvivors-ci

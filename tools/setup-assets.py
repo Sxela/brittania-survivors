@@ -16,7 +16,7 @@ TOOLS = ['classic_archive.py','classic_paths.py','client_bodymap.py','classic_an
  'extract_paperdoll_controls.py','extract_classic_minimap.py','extract_classic_summons.py',
  'export_native_locations.py','export_zone_maps.py','location_decorations.py',
  'location_collision.py','location_backdrop.py','location_floor_repairs.py',
- 'location_bounds.py','prepare_ground_patches.py','setup-assets.py','asset-recipe.json']
+ 'location_bounds.py','prepare_ground_patches.py','optimize-map-assets.py','setup-assets.py','asset-recipe.json']
 REQUIRED = ['artLegacyMUL.uop','gumpartLegacyMUL.uop','soundLegacyMUL.uop',
  'tiledata.mul','hues.mul','radarcol.mul','animdata.mul','anim.mul','anim.idx',
  'mobtypes.txt','Body.def','Bodyconv.def','Equipconv.def','gump.def',
@@ -78,7 +78,7 @@ def worker(client):
     extract_classic_menu.extract(client);extract_classic_hud.extract(client);extract_paperdoll_controls.extract(client)
     data=ClassicData(client)
     try:
-        for role,iid,hue in [('resources/gold-ore',0x19b9,0x8a5),('loot/chest',0xe41,0),('inventory/trash',0xe77,0),('scenery/tree-stump',3671,0)]:
+        for role,iid,hue in [('resources/gold-ore',0x19b9,0x8a5),('resources/gold-rock-0',0x1363,0x8a5),('resources/gold-rock-1',0x1364,0x8a5),('resources/gold-rock-2',0x1365,0x8a5),('loot/chest',0xe41,0),('inventory/trash',0xe77,0),('scenery/tree-stump',3671,0)]:
             image=data.art(iid)
             if image is None:raise ValueError('Missing required item art '+str(iid))
             file=ROOT/'game/assets/classic-ui'/(role.replace('/','-')+'.png');image.save(file)
@@ -102,7 +102,7 @@ def worker(client):
     source=ROOT/'game'/maps['images'][maps['regions'][0]['ground']]['src']
     with Image.open(source) as image:
         ImageEnhance.Brightness(image.convert('RGB').resize((1280,720))).enhance(.5).save(ROOT/'game/assets/menu-background.png')
-    subprocess.run(['node',str(ROOT/'tools/build-mobile.mjs')],cwd=ROOT,check=True)
+    subprocess.run(['node',str(ROOT/'tools/build-mobile.mjs')],cwd=ROOT,check=True,env={**os.environ,'BRITANNIA_ASSET_PYTHON':sys.executable})
     verify_resources()
     # Absolute installation paths and environment-dependent audit fields are
     # intentionally absent from local output manifests.

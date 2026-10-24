@@ -36,6 +36,12 @@ test('burn and existing poison ticks cannot renew their duration or trigger area
  tickSpellSystem(g,2);assert.ok(e.hp<hp);assert.equal(e.spellBurnUntil,burnUntil);assert.equal(e.spellPoisonUntil,poisonUntil);assert.equal(g.enemies[1].hp,1000);
  g.time=10;const done=e.hp;tickSpellSystem(g,1);assert.equal(e.hp,done);assert.equal(spellEnemyMovementMultiplier(g,e),1);
 });
+test('enemy burn ticks use Explosion artwork while poison keeps its own effect',()=>{
+ const g=fixture(),e=g.enemies[0];g.hurtEnemy(e,100,false,'Fire');g.hurtEnemy(e,100,false,'Poison');g.effects=[];
+ const hp=e.hp;tickSpellSystem(g,2);
+ assert.ok(e.hp<hp);assert.ok(g.effects.some(fx=>fx.kind==='explosion'));assert.ok(g.effects.some(fx=>fx.kind==='poison'));
+ assert.equal(g.effects.some(fx=>fx.kind==='fireball'),false);
+});
 test('elemental spell hits work and new burn state survives saves with validation',()=>{
  const g=new Game({}, {seed:9}),e=g.spawnEnemy();e.hp=e.maxHp=1000;
  g.hurtEnemy(e,100,false,'Fire');g.hurtEnemy(e,100,false,'Cold');

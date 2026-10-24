@@ -1,0 +1,15 @@
+# Mining economy and visual fixes
+
+Ordinary monster coin drops retain 10% of their previous expected gold: the coin-drop chance is now 1.2%, down from 12%, with the original coin values. Bosses, captains and pack champions retain guaranteed larger payouts. Gold Find applies to both creature rewards and mining.
+
+Each new area places up to eight reachable clusters initially, increasing by one every two areas to a maximum of 24. Cluster centers are separated by at least 180 world pixels. Each cluster contains up to four golden rocks within 63 pixels of its center; walls, different floors and insufficient space can reduce the cluster size. Each rock depletes after one three-second mining strike and shows one synchronized pickaxe swing. Randomized yields share the same area gold budget as before, including the expected ordinary monster gold removed from scheduled waves. Actual income depends on spawned enemies and mined rocks; unbounded post-boss reinforcement gold is not prepaid into ore. Old multi-strike rocks convert to one strike while preserving their remaining gold and progress. Saves preserve cluster membership and depletion.
+
+Staying on the ore?s original game tile or any of its eight adjacent tiles automatically mines it, including while moving. Range uses original isometric tile coordinates; walls and inaccessible floors still block mining. The current rock stays targeted while circling it, and leaving reach pauses its progress. New rocks have 1 HP and deplete on one completed hit; HP and progress persist in saves. Mining shows the original human mining action (11), facing the deposit, with a temporary visual pickaxe. Existing weapons and shields return when mining stops; inventory and combat equipment are preserved. Equipping an actual pickaxe grants 25% more ore gold and 20% faster mining. Each Mining skill point on equipment adds 1% mining speed, up to 200%. Gold deposits use three original rock sprites with the Golden resource hue.
+
+Haven's zero-height static water previously sorted like vertical scenery, drawing over planks and shoreline walls. Water now sorts as a flat surface below docks and piers. Tall waterfalls keep their vertical ordering. Original ruins and broken source geometry remain part of the map.
+
+Explosion retains its own 13-frame native effect and Flame Strike its 30-frame fire column. Their minimum lifetimes are 1.3 and 3 seconds respectively, so each can play its full sequence at the extracted 10 FPS. Damage timing stays unchanged. Enemy burn damage ticks use Explosion artwork; poison keeps its own effect.
+
+Menu backgrounds use cropped native interior textures with mirrored edges. Parchment borders are no longer repeated through the middle of property panels.
+
+`tests/mining-visuals.browser.cjs` captures desktop and phone Haven docks, parchment, both character mining models, golden rocks, Explosion and Flame Strike under `.cache/mining-visuals/`. Run it with Electron after extracting assets. Unit checks cover deposit budgets, save continuity, tool bonuses, leader rewards, water ordering, complete spell sequences, and matching texture edges.

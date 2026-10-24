@@ -59,13 +59,13 @@ test('gold, XP and item pickups float above the hero, aggregate rapid currency g
 });
 
 test('stale ore height is repaired on load or relocation, supports slopes, and rejects a separate floor',()=>{
- const g=fixture();g.pickups=[{id:10,x:25,y:0,z:40,kind:'ore',radius:18,value:10,strikes:4,progress:2,mining:false}];g.player.x=g.player.y=0;g.elevationAt=(x)=>x/5;g.canTraverse=()=>true;g.clearSight=()=>true;syncGoldOre(g);assert.equal(g.pickups[0].z,5);assert.equal(g.pickups[0].progress,0);tickGoldOre(g,3,false);assert.equal(g.player.gold,10);g.canTraverse=()=>false;tickGoldOre(g,3,false);assert.equal(g.player.gold,10);
+ const g=fixture();g.pickups=[{id:10,x:25,y:0,z:40,kind:'ore',radius:18,value:10,strikes:1,progress:2,mining:false}];g.player.x=g.player.y=0;g.elevationAt=(x)=>x/5;g.canTraverse=()=>true;g.clearSight=()=>true;syncGoldOre(g);assert.equal(g.pickups[0].z,5);assert.equal(g.pickups[0].progress,0);tickGoldOre(g,3,false);assert.equal(g.player.gold,10);g.canTraverse=()=>false;tickGoldOre(g,3,false);assert.equal(g.player.gold,10);
 });
 
 test('ore in all 73 native zones rests on its actual reachable walking floor and can be mined',()=>{
  const source=JSON.parse(readFileSync(new URL('../game/assets/locations/manifest.json',import.meta.url),'utf8'));
  for(const r of source.regions){const map=createLocationMap({regions:[r]},{}),point=map.nearestPlayable(r.spawn.x,r.spawn.y),g=fixture();g.enemies=[];g.pickups=[];g.player.x=point.x+10000;g.player.y=point.y;g.elevationAt=map.elevationAt;g.canStand=(x,y)=>map.isPlayable(x,y);g.canTraverse=map.canTraverse;g.clearSight=()=>true;
-  assert.equal(placeGoldOre(g,[point],'test'),1,r.name);const ore=g.pickups[0];ore.z+=40;Object.assign(g.player,point);tickGoldOre(g,3,false);assert.equal(ore.z,map.elevationAt(ore.x,ore.y),r.name);assert.equal(g.player.gold,10,r.name);assert.equal(ore.strikes,3,r.name);
+  assert.ok(placeGoldOre(g,[point],'test')>=1,r.name);for(const ore of g.pickups){const before=g.player.gold;ore.z+=40;Object.assign(g.player,{x:ore.x,y:ore.y});tickGoldOre(g,3,false);assert.equal(ore.z,map.elevationAt(ore.x,ore.y),r.name);assert.equal(g.player.gold-before,ore.value,r.name);assert.equal(ore.strikes,0,r.name);assert.equal(ore.collected,true,r.name);}
  }
 });
 

@@ -1,6 +1,7 @@
 import {actorAnchorY} from './actor-placement.mjs';
 import {trackAsset} from './asset-loading.mjs';
 import {actorFacing} from './presentation.mjs';
+import {isPickaxe,MINING_STRIKE_SECONDS} from './mining.mjs';
 import {orderedEquipment} from './equipment.mjs';
 import {applyHue,applySpectral,hueIdentity} from './hues.mjs';
 import {isEquipmentBody,enemySex,orderedEnemyEquipment} from './enemy-equipment.mjs';
@@ -29,9 +30,14 @@ export class WorldAppearance {
     g.restore();return true;
   }
   player(game,x,y,moving,time){
-    const sex=game.player.sex||'male',armed=!!(game.equipped('weapon')||game.equipped('offhand')),mode=armed?'walkArmed':'walk',base=this.manifest.playerBases[sex]?.[mode],phase=moving?Math.floor(time*8)%(base?.sourceFramesPerDirection||10):0;
-    const facing=actorFacing(game.lastDirection.x,game.lastDirection.y),items=orderedEquipment(game);
-    const drawItem=item=>{const art=this.manifest.equipment[String(item.itemId)]?.layers?.[sex],def=art?.[mode]||art?.walk;if(this.sprite(def,x,y,facing,phase,item.hue||0))this.layersDrawn.add(item.id);};
+    const target=(game.pickups||[]).find(p=>p.kind==='ore'&&p.mining&&!p.collected);
+    const sex=game.player.sex||'male',armed=!!(game.equipped('weapon')||game.equipped('offhand')),mining=!!target;
+    const mode=mining&&this.manifest.playerBases[sex]?.mine?'mine':armed||mining?'walkArmed':'walk',base=this.manifest.playerBases[sex]?.[mode];
+    const phase=mining?Math.min((base?.framesPerDirection||1)-1,Math.floor(target.progress/MINING_STRIKE_SECONDS*(base?.framesPerDirection||1))):moving?Math.floor(time*8)%(base?.sourceFramesPerDirection||10):0;
+    const facing=mining?actorFacing(target.x-game.player.x,target.y-game.player.y):actorFacing(game.lastDirection.x,game.lastDirection.y);
+    let items=orderedEquipment(game);
+    if(mining){const tool=items.find(i=>i.slot==='weapon'&&isPickaxe(i))||{id:'mining-pickaxe',itemId:0xe86,slot:'weapon',twoHanded:true};items=items.filter(i=>!['weapon','offhand'].includes(i.slot));items.push(tool);}
+    const drawItem=item=>{const art=this.manifest.equipment[String(item.itemId)]?.layers?.[sex],def=art?.[mode]||(mode==='mine'?null:art?.walk);if(this.sprite(def,x,y,facing,phase,item.hue||0))this.layersDrawn.add(item.id);};
     const rule=this.manifest.drawOrder?.twoHandedWeapons;
     const behind=items.filter(i=>i.twoHanded&&i.slot==='weapon'&&!rule?.exceptionItemIds.includes(i.itemId)&&((!facing.mirror&&facing.row>=1)||(facing.mirror&&facing.row===3)));
     behind.forEach(drawItem);
@@ -69,6 +75,6 @@ export class WorldAppearance {
       if(layer)this.sprite(layer,c.x-camera.x,c.y-camera.y,facing,0,item.hue||layer.equipmentConversionHue||0,scale,alpha);
     }
   }
-  async warm(game){const sex=game.player.sex||'male',srcs=new Set();for(const d of Object.values(this.manifest.playerBases[sex]||{}))srcs.add(d.src);for(const item of game.wornItems)for(const d of Object.values(this.manifest.equipment[String(item.itemId)]?.layers?.[sex]||{}))srcs.add(d.src);await Promise.all([...srcs].map(s=>this.load(s)));}
+  async warm(game){const sex=game.player.sex||'male',srcs=new Set();for(const d of Object.values(this.manifest.playerBases[sex]||{}))srcs.add(d.src);for(const item of game.wornItems)for(const d of Object.values(this.manifest.equipment[String(item.itemId)]?.layers?.[sex]||{}))srcs.add(d.src);for(const d of Object.values(this.manifest.equipment[String(0xe86)]?.layers?.[sex]||{}))srcs.add(d.src);await Promise.all([...srcs].map(s=>this.load(s)));}
   get stats(){return{bytes:this.bytes,tintBytes:this.tintBytes,layersDrawn:[...this.layersDrawn],corpsesDrawn:this.corpsesDrawn,images:this.images.size};}
 }

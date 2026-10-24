@@ -15,17 +15,27 @@ app.whenReady().then(async()=>{
       win=new BrowserWindow({width,height,show:false,webPreferences:{backgroundThrottling:false,offscreen:true}});
       await win.loadURL(url+(mobile?'/?mobile=1':''));await waitFor(win,'!!window.britannia');
       await win.webContents.executeJavaScript('document.getElementById("new-game").click()');
+      const wideButtons=await win.webContents.executeJavaScript(`([...document.querySelectorAll('#start,#menu-back,#menu-back-home')].filter(b=>b.getClientRects().length).map(b=>{const r=b.getBoundingClientRect(),art=getComputedStyle(b,'::before');return {top:r.top,width:r.width,height:parseFloat(art.height),image:art.backgroundImage,border:art.borderImageSource};}))`);
+      assert(wideButtons.every(b=>b.border==='none'&&b.image.includes('paperdoll/button.png')&&b.width/b.height>=110/17*.8&&b.width/b.height<=110/17*1.2),JSON.stringify(wideButtons));
+      if(width>=768&&wideButtons.length===2)assert.equal(wideButtons[0].top,wideButtons[1].top,'Play and Back must align');
       await screenshot(win,path.join(out,'menu-setup-'+width+'.png'));
       await win.webContents.executeJavaScript('window.britannia.start({seed:12345})');
+      await win.webContents.executeJavaScript('window.britannia.pause()');
+      const paused=await win.webContents.executeJavaScript(`([...document.querySelectorAll('#dialog button')].map(b=>{const r=b.getBoundingClientRect(),art=getComputedStyle(b,'::before'),range=document.createRange();range.selectNodeContents(b);const text=range.getBoundingClientRect();return {label:b.textContent,font:getComputedStyle(b).fontSize,top:r.top,height:r.height,artHeight:parseFloat(art.height),repeat:art.borderImageRepeat,overflow:b.scrollWidth-b.clientWidth,textHeight:text.height,textWidth:text.width,width:r.width};}))`);
+      assert.equal(paused.length,5);if(width>=600)assert.equal(paused[0].top,paused[1].top,"Pause actions must align vertically");assert(paused.every(b=>b.font==='16px'&&b.height===58&&b.artHeight===36&&b.repeat==='stretch'&&b.overflow<=1&&b.textHeight<=32&&b.textWidth<=b.width-20),JSON.stringify(paused));
+      const hud=await win.webContents.executeJavaScript(`([...document.querySelectorAll('#pause,#stats-button,.actions .hud-shortcut')].filter(b=>b.getClientRects().length).map(b=>({label:b.textContent,height:b.getBoundingClientRect().height})))`);
+      assert(hud.every(b=>b.height===58),JSON.stringify(hud));
+      await screenshot(win,path.join(out,'pause-buttons-'+width+'.png'));
+      await win.webContents.executeJavaScript('document.getElementById("resume").click()');
       await win.webContents.executeJavaScript('window.britannia.inventory()');
       await waitFor(win,'[...document.querySelectorAll("#dialog img")].every(image=>image.complete)');
       assert.equal(await win.webContents.executeJavaScript('!!document.querySelector("#paperdoll-backpack,#inventory-shop-jump")'),false);
-      const metrics=await win.webContents.executeJavaScript(`(()=>{const dialog=document.getElementById('dialog');return {overflow:dialog.scrollWidth-dialog.clientWidth,images:[...dialog.querySelectorAll('img')].filter(im=>im.getClientRects().length).map(im=>({src:im.src,fit:getComputedStyle(im).objectFit})),buttons:[...dialog.querySelectorAll('button:not(.pack-item)')].filter(b=>b.getClientRects().length).map(b=>({text:b.textContent,overflow:b.scrollWidth-b.clientWidth,height:b.getBoundingClientRect().height,size:getComputedStyle(b).backgroundSize,border:getComputedStyle(b).borderImageSource}))};})()`);
+      const metrics=await win.webContents.executeJavaScript(`(()=>{const dialog=document.getElementById('dialog');return {overflow:dialog.scrollWidth-dialog.clientWidth,images:[...dialog.querySelectorAll('img')].filter(im=>im.getClientRects().length).map(im=>({src:im.src,fit:getComputedStyle(im).objectFit})),buttons:[...dialog.querySelectorAll('button:not(.pack-item)')].filter(b=>b.getClientRects().length).map(b=>({text:b.textContent,overflow:b.scrollWidth-b.clientWidth,font:getComputedStyle(b).fontSize,height:b.getBoundingClientRect().height,artHeight:parseFloat(getComputedStyle(b,'::before').height),repeat:getComputedStyle(b,'::before').borderImageRepeat,border:getComputedStyle(b).borderImageSource}))};})()`);
       if(metrics.overflow>1){console.log(await win.webContents.executeJavaScript(`(()=>{const d=document.getElementById('dialog'),r=d.getBoundingClientRect();return [...d.querySelectorAll('*')].filter(e=>e.getClientRects().length&&e.getBoundingClientRect().right>r.right).map(e=>({tag:e.tagName,id:e.id,cls:e.className,w:e.getBoundingClientRect().width,right:e.getBoundingClientRect().right,position:getComputedStyle(e).position}));})()`));fs.writeFileSync(path.join(out,'menu-overflow-'+width+'.png'),(await win.webContents.capturePage()).toPNG());}
       assert(metrics.overflow<=1,JSON.stringify(metrics));
       assert(metrics.images.every(im=>im.fit==='contain'),JSON.stringify(metrics.images));
-      assert(metrics.buttons.every(b=>b.overflow<=1&&b.height>=44),JSON.stringify(metrics.buttons));
-      assert(metrics.buttons.filter(b=>b.text!=='Trash').every(b=>b.size==='100% auto'&&b.border==='none'),JSON.stringify(metrics.buttons));
+      assert(metrics.buttons.every(b=>b.overflow<=1&&b.height>=58),JSON.stringify(metrics.buttons));
+      assert(metrics.buttons.filter(b=>b.text!=='Trash').every(b=>b.font==='16px'&&b.artHeight===36&&b.repeat==='stretch'&&b.border==='none'),JSON.stringify(metrics.buttons));
       await screenshot(win,path.join(out,'inventory-'+width+'.png'));
       if(mobile){
         await win.webContents.executeJavaScript('document.querySelector("[data-mobile-inventory=doll]").click()');
@@ -39,6 +49,8 @@ app.whenReady().then(async()=>{
       await win.webContents.executeJavaScript('document.getElementById("shop-tab").click()');
       assert.equal(await win.webContents.executeJavaScript('document.getElementById("shop-tab").getAttribute("aria-selected")'), 'true');
       assert.equal(await win.webContents.executeJavaScript('document.getElementById("equipment-shop").classList.contains("hidden")'), false);
+      const selected=await win.webContents.executeJavaScript(`([...document.querySelectorAll('#dialog [aria-selected="true"],#dialog [data-mobile-inventory][aria-pressed="true"]')].filter(b=>b.getClientRects().length).map(b=>({outline:getComputedStyle(b).outlineStyle,tint:getComputedStyle(b,'::before').filter})))`);
+      assert(selected.every(b=>b.outline==='none'&&b.tint.includes('sepia')),JSON.stringify(selected));
       await screenshot(win,path.join(out,'shop-'+width+'.png'));
       await win.webContents.executeJavaScript('document.getElementById("close-dialog").click();window.britannia.game.player.xp=window.britannia.game.player.nextXp;window.britannia.game.checkLevel()');
       await waitFor(win,'!!document.querySelector("[data-choice]")');

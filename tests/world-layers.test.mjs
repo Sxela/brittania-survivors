@@ -4,6 +4,16 @@ import {Game,GAME_DEFAULTS} from '../game/core.mjs';
 // These mechanics tests interact with creatures on the tick they spawn.
 GAME_DEFAULTS.enemyArrival=0;
 import {entityElevation,actorDepth,staticDepth,obstructsCharacter} from '../game/world-layers.mjs';
+
+test('Haven static water stays beneath its dock, piers and shoreline walls',()=>{
+ const point=mapPoint(114,146);
+ const water={flags:524481,height:0,z:-5,bounds:[43,43,0,0]};
+ const plank={flags:25089,height:1,z:-3},pier={flags:16448,height:5,z:-1},wall={flags:24656,height:20,z:-5};
+ assert.ok(staticDepth(point,water)<staticDepth(point,plank,true));
+ assert.ok(staticDepth(point,water)<staticDepth(point,pier));
+ assert.ok(staticDepth(point,water)<staticDepth(point,wall));
+ assert.equal(staticDepth(point,{...water,height:30}),point.y+22-.05,'tall waterfalls retain vertical scenery depth');
+});
 import {mapPoint} from '../game/map-regions.mjs';
 
 test('raised floor diamonds sort behind their own occupants across the cell, including loot and corpses',()=>{

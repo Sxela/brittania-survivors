@@ -63,6 +63,7 @@ for(const group of ['abilities','maps','classic-minimap','classic-summons','zone
   collectExtra(data.animations);
 }
 const sourceFiles = [
+  'game/map-asset-store.mjs',
   'game/asset-cache.mjs',
   'game/asset-cache-policy.mjs',
   'game/asset-cache-worker.js',

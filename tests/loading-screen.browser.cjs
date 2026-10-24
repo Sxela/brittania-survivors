@@ -16,12 +16,12 @@ const server=http.createServer((req,res)=>{
   if(name==='/__loading-probe.png'){setTimeout(()=>{res.writeHead(503);res.end();},1500);return;}
   if(name==='/favicon.ico'){res.writeHead(204);res.end();return;}
   if(bootFailure&&name==='/assets/audio/manifest.json'){res.writeHead(503);res.end('unavailable');return;}
-  const area=name.includes('/mobile-locations/')&&!name.endsWith('/manifest.json');
+  const area=(name.includes('/mobile-locations/')||name.includes('/optimized-locations/areas/'))&&!name.endsWith('/manifest.json');
   if(area&&areaMode==='fail'){res.writeHead(503);res.end('unavailable');return;}
   const file=path.resolve(root,'.'+(name==='/'?'/index.html':name));
   if(!file.startsWith(root+path.sep)||!fs.existsSync(file)){res.writeHead(404);res.end();return;}
   const send=()=>{
-    const types={'.mjs':'text/javascript','.js':'text/javascript','.html':'text/html','.json':'application/json','.css':'text/css','.png':'image/png','.ttf':'font/ttf'};
+    const types={'.mjs':'text/javascript','.js':'text/javascript','.html':'text/html','.json':'application/json','.css':'text/css','.png':'image/png','.webp':'image/webp','.ttf':'font/ttf'};
     res.writeHead(200,{'content-type':types[path.extname(file)]||'application/octet-stream','content-length':fs.statSync(file).size,'cache-control':'no-store'});
     fs.createReadStream(file).pipe(res);
   };

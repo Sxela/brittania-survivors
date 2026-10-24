@@ -4,6 +4,10 @@ export function entityElevation(entity,map,time=0){
 }
 export function actorDepth(entity,map,time=0){return entity.y+entityElevation(entity,map,time)*.01;}
 export function staticDepth(point,item,floor=false){
+ // Native water is often a zero-height *static*, not baked land. Sorting it
+ // like a wall puts it over the dock or shoreline wall in the same cell.
+ const water=!!(item.flags&0x80)&&(item.height||0)===0&&(item.bounds?.[1]||0)<=50;
+ floor=floor||water;
  // A floor starts behind its occupant, not at the front half of its diamond.
  return point.y+(floor?0:22)+(item.z||0)*.01-(floor ? .01 : 0);
 }

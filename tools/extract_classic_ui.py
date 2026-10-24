@@ -5,6 +5,15 @@ from PIL import Image
 from classic_font import bitmap_font
 from classic_paths import DEFAULT_CLASSIC
 SPELLS=['clumsy','create-food','feeblemind','heal','magic-arrow','night-sight','reactive-armor','weaken','agility','cunning','cure','harm','magic-trap','magic-untrap','protection','strength','bless','fireball','magic-lock','poison','telekinesis','teleport','unlock','wall-of-stone','arch-cure','arch-protection','curse','fire-field','greater-heal','lightning','mana-drain','recall','blade-spirits','dispel-field','incognito','magic-reflection','mind-blast','paralyze','poison-field','summon-creature','dispel','energy-bolt','explosion','invisibility','mark','mass-curse','paralyze-field','reveal','chain-lightning','energy-field','flame-strike','gate-travel','mana-vampire','mass-dispel','meteor-swarm','polymorph','earthquake','energy-vortex','resurrection','air-elemental','summon-daemon','earth-elemental','fire-elemental','water-elemental']
+
+def seamless_interior(image):
+    """Keep native texture pixels, excluding frame edges, with mirrored joins."""
+    margin=min(8,(min(image.size)-1)//4)
+    tile=image.crop((margin,margin,image.width-margin,image.height-margin))
+    result=Image.new('RGBA',(tile.width*2,tile.height*2))
+    result.paste(tile,(0,0));result.paste(tile.transpose(Image.Transpose.FLIP_LEFT_RIGHT),(tile.width,0))
+    result.paste(result.crop((0,0,result.width,tile.height)).transpose(Image.Transpose.FLIP_TOP_BOTTOM),(0,tile.height))
+    return result
 def extract(client=DEFAULT_CLASSIC,out='game/assets/classic-ui'):
     from classic_data import ClassicData
     client=pathlib.Path(client);out=pathlib.Path(out);out.mkdir(parents=True,exist_ok=True);data=ClassicData(client)
@@ -25,6 +34,8 @@ def extract(client=DEFAULT_CLASSIC,out='game/assets/classic-ui'):
         im,slices=resizepic(base);save(role,im,list(range(base,base+9)),borderImageSlice=slices)
     center=data.gump(5058)
     for role in ['window-background','bar-track','slot-shadow']:save(role,center,[5058])
+    for role,gid in [('window-texture',5058),('properties-texture',3004)]:
+        save(role,seamless_interior(data.gump(gid)),[gid],adaptation='Cropped native interior with reflected edges for seamless tiling')
     singles={'button-normal':4005,'button-hover':4006,'button-pressed':4007,'button-disabled':4005,'close-normal':4017,'close-hover':4018,'close-pressed':4019,'slot':3004,'divider':58,'separator':58,'emblem':10460,'joystick-track':52,'joystick-thumb':2103,'scroll-thumb':254,'scroll-track':255,'bar-health':2053,'bar-experience':2057,'health-fill':2053,'stamina-fill':2057,'textures/buttons/arrowbuttonright':4005}
     for role,gid in singles.items():
         im=data.gump(gid)

@@ -11,7 +11,7 @@ import { EQUIPMENT_SLOTS, activeProperty, hasGameplayStats, aosFamily, lootSourc
 import { DIFFICULTIES, POWERUPS, strictlyDominates } from "./general-mechanics.mjs";
 import { SPELLS, MAGERY_BOOK, RETIRED_SPELLS, spellImpact, initSpellState, spellChoices, newSpellChoices, chooseSpell, applySpellOffer, tickSpellSystem, passiveIcon, spellResistanceBonus, validSpellState,tryReflectSpell,spellBlocksMovement,spellMovementMultiplier,spellDamageBonus,spellEnemyMovementMultiplier,spellEnemyDamageMultiplier,spellInvisible } from "./spell-system.mjs";
 import { initMonsterBehavior, tickMonsterBehavior, applyMonsterContact, tickMonsterStatus,monsterProfile,enemyCasterSpawnAllowed,tickEnemyCasts } from "./monster-behavior.mjs";
-import { dropsLootChest, POWERUP_DROP_CHANCE, HEAL_DROP_CHANCE, GOLD_DROP_CHANCE, bossSchedule, championSchedule, lootRarity, lootLeader } from './reward-rules.mjs';
+import { dropsLootChest, POWERUP_DROP_CHANCE, HEAL_DROP_CHANCE, GOLD_DROP_CHANCE, ORDINARY_GOLD_RETAINED, monsterGoldBase, bossSchedule, championSchedule, lootRarity, lootLeader } from './reward-rules.mjs';
 import {nativeMonsterStats,waveCreature,bossAvailable} from './monster-stats.mjs';
 import {generateEnemyEquipment,isEquipmentBody} from './enemy-equipment.mjs';
 import {chooseAreaRoute,areaForTime} from './area-route.mjs';
@@ -484,7 +484,7 @@ export class Game {
 
   step(dt, input) {
     this.time += dt;
-    const p = this.player,previousPosition={x:this.player.x,y:this.player.y};
+    const p = this.player;
     for(const [id,buff]of Object.entries(this.buffs)){buff.remaining=Math.max(0,buff.remaining-dt);if(!buff.remaining)delete this.buffs[id];}
     const movementMultiplier=1+((this.buffs.haste?.remaining>0?.3:0)+spellMovementMultiplier(this)-1)*(this.attackKind==='arrow'?165:150)/p.speed;
     let x = Number.isFinite(input.x) ? input.x : 0,
@@ -631,7 +631,7 @@ export class Game {
     }
     this.projectiles = this.projectiles.filter((s) => s.life > 0);
     this.enemies = this.enemies.filter((e) => e.hp > 0);
-    tickGoldOre(this,dt,Math.hypot(p.x-previousPosition.x,p.y-previousPosition.y)>.1);
+    tickGoldOre(this,dt);
     for (const drop of this.pickups) {
       if(drop.kind==='ore')continue;
       if(drop.kind==='loot'){
@@ -992,6 +992,7 @@ export class Game {
   }
 
   effect(x, y, radius, color, kind = "hit", life = 0.2) {
+    life=Math.max(life,kind==='explosion'?1.3:kind==='flame-strike'?3:0);
     this.effects.push({ x, y, radius, color, kind, life, maxLife: life });
   }
   hurtPlayer(damage,element="Physical",attacker=null) {
@@ -1084,9 +1085,9 @@ export class Game {
       this.bossesKilled++;
     }
     if(dropsLootChest(enemy))this.dropLoot(enemy);
-    if (enemy.boss || enemy.captain || this.random() < GOLD_DROP_CHANCE) {
-      const gold=withGoldFind(this,Math.max(1,Math.round((enemy.boss ? 15 : enemy.captain ? 6 : 2+Math.floor(zoneCombatTime(this)/180))*(this.difficulty==='hard'?1.5:1)*this.zoneScale.gold)+(this.zoneRun?.index||0)));
-      if(enemy.boss||enemy.captain){this.player.gold+=gold;this.notifyLoot({kind:'gold',value:gold,text:`+${gold} gold`});}
+    if (enemy.boss || enemy.captain || enemy.packChampion || this.random() < GOLD_DROP_CHANCE*ORDINARY_GOLD_RETAINED) {
+      const gold=withGoldFind(this,monsterGoldBase(this,enemy));
+      if(enemy.boss||enemy.captain||enemy.packChampion){this.player.gold+=gold;this.notifyLoot({kind:'gold',value:gold,text:`+${gold} gold`});}
       else this.pickups.push({
         id: this.nextId++,
         x: enemy.x + 8,

@@ -9,8 +9,8 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "bytes": 962,
-      "sha256": "7b5c1c9458a61699cdb172800d08bb5e3d5fe563190034b4fe5bdfce9541735a"
+      "bytes": 1238,
+      "sha256": "670c696b63f9ab4e9894d1b7246cabe08cf7d2a38da0c61386835cf227d488f4"
     },
     {
       "path": ".github/workflows/release.yml",
@@ -48,6 +48,16 @@
       "sha256": "38facc47347371d7b9a6a456a4b358c9109c54f45783b295e9927b9dd178a89e"
     },
     {
+      "path": "docs/map-asset-optimization.md",
+      "bytes": 3254,
+      "sha256": "1260798b3324d57e927fdc72d271d54a63e93e1938e412ce6acb443cf2a9b9b8"
+    },
+    {
+      "path": "docs/mining-and-rendering-fixes.md",
+      "bytes": 3139,
+      "sha256": "6906ee628c9a935e1998e554fec74d2ad5b2eb34771a509d2d521c1a2f5959f5"
+    },
+    {
       "path": "docs/nostalgic-ui-workflow.md",
       "bytes": 17074,
       "sha256": "b655fad6ab7e4c6cdebc86bcc9832b6f7d5ec371fe1f25807658c167c83d34aa"
@@ -74,8 +84,8 @@
     },
     {
       "path": "game/app.mjs",
-      "bytes": 89753,
-      "sha256": "1fe4f678f0a21602db0fbb43454aa1541a46a104d2d091df9004d602e38cf54f"
+      "bytes": 90928,
+      "sha256": "86265d3479ad7ddbb1e07db5a8081757d7d11d2305ba0d50669c2e42c9bc7758"
     },
     {
       "path": "game/area-route.mjs",
@@ -139,8 +149,8 @@
     },
     {
       "path": "game/core.mjs",
-      "bytes": 93286,
-      "sha256": "69d36cd9f81cf58eb80ecb967436ae6ff608f8b3b0afe8ea40cb16f5eb1460d0"
+      "bytes": 93202,
+      "sha256": "4f1668ba32375b6327e3489eb2a45e8fc863ccae8845cb15d0f0e80e760eeba6"
     },
     {
       "path": "game/data/areas.json",
@@ -169,8 +179,8 @@
     },
     {
       "path": "game/equipment.mjs",
-      "bytes": 10233,
-      "sha256": "ff17b772e086f6c083b8cdf04026a8e625894f552d1edce715b59bc8900c1d35"
+      "bytes": 10555,
+      "sha256": "fa3d86a1975f05555e385ab2c695d7c3d99bf46e3a3f931d33b04fdc088cd7e8"
     },
     {
       "path": "game/general-mechanics.mjs",
@@ -214,13 +224,18 @@
     },
     {
       "path": "game/location-map.mjs",
-      "bytes": 14268,
-      "sha256": "f4ea3234d41e0dea106f87f9cbfb2f3396fdef321fc7056f38612b1b43717303"
+      "bytes": 16052,
+      "sha256": "23836b5b66f360e7f989443885612f6ebde24b6e8b8ba8eebf32b6dc03da7f0c"
     },
     {
       "path": "game/loot-chests.mjs",
       "bytes": 877,
       "sha256": "b542044644e75a061c0e9faab4e473fc3e1bd834849b08816ae82aed6f976ec4"
+    },
+    {
+      "path": "game/map-asset-store.mjs",
+      "bytes": 7004,
+      "sha256": "130a3468bc562184a1420a6a95822b02c95ba0d5df506182c8f03dbf6adcdb8d"
     },
     {
       "path": "game/map-navigation.mjs",
@@ -239,8 +254,8 @@
     },
     {
       "path": "game/mining.mjs",
-      "bytes": 2686,
-      "sha256": "a938d52af5e6546605e449f1eacf563f9e9cc0ccf4cfcda48f863ee2f250debd"
+      "bytes": 6487,
+      "sha256": "cfd05a3dfd7486a4b52a7d9d6bf65b7be527e26325fdc244b4ca813fd3483de8"
     },
     {
       "path": "game/mobile.mjs",
@@ -289,8 +304,8 @@
     },
     {
       "path": "game/reward-rules.mjs",
-      "bytes": 1385,
-      "sha256": "76b806f5c912035097172e30d9594dd796490086559074f68daa9e576066cb60"
+      "bytes": 1918,
+      "sha256": "6cb48fa31c345107eca174619e05c651e6d6dd500fa33d06284a88d290367d3e"
     },
     {
       "path": "game/route-maps.mjs",
@@ -310,7 +325,7 @@
     {
       "path": "game/spell-system.mjs",
       "bytes": 26184,
-      "sha256": "36e0b1964d2d8f007b316c48599a12502128ba51f7216d9a9e6b8c6103600ecd"
+      "sha256": "6d98122a72f8e6d37639a332e30b6b5cb2192635d2caf6284bf3eb182fe4d5d9"
     },
     {
       "path": "game/spell-upgrades.mjs",
@@ -324,8 +339,8 @@
     },
     {
       "path": "game/style.css",
-      "bytes": 59753,
-      "sha256": "ba41ac244f2ff064decd58945d864b3f97a5bddcf39aeb51d9c84b865ebcf672"
+      "bytes": 62300,
+      "sha256": "5145aafee057d3b7e1dcfd0bea826d06377ae4e05785f8502019ba2d85e46ffd"
     },
     {
       "path": "game/weapon-traits.mjs",
@@ -334,13 +349,13 @@
     },
     {
       "path": "game/world-appearance.mjs",
-      "bytes": 6747,
-      "sha256": "2438872d5ce0e45ae6076fbf7019e1bcb931d929164646d4414faf39a0257d29"
+      "bytes": 7546,
+      "sha256": "58f47a1afa81d3ca1349596402487353da67f01aabdf1cfad90b17bf2070d674"
     },
     {
       "path": "game/world-layers.mjs",
-      "bytes": 1691,
-      "sha256": "1da2b0eaf85aaa426bad0bf07745030375581ceece1f9347654af1d09caceac4"
+      "bytes": 1950,
+      "sha256": "c5eac04fbbe474ca30d740bcb397cc5193ce416465cbde67647acc7ea0ff9ef2"
     },
     {
       "path": "game/zone-pacing.mjs",
@@ -449,8 +464,8 @@
     },
     {
       "path": "tests/elemental-attacks.test.mjs",
-      "bytes": 4217,
-      "sha256": "d3601722557a5a3aff50689da1337b6adefce841ead6397a42cbe48a51794eec"
+      "bytes": 4651,
+      "sha256": "d7f054312353bde7c88aabb9281211b761729c45860bf178012577f9e432cee1"
     },
     {
       "path": "tests/enemy-casting.test.mjs",
@@ -484,13 +499,13 @@
     },
     {
       "path": "tests/jump.test.mjs",
-      "bytes": 1736,
-      "sha256": "faa1d302bd9ec47b913689933705e606e4c8a4bba065ac4a59a6f606487f7d75"
+      "bytes": 3910,
+      "sha256": "fc17d345e604eb0a5c0e6452ad606beaa4dad343b98df37d3937818af24d5d89"
     },
     {
       "path": "tests/loading-screen.browser.cjs",
-      "bytes": 7278,
-      "sha256": "99d96106cd2828a4397fd2fff1c858a8564cd0137434b2cbe04e45f6dbb79590"
+      "bytes": 7347,
+      "sha256": "5a95a70f8edca383f1e663827e68f70048a24694916fe3d3e1ffe0e87be9c62d"
     },
     {
       "path": "tests/loading-screen.test.mjs",
@@ -513,14 +528,29 @@
       "sha256": "d067083d0cc192cdad56e217da4dd8661897a73e11f9568c9fbb0d9092dca945"
     },
     {
+      "path": "tests/map-asset-store.test.mjs",
+      "bytes": 3660,
+      "sha256": "98ffe50c2d8a67b18c57ea15051bdc1c94d329da712400b0d562cd0f320787ce"
+    },
+    {
+      "path": "tests/map-streaming.browser.cjs",
+      "bytes": 9789,
+      "sha256": "126a4b64afcb42256b014a7a96821cd66d2b19328318cf93abd204ee01ab2b14"
+    },
+    {
       "path": "tests/menu-ui.browser.cjs",
-      "bytes": 5925,
-      "sha256": "63400ede1cadb50b790bb34cc02b6e389bd79276c5d5bbbf14614320349154ab"
+      "bytes": 8635,
+      "sha256": "092435171cf93b9cfdbecc894372ee027e3d984ec068b5c87e8980e02f9ced38"
     },
     {
       "path": "tests/mining-shop.test.mjs",
-      "bytes": 3896,
-      "sha256": "3b493bbd6ea812d5dfaed25b2e374cdbdb395d528662c9969ffe020f9aad4876"
+      "bytes": 8106,
+      "sha256": "066d32809ca3aa03ade49232f244a727cc87910d8aee1ed386a5150ca39ba217"
+    },
+    {
+      "path": "tests/mining-visuals.browser.cjs",
+      "bytes": 6875,
+      "sha256": "a8018bdebbe725b434892dec2e28d258d363bbfc67788b6797f4751cd660509a"
     },
     {
       "path": "tests/monster-stats.test.mjs",
@@ -609,8 +639,8 @@
     },
     {
       "path": "tests/timed-zones.test.mjs",
-      "bytes": 11672,
-      "sha256": "0526b97a22e18fd5e93fb68c6af73529f409a284e0ff789f11f7913be52d3694"
+      "bytes": 11769,
+      "sha256": "ee5f165b30d915df2519b9ecb018bfd5084a2d111dd5055a34921e5633e6e269"
     },
     {
       "path": "tests/upgrade-math.test.mjs",
@@ -624,8 +654,8 @@
     },
     {
       "path": "tests/world-layers.test.mjs",
-      "bytes": 3528,
-      "sha256": "3d30cc4782ed3b0b55c0b1a926337807092ab7a968b32137a3c46e3ed1390ac9"
+      "bytes": 4139,
+      "sha256": "50e1488bc81a312a891efdc7267105d134b014b2c4b41cb77408e515a66bed24"
     },
     {
       "path": "tests/zone-progression.test.mjs",
@@ -659,8 +689,8 @@
     },
     {
       "path": "tools/build-mobile.mjs",
-      "bytes": 1067,
-      "sha256": "055b674b4fb8aac60eec2d625c0985fbfb8455932332b8b5a77fbf638cfe3430"
+      "bytes": 1447,
+      "sha256": "3c29c746ffe290fe1220d1d06ed9302944d2b637f7c72335191c59439a97688b"
     },
     {
       "path": "tools/classic_animation.py",
@@ -734,8 +764,8 @@
     },
     {
       "path": "tools/extract_classic_actors.py",
-      "bytes": 23824,
-      "sha256": "ee3940df9ee15d8c942137f3526eca0843481e6f24fe2f801f15d6be485d13c6"
+      "bytes": 23922,
+      "sha256": "35cffe4856ef05e2749bc7aafb31158b0a6581fa605844bc787620dd880ca9ec"
     },
     {
       "path": "tools/extract_classic_audio.py",
@@ -779,8 +809,8 @@
     },
     {
       "path": "tools/extract_classic_ui.py",
-      "bytes": 6685,
-      "sha256": "44346e1fb290bfdfcca1143c977245e25822800ad226e51d6381146a33219637"
+      "bytes": 7441,
+      "sha256": "7910712ddecc8e8837cb2ff5f3736860c8ca23ced6c7f2876fe0aff9cc3ae79d"
     },
     {
       "path": "tools/extract_paperdoll_controls.py",
@@ -799,8 +829,8 @@
     },
     {
       "path": "tools/location_collision.py",
-      "bytes": 6440,
-      "sha256": "591f5c0ffca4ead4b5c7cb8b1840c90e7acbf01db8a62ce0b66960ac9cc8b4cb"
+      "bytes": 6475,
+      "sha256": "eb6b8084bc7e201fbb811ab861470a0dd293fed875d18804bb4e5712ca1fff41"
     },
     {
       "path": "tools/location_decorations.py",
@@ -811,6 +841,11 @@
       "path": "tools/location_floor_repairs.py",
       "bytes": 6415,
       "sha256": "358537df3d1bc19bad83018d90f7ea7c63f9eca67e4e9e70d194c78164abb358"
+    },
+    {
+      "path": "tools/optimize-map-assets.py",
+      "bytes": 10137,
+      "sha256": "7d5282f1d2f34f6943b3dcc323fe7beccb7e8645d0a20222f31060ece07fcb37"
     },
     {
       "path": "tools/prepare_ground_patches.py",
@@ -829,13 +864,13 @@
     },
     {
       "path": "tools/serve.mjs",
-      "bytes": 3534,
-      "sha256": "6a0a50cad4eed7e104ba42f8a2318079853a264ec83c8b733900e2e31f775aec"
+      "bytes": 3596,
+      "sha256": "630c7e8e0bbb027852b8a9dfb6c1e92646a85c410bb6ff623e1f3ff080078f75"
     },
     {
       "path": "tools/setup-assets.py",
-      "bytes": 12058,
-      "sha256": "83ad30e37548a54163dc333bd264abdd3dd73e52cb6e859ed8977659b4a7aeec"
+      "bytes": 12259,
+      "sha256": "c2e542a6d96a956e49bf92f032c7f4bdde495d683088d4b0a399e740dc8cf34c"
     },
     {
       "path": "tools/simulate-balance.mjs",
@@ -844,8 +879,8 @@
     },
     {
       "path": "tools/stage-desktop.mjs",
-      "bytes": 9292,
-      "sha256": "f0a418d8d02e9860f74dab3523e727ee264343008c99cf1f3c2c3a210b86660e"
+      "bytes": 9323,
+      "sha256": "477dbfee6aac38c04594570d66281d9cfcf0ce7bc56719ebf4cc140a8594f10e"
     },
     {
       "path": "tools/stage-source-desktop.mjs",
@@ -863,9 +898,19 @@
       "sha256": "58bd7a1e54c0dc6964a3b690ac98279b89657d80f9aeb642c720ac58929ab74a"
     },
     {
+      "path": "tools/test_optimize_map_assets.py",
+      "bytes": 4315,
+      "sha256": "208bea191c7b6497b3ea3d8721840a57bc2f35523e410df644aaa648cdc4c53c"
+    },
+    {
       "path": "tools/test_setup_assets.py",
       "bytes": 1732,
       "sha256": "bff9c917746d6d6b40963fc974da6ec79d07f5395fd6193210979b14dd6e7573"
+    },
+    {
+      "path": "tools/test_ui_textures.py",
+      "bytes": 1015,
+      "sha256": "44193bf5cc0ff5877c2bc9693fa961a69e4a1c52d3abfc9f1093fe6bf6f31745"
     },
     {
       "path": "tools/test-ci.mjs",
