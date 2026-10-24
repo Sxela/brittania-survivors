@@ -11,6 +11,8 @@ app.on('window-all-closed',()=>{});
 let areaMode='slow',bootFailure=false;
 const server=http.createServer((req,res)=>{
   const name=decodeURIComponent(new URL(req.url,'http://localhost').pathname);
+  if(name==='/__loading-probe.json'){setTimeout(()=>{res.writeHead(200,{'content-type':'application/json'});res.end('{"ok":true}');},1500);return;}
+  if(name==='/__loading-probe.png'){setTimeout(()=>{res.writeHead(503);res.end();},1500);return;}
   if(name==='/favicon.ico'){res.writeHead(204);res.end();return;}
   if(bootFailure&&name==='/assets/audio/manifest.json'){res.writeHead(503);res.end('unavailable');return;}
   const area=name.includes('/mobile-locations/')&&!name.endsWith('/manifest.json');
@@ -47,6 +49,19 @@ app.whenReady().then(async()=>{
       await win.webContents.executeJavaScript('window.startPromise');
       assert.equal(await win.webContents.executeJavaScript('window.loadingSamples.some(s=>s.label==="Loading area artwork" && s.value>0 && s.detail.includes("files"))'),true);
       assert.equal(await win.webContents.executeJavaScript('document.getElementById("asset-loading").hidden && window.britannia.game.status==="playing"'),true);
+      await win.webContents.executeJavaScript('window.britannia.game.pause();window.backgroundPromise=import("/asset-loading.mjs").then(m=>m.loadAssetJson("/__loading-probe.json"));true');
+      await waitFor(win,'!document.getElementById("background-loading").hidden');
+      assert.equal(await win.webContents.executeJavaScript('getComputedStyle(document.getElementById("background-loading")).pointerEvents'), 'none');
+      await win.webContents.executeJavaScript('window.backgroundPromise');
+      await waitFor(win,'document.getElementById("background-loading").hidden');
+      await win.webContents.executeJavaScript('const image=document.createElement("img");image.src="/__loading-probe.png";document.body.append(image);true');
+      await waitFor(win,'!document.getElementById("background-loading").hidden');
+      await waitFor(win,'document.getElementById("background-loading").hidden');
+      await win.webContents.executeJavaScript('window.probe=document.createElement("img");window.probe.src="/__loading-probe.png?removed=1";document.body.append(window.probe);true');
+      await waitFor(win,'!document.getElementById("background-loading").hidden');
+      await win.webContents.executeJavaScript('window.probe.src="/__loading-probe.png?replacement=1";true');
+      await win.webContents.executeJavaScript('window.probe.remove();true');
+      await waitFor(win,'document.getElementById("background-loading").hidden');
       areaMode='fail';await win.reload();await waitFor(win,'!!window.britannia');
       await win.webContents.executeJavaScript('window.britannia.start()');
       assert.equal(await win.webContents.executeJavaScript('document.getElementById("asset-loading").hidden && !document.getElementById("start").disabled && document.getElementById("menu-message").textContent.includes("HTTP 503")'),true);

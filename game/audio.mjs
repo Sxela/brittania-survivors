@@ -1,3 +1,4 @@
+import {trackAsset} from './asset-loading.mjs';
 export class OriginalAudio {
   constructor(manifest) {
     this.manifest=manifest;this.volume=.2;this.enabled=true;this.context=null;this.buffers=new Map();this.loading=new Map();this.lastPlayed=new Map();this.active=new Set();this.played=0;
@@ -44,10 +45,10 @@ export class OriginalAudio {
     const entry=this.manifest.sounds[role];if(!entry)return null;
     const src=entry.src;
     if(this.buffers.has(src))return this.buffers.get(src);
-    if(!this.loading.has(src))this.loading.set(src,(async()=>{
+    if(!this.loading.has(src))this.loading.set(src,trackAsset('Audio',async()=>{
       const response=await fetch(src);if(!response.ok)throw Error('Original sound unavailable: '+role);
       const buffer=await this.context.decodeAudioData(await response.arrayBuffer());this.buffers.set(src,buffer);return buffer;
-    })().catch(()=>null));
+    }).catch(()=>null));
     return this.loading.get(src);
   }
   async play(role,source,listener) {

@@ -74,8 +74,8 @@
     },
     {
       "path": "game/app.mjs",
-      "bytes": 87490,
-      "sha256": "7b4512865b2d88441c0a73570eed510efe0299fa4d716b21dca6545b4cfdd56c"
+      "bytes": 89105,
+      "sha256": "89949cf1c10b8927a56c53559990590986502f391a388fa3f5821e27a93ffe1f"
     },
     {
       "path": "game/area-route.mjs",
@@ -83,9 +83,14 @@
       "sha256": "d5206f53971692b5080eee75d2521e52c29179b442a21516f0ffe5bcaeec43d5"
     },
     {
+      "path": "game/asset-loading.mjs",
+      "bytes": 3486,
+      "sha256": "891d7bf0bf2990dd9ac9cc907a9b1e32312fd49c5d328b73e3d4712fd6813c52"
+    },
+    {
       "path": "game/audio.mjs",
-      "bytes": 3958,
-      "sha256": "02cc7e8726e2a568a950d5c2b611d1a0b4b0545b65c988f8adacce674dc7b5e0"
+      "bytes": 4023,
+      "sha256": "15a2356819dbbdfa36aeeb2e4d07ea626e0cf76a352e719ed1721afbdb2d2d7a"
     },
     {
       "path": "game/biome-terrain.mjs",
@@ -139,8 +144,8 @@
     },
     {
       "path": "game/effects.mjs",
-      "bytes": 3930,
-      "sha256": "a9cc98055f66f7b3d703b5077ab12addbddb4b706ef2f355e2d028222ea04dd6"
+      "bytes": 4011,
+      "sha256": "b196fa62bfe322d6ca8c0ed7ea3b1e076088549149dc37f9722c6859fabcbc01"
     },
     {
       "path": "game/enemy-equipment.mjs",
@@ -169,13 +174,13 @@
     },
     {
       "path": "game/index.html",
-      "bytes": 7079,
-      "sha256": "193e513954393aa8c91ea74185535c4c41ed6156914bb4463d24ca6ae5cb7369"
+      "bytes": 7326,
+      "sha256": "4598bc37841d922ef5eae5bb8af42120b359c24fc0eae357e2ba7364f5aab3f9"
     },
     {
       "path": "game/inventory.mjs",
-      "bytes": 22372,
-      "sha256": "e94a7ba75172c255dae3ac2214441280bb2f897a819f6523a78ea5c6b40ded84"
+      "bytes": 22457,
+      "sha256": "b47472cf1465ebc32ed3cbbb27f820bdd9ca46890a9729d4e5a5af6593cb4c0d"
     },
     {
       "path": "game/item-overlay.mjs",
@@ -304,8 +309,8 @@
     },
     {
       "path": "game/style.css",
-      "bytes": 57937,
-      "sha256": "ced5a380cd5e67d1c0f2eea4cc309d51a0ac55a338642f8bae955fafe95b4ea7"
+      "bytes": 58417,
+      "sha256": "e487ebfec2b35c0c519425313f3574647cee90e6592a9190fc6e1961e8185c14"
     },
     {
       "path": "game/weapon-traits.mjs",
@@ -314,8 +319,8 @@
     },
     {
       "path": "game/world-appearance.mjs",
-      "bytes": 6662,
-      "sha256": "22aab8538599095cf54bd49e14b76f581f42729473f1f0a4cfdfc72aaca184b6"
+      "bytes": 6747,
+      "sha256": "2438872d5ce0e45ae6076fbf7019e1bcb931d929164646d4414faf39a0257d29"
     },
     {
       "path": "game/world-layers.mjs",
@@ -349,8 +354,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 4684,
-      "sha256": "b2f32d8faa5d867ac459c16405437746d4aa906be0cce8e7daad5e20cb1af752"
+      "bytes": 4843,
+      "sha256": "1afc53c3a229c4fe4dcf96129d350af4cf632fb248f48a7fea787033f368212b"
     },
     {
       "path": "requirements-assets.txt",
@@ -371,6 +376,11 @@
       "path": "Start-Survivors.cmd",
       "bytes": 53,
       "sha256": "4660507d69a4a938569475af6075d9cb822562c749e1b33054f952ad403cee71"
+    },
+    {
+      "path": "tests/asset-loading.test.mjs",
+      "bytes": 1518,
+      "sha256": "e01ded78910a893487375616e0540c3e27235a5910d743e35213b7cd92f28ec9"
     },
     {
       "path": "tests/balance-safety.test.mjs",
@@ -454,8 +464,8 @@
     },
     {
       "path": "tests/loading-screen.browser.cjs",
-      "bytes": 5198,
-      "sha256": "21349bdd1af74ac24e33aeda284d1fb1d47112bc64cc4a653ad775bc5abfabc8"
+      "bytes": 6874,
+      "sha256": "699cd4b8c866bb25118a56fbf3778ff022d1e57cafab65527c74b0ff9366ed93"
     },
     {
       "path": "tests/loading-screen.test.mjs",

@@ -1,4 +1,5 @@
 import {actorAnchorY} from './actor-placement.mjs';
+import {trackAsset} from './asset-loading.mjs';
 import {actorFacing} from './presentation.mjs';
 import {orderedEquipment} from './equipment.mjs';
 import {applyHue,applySpectral,hueIdentity} from './hues.mjs';
@@ -7,7 +8,7 @@ export class WorldAppearance {
   constructor(ctx,manifest,palettes){this.ctx=ctx;this.manifest=manifest;this.palettes=palettes;this.maxBytes=128*1024*1024;this.images=new Map();this.pending=new Map();this.bytes=0;this.tints=new Map();this.tintBytes=0;this.layersDrawn=new Set();this.corpsesDrawn=0;}
   async load(src){
     if(this.images.has(src)){const e=this.images.get(src);this.images.delete(src);this.images.set(src,e);return e.image;}
-    if(!this.pending.has(src)){const im=new Image();im.src=src;this.pending.set(src,im.decode().then(()=>{const bytes=im.width*im.height*4;this.images.set(src,{image:im,bytes});this.bytes+=bytes;while(this.bytes>this.maxBytes&&this.images.size>1){const key=this.images.keys().next().value;this.bytes-=this.images.get(key).bytes;this.images.delete(key);this.pending.delete(key);}return im;}).catch(()=>null));}
+    if(!this.pending.has(src)){const im=new Image();im.src=src;this.pending.set(src,trackAsset('Equipment artwork',()=>im.decode()).then(()=>{const bytes=im.width*im.height*4;this.images.set(src,{image:im,bytes});this.bytes+=bytes;while(this.bytes>this.maxBytes&&this.images.size>1){const key=this.images.keys().next().value;this.bytes-=this.images.get(key).bytes;this.images.delete(key);this.pending.delete(key);}return im;}).catch(()=>null));}
     return this.pending.get(src);
   }
   image(src){const e=this.images.get(src);if(!e){this.load(src);return null;}this.images.delete(src);this.images.set(src,e);return e.image;}

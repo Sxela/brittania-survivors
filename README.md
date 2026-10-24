@@ -30,6 +30,8 @@ After setup use `npm run desktop` for a desktop window, or `npm run mobile` for 
 
 Startup and area transitions show asset-loading progress, including downloaded
 area data and completed artwork files. Failed startup loads show a Retry button.
+Assets loaded during play, in inventories or shops, and on first use of audio,
+spells or creatures show a compact progress bar while controls remain usable.
 
 ## Controls
 

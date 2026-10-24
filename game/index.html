@@ -18,6 +18,10 @@
         <button id="asset-loading-retry" hidden onclick="location.reload()">Retry</button>
       </div>
     </section>
+    <aside id="background-loading" hidden role="status" aria-live="polite">
+      <span id="background-loading-label"></span>
+      <progress id="background-loading-progress" aria-labelledby="background-loading-label"></progress>
+    </aside>
     <main id="app">
       <header>
         <div class="brand">

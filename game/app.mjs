@@ -30,6 +30,8 @@ import { pickupGuides, championGuides, lastEnemyGuides } from "./guidance.mjs";
 import { OriginalEffects } from "./classic-effects.mjs";
 import { attachMovableHud } from './movable-hud.mjs';
 import {createLoadingScreen,fetchLoadingJson,paintLoadingScreen} from './loading-screen.mjs';
+import {trackAsset,loadAssetJson,showBackgroundLoading} from './asset-loading.mjs';
+showBackgroundLoading(document);
 const assetLoading=createLoadingScreen(document);
 assetLoading.begin('Loading sound and interface');
 const forceMobile=new URLSearchParams(location.search).get('mobile')==='1';
@@ -40,44 +42,41 @@ try{const saved=Number(localStorage.getItem('britannia-mobile-zoom'));if([1,1.5,
 const navigation = new PointerNavigation();
 navigation.onUnreachable=()=>announce('That location is blocked. Choose an open path.');
 import { renderEquipmentWindow, renderShopWindow, clearEquipmentWindow } from "./inventory.mjs";
-const audioManifest = await fetch("./assets/audio/manifest.json").then(r=>r.json());
+const audioManifest = await loadAssetJson("./assets/audio/manifest.json");
 const soundtrack = new OriginalAudio(audioManifest);
-const uiManifest = await fetch("./assets/ui/manifest.json").then(r => r.json());
+const uiManifest = await loadAssetJson("./assets/ui/manifest.json");
 const $ = (id) => document.getElementById(id),
   canvas = $("world"),
   ctx = canvas.getContext("2d");
 const movableHud=attachMovableHud($('hud'));
-await Promise.all(['UOText','UOTitle','UOSubtitle'].map(font=>document.fonts.load('16px '+font)));
-await document.fonts.ready;
+await trackAsset('Fonts',()=>Promise.all(['UOText','UOTitle','UOSubtitle'].map(font=>document.fonts.load('16px '+font))));
+await trackAsset('Fonts',document.fonts.ready);
 assetLoading.begin('Loading spell effects');
-const effectsManifest=await fetch("./assets/effects/manifest.json").then(r=>r.json());
+const effectsManifest=await loadAssetJson("./assets/effects/manifest.json");
 const spellEffects=new OriginalEffects(ctx,effectsManifest);
 assetLoading.begin('Loading spell effects',Object.keys(effectsManifest.effects).length);
 await spellEffects.load(()=>assetLoading.advance());
 assetLoading.begin('Loading game data');
-const catalog = await fetch("./data/catalog.json").then((r) => {
-  if (!r.ok) throw Error("Run the server extraction first");
-  return r.json();
-});
-catalog.enemyEquipment=await fetch('./data/enemy-equipment.json').then(r=>r.json());
-const areaCatalog=await fetch('./data/areas.json').then(r=>r.json());
+const catalog = await loadAssetJson('./data/catalog.json');
+catalog.enemyEquipment=await loadAssetJson('./data/enemy-equipment.json');
+const areaCatalog=await loadAssetJson('./data/areas.json');
 catalog.areas=areaCatalog.areas;delete catalog.areaCount;
 catalog.zoneMode=true;
-const radarManifest=await fetch('./assets/classic-minimap/manifest.json').then(r=>r.json()),radarImages={};
+const radarManifest=await loadAssetJson('./assets/classic-minimap/manifest.json'),radarImages={};
 assetLoading.begin('Loading minimap artwork',Object.keys(radarManifest.images).length);
-await Promise.all(Object.entries(radarManifest.images).map(async([key,entry])=>{const image=new Image();image.src=entry.src;await image.decode();radarImages[key]=image;assetLoading.advance();}));
+await Promise.all(Object.entries(radarManifest.images).map(async([key,entry])=>{const image=new Image();image.src=entry.src;await trackAsset('Minimap artwork',()=>image.decode());radarImages[key]=image;assetLoading.advance();}));
 let nativeMinimap=createNativeMinimap(radarManifest,radarImages);
 let manifest = { images: {}, animations: {} },
   images = {};
 try {
-  manifest = await fetch("./assets/manifest.json").then((r) => r.json());
+  manifest = await loadAssetJson("./assets/manifest.json");
   assetLoading.begin('Loading interface artwork',Object.keys(manifest.images||{}).length);
   await Promise.all(
     Object.entries(manifest.images || {}).map(async ([key, entry]) => {
       const img = new Image();
       img.src = "./" + (typeof entry === "string" ? entry : entry.src);
       try {
-        await img.decode();
+        await trackAsset('Interface artwork',()=>img.decode());
         images[key] = img;
       } catch {} finally {assetLoading.advance();}
     }),
@@ -87,37 +86,37 @@ try {
     "Client art unavailable. Run python tools/extract_client.py to recover it.";
 }
 assetLoading.begin('Loading world manifests');
-const summonManifest=await fetch('./assets/classic-summons/manifest.json').then(r=>r.json());
+const summonManifest=await loadAssetJson('./assets/classic-summons/manifest.json');
 manifest.animations={...manifest.animations,...summonManifest.animations};
 let huePalettes = {};
 try {
-  const hueData = await fetch(
+  const hueData = await loadAssetJson(
     "./" + (manifest.hues?.src || "assets/hues.json"),
-  ).then((r) => r.json());
+  );
   huePalettes = hueData.palettes || {};
 } catch {}
-const legacyMapManifest=await fetch('./assets/maps/manifest.json').then(r=>r.json());
+const legacyMapManifest=await loadAssetJson('./assets/maps/manifest.json');
 let areaMapManifest=null;
-const originalLocations=await fetch('./assets/mobile-locations/manifest.json').then(r=>{if(!r.ok)throw Error('Native location index is unavailable');return r.json();});
+const originalLocations=await loadAssetJson('./assets/mobile-locations/manifest.json');
 let mobileAreaCache=null;
 async function nativeArea(area){
  if(mobileAreaCache?.regions[0]?.areaId===area.id){mobileAreaCache.regions[0].runFacet=area.facet;return mobileAreaCache;}
  const entry=originalLocations.areas[area.id];if(!entry)throw Error('Native location unavailable: '+area.name);
- mobileAreaCache=await fetchLoadingJson(entry.src,(loaded,total)=>assetLoading.bytes(loaded,total));mobileAreaCache.regions[0].runFacet=area.facet;return mobileAreaCache;
+ mobileAreaCache=await trackAsset('Area data',()=>fetchLoadingJson(entry.src,(loaded,total)=>assetLoading.bytes(loaded,total)));mobileAreaCache.regions[0].runFacet=area.facet;return mobileAreaCache;
 }
 let mapManifest=legacyMapManifest,mapImages={},mapRegions=createMapRegions(mapManifest,mapImages,{palettes:huePalettes}),mapLoading=false;
 let activeBiomeStage=0;
 async function attachMap(newRun=false,mapState=null){
   assetLoading.begin('Loading '+(game.currentArea()?.name||'area')+' data');
   await paintLoadingScreen();
-  if(!game.zoneRun&&game.areaRoute?.length&&!areaMapManifest)areaMapManifest=await fetch('./assets/zone-maps/manifest.json').then(r=>r.json());
+  if(!game.zoneRun&&game.areaRoute?.length&&!areaMapManifest)areaMapManifest=await loadAssetJson('./assets/zone-maps/manifest.json');
   const selected=game.zoneRun?await nativeArea(game.currentArea()):game.areaRoute?.length?routeMapManifest(areaMapManifest,game.areaRoute,game.duration):legacyMapManifest;
   if(game.zoneRun)selected.images['tree-stump']=uiManifest.images['scenery/tree-stump'];
   const loaded={};
   assetLoading.begin('Loading area artwork',Object.keys(selected.images).length);
   // Explicit bitmap decoding also works while the native window is offscreen.
   // Detached HTML image decode promises can stall after a viewport resize.
-  await Promise.all(Object.entries(selected.images).map(async([key,entry])=>{const response=await fetch(entry.src);if(!response.ok)throw Error('Area artwork could not be loaded');loaded[key]=await createImageBitmap(await response.blob());assetLoading.advance();}));
+  await Promise.all(Object.entries(selected.images).map(([key,entry])=>trackAsset('Area artwork',async()=>{const response=await fetch(entry.src);if(!response.ok)throw Error('Area artwork could not be loaded');loaded[key]=await createImageBitmap(await response.blob());assetLoading.advance();})));
   assetLoading.begin('Preparing terrain and paths');
   await paintLoadingScreen();
   for(const image of Object.values(mapImages))image.close?.();
@@ -218,14 +217,14 @@ async function completeZoneTravel(){
  finally{assetLoading.hide();mapLoading=false;save();}
 }
 $('zone-action').onclick=()=>{if(game?.zoneRun?.phase==='spellshop')zoneSpellShop();else enterMoongate();};
-const worldManifest=await fetch('./assets/world-equipment/manifest.json').then(r=>r.json());
+const worldManifest=await loadAssetJson('./assets/world-equipment/manifest.json');
 const worldAppearance=new WorldAppearance(ctx,worldManifest,huePalettes);
 worldAppearance.maxBytes=(mobileClient?64:128)*1024*1024;
 const lootFeed=[];
 function itemArt(item){const art=uiManifest.equipment?.items?.[item?.id];return art?.variants?.find(v=>v.itemId===item.itemId)||art;}
 function dropImage(kind,item){const art=kind==='gold'?uiManifest.equipment.items['gold-large']:kind==='heal'?uiManifest.equipment.items.potion:itemArt(item);return uiManifest.images[art?.icon];}
 const abilityImages=new Map();
-function abilityImage(src){if(!abilityImages.has(src)){const image=new Image();image.src=src;abilityImages.set(src,image);}const image=abilityImages.get(src);return image.complete&&image.naturalWidth?image:null;}
+function abilityImage(src){if(!abilityImages.has(src)){const image=new Image();image.src=src;abilityImages.set(src,image);trackAsset('Spell icons',()=>image.decode()).catch(()=>{});}const image=abilityImages.get(src);return image.complete&&image.naturalWidth?image:null;}
 function powerupIcon(id){return 'assets/classic-ui/abilities/spells/'+({haste:'agility',shield:'protection',magnet:'telekinesis','heal-percent':'greater-heal'}[id]||'heal')+'.png';}
 function drawDrop(drop,camera){
   const x=drop.x-camera.x,y=drop.y-camera.y-entityElevation(drop,mapRegions,game?.time||0)*Z_SCALE;
@@ -298,8 +297,7 @@ async function loadSprite(body) {
     img.src = "./" + def.src;
     spriteLoads.set(
       def.src,
-      img
-        .decode()
+      trackAsset('Creature artwork',()=>img.decode())
         .then(() => img)
         .catch(() => null),
     );
@@ -412,7 +410,7 @@ function refreshCamp(){renderCampControls(campRoot,profile,{
 function returnCamp(){showMenuView('home');if(campMode&&game){profile=bankCamp(profile,game);persistProgress();}campMode=false;game=null;screen='menu';overlay(true);$('menu').classList.remove('hidden');for(const id of ['hud','top-hud','bottom-hud','minimap'])$(id).classList.add('hidden');$('continue').classList.toggle('hidden',!localStorage.getItem('britannia-run-v1'));refreshCamp();soundtrack.setScene('menu');}
 function openLegacy(){screen='legacy';dialog('');renderLegacy($('dialog'),profile,{onBuy:id=>{if(buyLegacy(profile,id)){persistProgress();openLegacy();}},onClose:returnCamp});}
 function exportProgress(){save();const run=localStorage.getItem('britannia-run-v1');const blob=new Blob([JSON.stringify({format:'britannia-survivors',version:1,profile,run:run?JSON.parse(run):null},null,2)],{type:'application/json'});const link=document.createElement('a'),url=URL.createObjectURL(blob);link.href=url;link.download='Britannia-Survivors-save.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
-function importProgress(){const input=document.createElement('input');input.type='file';input.accept='.json,application/json';input.onchange=async()=>{try{const file=input.files[0];if(!file||file.size>16*1024*1024)throw Error('Save file is too large');const data=JSON.parse(await file.text());if(data.format!=='britannia-survivors'||data.version!==1)throw Error('Unsupported save file');const next=validateProgress(data.profile,runtimeCatalog);if(data.run){if(!paths.some(p=>p.id===data.run.archetype))throw Error('Invalid character');Game.restore(runtimeCatalog,data.run.state);}profile=next;persistProgress();if(data.run)localStorage.setItem('britannia-run-v1',JSON.stringify(data.run));else localStorage.removeItem('britannia-run-v1');campMode=false;returnCamp();announce('Progress imported.');}catch(error){announce('Import failed: '+error.message);}};input.click();}
+function importProgress(){const input=document.createElement('input');input.type='file';input.accept='.json,application/json';input.onchange=async()=>{try{const file=input.files[0];if(!file||file.size>16*1024*1024)throw Error('Save file is too large');const data=JSON.parse(await trackAsset('Save data',()=>file.text()));if(data.format!=='britannia-survivors'||data.version!==1)throw Error('Unsupported save file');const next=validateProgress(data.profile,runtimeCatalog);if(data.run){if(!paths.some(p=>p.id===data.run.archetype))throw Error('Invalid character');Game.restore(runtimeCatalog,data.run.state);}profile=next;persistProgress();if(data.run)localStorage.setItem('britannia-run-v1',JSON.stringify(data.run));else localStorage.removeItem('britannia-run-v1');campMode=false;returnCamp();announce('Progress imported.');}catch(error){announce('Import failed: '+error.message);}};input.click();}
 const paths = [
   {
     id: "warrior",

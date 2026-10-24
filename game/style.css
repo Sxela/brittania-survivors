@@ -326,6 +326,9 @@ h1 em { font-style: normal; color: var(--gold); font-size: .8em; }
 .asset-loading-card p { margin:12px 0 0;font:15px/1.4 system-ui,sans-serif;overflow-wrap:anywhere; }
 #asset-loading-progress { display:block;appearance:auto;width:100%;height:22px;accent-color:#d1ae60; }
 #asset-loading-progress[hidden] { display:none; }
+#background-loading { position:fixed;z-index:1900;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);box-sizing:border-box;width:min(380px,calc(100% - 24px));padding:10px 14px;border:1px solid #a48a52;background:#252017f2;color:#f4e5bc;font:13px/1.4 system-ui,sans-serif;pointer-events:none; }
+#background-loading[hidden] { display:none; }
+#background-loading-progress { display:block;width:100%;height:12px;margin-top:5px;accent-color:#d1ae60; }
 #menu .camp-actions { gap:5px; }
 #menu .camp-actions button { font-size:12px;padding:0 4px; }
 @media(max-width:700px) {

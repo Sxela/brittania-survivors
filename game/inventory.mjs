@@ -1,4 +1,5 @@
 import {itemOverlayPosition} from './item-overlay.mjs';
+import {trackAsset} from './asset-loading.mjs';
 import { SLOT_LABELS, orderedEquipment, propertyRows, comparisonItem } from "./equipment.mjs";
 import { applyHue } from "./hues.mjs";
 import { compareEquipment } from "./presentation.mjs";
@@ -231,7 +232,7 @@ async function paintDoll(canvas,game,ui,palettes) {
   const g=canvas.getContext('2d'),origin=ui.equipment?.canvas||{originX:220,originY:325},sex=game.player.sex||'male';
   const draw=async(visual,hue=0,partialHue=false)=>{
     if(!visual)return;const entry=ui.images[visual.image];if(!entry)return;
-    const image=new Image();image.src=entry.src;await image.decode();if(!canvas.isConnected)return;
+    const image=new Image();image.src=entry.src;await trackAsset('Inventory artwork',()=>image.decode());if(!canvas.isConnected)return;
     let art=image;
     hue=hue||visual.sourceHue||visual.equipmentConversion?.hue||0;
     if(hue&&palettes[String(hue&0x3fff)]){const c=document.createElement('canvas');c.width=image.width;c.height=image.height;const cg=c.getContext('2d');cg.drawImage(image,0,0);const p=cg.getImageData(0,0,c.width,c.height);applyHue(p.data,palettes[String(hue&0x3fff)],partialHue||!!(hue&0x8000));cg.putImageData(p,0,0);art=c;}
