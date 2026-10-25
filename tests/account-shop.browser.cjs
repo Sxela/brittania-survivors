@@ -2,7 +2,7 @@
 const {app,BrowserWindow}=require('electron');
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const out=path.resolve(__dirname,'../.cache/account-shop');fs.mkdirSync(out,{recursive:true});
-app.setPath('userData',path.join(out,'profile'));app.commandLine.appendSwitch('disable-gpu');app.on('window-all-closed',()=>{});
+app.setPath('userData',path.join(out,'profile-'+process.pid));app.commandLine.appendSwitch('disable-gpu');app.on('window-all-closed',()=>{});
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 async function until(win,code){const deadline=Date.now()+90000;while(Date.now()<deadline){if(await win.webContents.executeJavaScript(code))return;await wait(80);}throw Error('Timed out: '+code);}
 app.whenReady().then(async()=>{
@@ -16,6 +16,7 @@ app.whenReady().then(async()=>{
   await js("localStorage.removeItem('britannia-run-v1');window.britannia.profile.account.ingots=100;document.getElementById('account-shop-button').click()");
   assert.equal(await js("document.querySelectorAll('[data-account-class]').length"),3);
   await js("document.getElementById('shop-tab').click();document.querySelector('[data-account-upgrade=power]').click()");assert.equal(await js('window.britannia.profile.account.ingots'),80);assert.equal(await js('window.britannia.profile.account.upgrades.power'),1);
+  await until(win,`(()=>{const im=document.querySelector('.inventory-toolbar .ingot-icon');return im?.complete&&im.naturalWidth>0&&im.src.endsWith('resources-gold-ingots.png')})()`);
   await capture('account-upgrades-desktop');
   await js(`(()=>{const g=window.britannia.game,source=window.britannia.runtimeCatalog.items.find(i=>i.slot==='ring');const item=g.makeItem(source,'ring',1);item.insured=true;g.inventory.push(item);g.equip(g.inventory.length-1);document.querySelector('[data-account-class=warrior]').click();})()`);
   assert.equal(await js('window.britannia.profile.account.inventory.length>0'),true);

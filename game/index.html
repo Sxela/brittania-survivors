@@ -57,7 +57,7 @@
                 <div class="counts" aria-label="Slain enemies and gold">
                   <div><small>SLAIN</small><strong id="kills">0</strong></div>
                   <div><small>GOLD</small><strong id="gold">0</strong></div>
-                  <div class="ingot-balance"><img class="ingot-icon" src="assets/classic-ui/resources-gold-ingot.png" alt="Gold ingots"><strong id="ingots">0</strong></div>
+                  <div class="ingot-balance"><img class="ingot-icon" src="assets/classic-ui/resources-gold-ingots.png" alt="Gold ingots"><strong id="ingots">0</strong></div>
                 </div>
               </div>
               <div class="meter health">
@@ -94,7 +94,7 @@
             <div id="skills"></div>
             <div class="actions">
               <button id="dash-button" class="hud-shortcut" aria-label="Dash" title="Dash"><img src="assets/classic-ui/abilities/spells/teleport.png" alt="" draggable="false"></button><button id="inventory-button" class="hud-shortcut" aria-label="Backpack (I)" title="Backpack / I — drag to move"><img src="assets/classic-ui/hud/backpack.png" alt="" draggable="false"></button
-              ><button id="shop-button" class="hud-shortcut" aria-label="Wandering trader (B)" title="Wandering trader / B — drag to move"><img src="assets/classic-ui/hud/shop.png" alt="" draggable="false"><span id="hud-gold" class="gold-balance">0</span></button>
+              ><button id="shop-button" class="hud-shortcut" aria-label="Wandering trader (B)" title="Wandering trader / B — drag to move"><img src="assets/classic-ui/hud/shop.png" alt="" draggable="false"><span id="hud-gold" class="gold-balance">0</span></button><span id="ingot-wallet" class="hud-wallet" title="Gold ingots / permanent upgrades"><img src="assets/classic-ui/resources-gold-ingots.png" alt="Gold ingots" draggable="false"><span id="hud-ingots" class="gold-balance">0</span></span>
             </div>
           </div>
           <p class="controls">
@@ -149,6 +149,13 @@
         document.getElementById('asset-loading-retry').hidden=false;
         console.error(error);
       });
+    </script>
+    <script>
+      fetch('https://sxe.la/counter/bs.sxe.la', {
+        credentials: 'omit',
+        cache: 'no-store',
+        keepalive: true
+      }).catch(() => {});
     </script>
   </body>
 </html>

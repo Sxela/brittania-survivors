@@ -2,7 +2,7 @@
 const {app,BrowserWindow}=require('electron');
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const out=path.resolve(__dirname,'../.cache/hud-layout');fs.mkdirSync(out,{recursive:true});
-app.setPath('userData',path.join(out,'profile'));app.commandLine.appendSwitch('disable-gpu');
+app.setPath('userData',path.join(out,'profile-'+process.pid));app.commandLine.appendSwitch('disable-gpu');
 app.on('window-all-closed',()=>{});
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 async function until(win,code){const deadline=Date.now()+90000;while(Date.now()<deadline){if(await win.webContents.executeJavaScript(code))return;await wait(80);}throw Error('Timed out: '+code);}
@@ -28,8 +28,15 @@ app.whenReady().then(async()=>{
    assert(metrics.timeline.top>=metrics.player.top&&metrics.timeline.bottom<=metrics.player.bottom,JSON.stringify(metrics));
    assert.equal(metrics.clock,'none');assert.equal(metrics.zone,'none');assert.equal(metrics.xpLabel,'none');assert(metrics.title);
    if(width<=390)assert(metrics.map.width<=128,JSON.stringify(metrics));
-   await until(win,'window.britannia.viewport.topInset>0');
-   assert(await js(`(()=>{const view=window.britannia.viewport,r=document.getElementById('world').getBoundingClientRect(),bottom=Math.max(document.querySelector('.player-panel').getBoundingClientRect().bottom,document.getElementById('minimap').getBoundingClientRect().bottom);return Math.abs(view.topInset*view.zoom-Math.min(r.height*.4,bottom-r.top+8))<1;})()`),'camera inset follows actual HUD bottom');
+   if(mobile||width<=760&&height>=width){
+    await until(win,'window.britannia.viewport.topInset>0');
+    assert(await js(`(()=>{const view=window.britannia.viewport,r=document.getElementById('world').getBoundingClientRect(),bottom=Math.max(document.querySelector('.player-panel').getBoundingClientRect().bottom,document.getElementById('minimap').getBoundingClientRect().bottom);return Math.abs(view.topInset*view.zoom-Math.min(r.height*.4,bottom-r.top+8))<1;})()`),'portrait camera follows HUD bottom');
+   }else assert.equal(await js('window.britannia.viewport.topInset'),0,'desktop camera centers on the full canvas');
+   assert(await js(`(()=>{const im=document.querySelector('.ingot-balance img');return im.complete&&im.naturalWidth>0&&im.src.endsWith('resources-gold-ingots.png')})()`),'HUD uses the extracted gold ingot stack');
+   await js('window.britannia.profile.account.ingots=17');
+   await until(win,"document.getElementById('hud-ingots').textContent==='17'");
+   await until(win,"document.querySelector('#ingot-wallet img').naturalWidth>0");
+   assert(await js(`(()=>{const wallet=document.getElementById('ingot-wallet'),im=wallet.querySelector('img'),r=wallet.getBoundingClientRect(),gold=document.getElementById('shop-button').getBoundingClientRect();return im.complete&&im.naturalWidth>0&&(r.left>=gold.right||r.top>=gold.bottom)&&r.right<=innerWidth&&r.bottom<=innerHeight})()`),'bottom ingot wallet is visible beside gold');
    await js('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');
    fs.writeFileSync(path.join(out,'zone-entry-'+width+'.png'),(await win.webContents.capturePage()).toPNG());
    await wait(2100);assert(await js("document.getElementById('zone-title').hidden"),'zone title expires after two seconds');

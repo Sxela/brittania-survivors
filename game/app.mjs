@@ -253,7 +253,7 @@ function drawDrop(drop,camera,showOreHint=false){
     const icon=abilityImage(powerupIcon(drop.kind));if(icon)ctx.drawImage(icon,x-14,y-28,28,28);
     ctx.font='12px UOText';ctx.textAlign='center';ctx.fillStyle='#fff0a0';ctx.fillText(POWERUPS[drop.kind].name,x,y-35);return;
   }
-  const art=drop.kind==='loot'?uiManifest.images['loot/chest']:drop.kind==='ingot'?uiManifest.images['resources/gold-ingot']:drop.kind==='ore'?(uiManifest.images['resources/gold-rock-'+(drop.rockVariant||0)]||uiManifest.images['resources/gold-ore']):dropImage(drop.kind,drop.item);if(!art)return;
+  const art=drop.kind==='loot'?uiManifest.images['loot/chest']:drop.kind==='ingot'?uiManifest.images['resources/gold-ingots']:drop.kind==='ore'?(uiManifest.images['resources/gold-rock-'+(drop.rockVariant||0)]||uiManifest.images['resources/gold-ore']):dropImage(drop.kind,drop.item);if(!art)return;
   const scale=Math.min(1.25,(['ore','loot'].includes(drop.kind)?52:36)/art.width,(['ore','loot'].includes(drop.kind)?60:40)/art.height),def={src:art.src,cellWidth:art.width,cellHeight:art.height,framesPerDirection:1,anchorX:art.width/2,anchorY:art.height};
   worldAppearance.sprite(def,x,y,{row:0,mirror:false},0,drop.kind==='ore'?0x8A5:drop.kind==='loot'?0:drop.item?.hue||0,scale);
   if(drop.kind==='loot'&&Math.hypot(drop.x-game.player.x,drop.y-game.player.y)<150){
@@ -277,7 +277,7 @@ function drawPickupGuidance(){
 function renderLootFeed(){
   while(lootFeed.length&&fxTime-lootFeed[0].time>5)lootFeed.shift();
   const feed=$('pickup-feed');
-  feed.innerHTML=[...lootFeed].reverse().map(e=>{const art=e.kind==='ingot'?uiManifest.images['resources/gold-ingot']:dropImage(e.kind==='autosell'?'loot':e.kind,e.item);return `<div class="pickup-notice ${e.item?.rarity||e.kind}" data-pickup="${esc(e.kind)}">${art?`<img src="${art.src}" alt="">`:''}<span>${esc(e.text)}${e.value&&e.kind==='autosell'?` <b>+${e.value} gold</b>`:''}</span></div>`;}).join('');
+  feed.innerHTML=[...lootFeed].reverse().map(e=>{const art=e.kind==='ingot'?uiManifest.images['resources/gold-ingots']:dropImage(e.kind==='autosell'?'loot':e.kind,e.item);return `<div class="pickup-notice ${e.item?.rarity||e.kind}" data-pickup="${esc(e.kind)}">${art?`<img src="${art.src}" alt="">`:''}<span>${esc(e.text)}${e.value&&e.kind==='autosell'?` <b>+${e.value} gold</b>`:''}</span></div>`;}).join('');
 }
 const spriteLoads = new Map();
 const spriteSizes = new Map(),
@@ -438,7 +438,7 @@ function openAccountShop(archetype=accountClass,refresh=false){
   $('gear-tab').textContent='Wardrobe';$('shop-tab').textContent='Upgrades';
   const shop=$('equipment-shop');shop.innerHTML=`<h2>Permanent upgrades</h2><p class="fine">Shared bonuses for new runs. Pay with gold ingots.</p><div class="items account-upgrades">${ACCOUNT_UPGRADES.map(entry=>{const rank=profile.account.upgrades[entry.id]||0;return `<article class="item"><strong>${entry.name} ${rank}/10</strong><p>${entry.description} per rank.</p><button data-account-upgrade="${entry.id}" ${rank>=10||profile.account.ingots<accountCost(rank)?'disabled':''}>${rank>=10?'Mastered':accountCost(rank)+' ingots'}</button></article>`;}).join('')}</div>`;
   shop.querySelectorAll('[data-account-upgrade]').forEach(button=>button.onclick=()=>{if(buyAccountUpgrade(profile,button.dataset.accountUpgrade)){persistProgress();openAccountShop(accountClass,true);$('dialog').setInventoryTab('shop');}});
-  const wallet=$('dialog').querySelector('.inventory-toolbar > strong');wallet.innerHTML=`<img class="ingot-icon" src="assets/classic-ui/resources-gold-ingot.png" alt=""> ${profile.account.ingots} ingots`;
+  const wallet=$('dialog').querySelector('.inventory-toolbar > strong');wallet.innerHTML=`<img class="ingot-icon" src="assets/classic-ui/resources-gold-ingots.png" alt=""> ${profile.account.ingots} ingots`;
   $('dialog').querySelector('.equipment-settings')?.classList.add('hidden');
   $('dialog').dataset.inventoryTab='gear';$('dialog').setInventoryTab('gear');
 }
@@ -564,6 +564,8 @@ function resize() {
 }
 new ResizeObserver(resize).observe(canvas);
 function measureCameraInset(){
+  const compensateHud=document.body.classList.contains('touch-device')||innerWidth<=760&&innerHeight>=innerWidth;
+  if(!compensateHud){view.topInset=0;return;}
   const r=canvas.getBoundingClientRect();
   const panels=[document.querySelector('.player-panel'),$('minimap')].filter(el=>el?.getClientRects().length);
   const cutoff=panels.length?Math.max(...panels.map(el=>el.getBoundingClientRect().bottom))-r.top+8:0;
@@ -1040,7 +1042,10 @@ function hud() {
   $("clock").textContent =
     `${String(Math.floor(game.time / 60)).padStart(2, "0")}:${String(Math.floor(game.time % 60)).padStart(2, "0")}`;
   for(const [id,value] of [["kills",game.kills],["gold",Math.floor(p.gold)],["hud-gold",Math.floor(p.gold)]]){const node=$(id);node.textContent=value<10000?value:compactCount.format(value);node.title=value.toLocaleString("en-US");}
-  $('ingots').textContent=String(profile.account.ingots);
+  for(const id of ['ingots','hud-ingots']){
+    const node=$(id),amount=profile.account.ingots;
+    node.textContent=amount<10000?String(amount):compactCount.format(amount);node.title=amount.toLocaleString('en-US')+' gold ingots';
+  }
   $("xp-label").textContent = `LEVEL ${p.level}`;
   $("xp-text").textContent = `${Math.floor(p.xp)} / ${p.nextXp} EXPERIENCE`;
   $("xp-fill").style.width = `${(100 * p.xp) / p.nextXp}%`;

@@ -89,8 +89,8 @@
     },
     {
       "path": "game/app.mjs",
-      "bytes": 94713,
-      "sha256": "38546a82d8dff38a83d7cba87d7b39dddd388cf0790332388336f2e30d9cca7a"
+      "bytes": 96625,
+      "sha256": "7976d637b72616babb1e1398d7d6c2f957cc886c0738f46362400ba884c497cb"
     },
     {
       "path": "game/area-route.mjs",
@@ -204,8 +204,8 @@
     },
     {
       "path": "game/index.html",
-      "bytes": 7688,
-      "sha256": "4b7246367adf1d93663aa15673edfc883c7b8b6d4e6885c84a25104cbd9a1fe8"
+      "bytes": 8266,
+      "sha256": "891a0e41d4b204298bc4ee704f9716aeb09c8e07b9029013b2a82f0769318f68"
     },
     {
       "path": "game/inventory.mjs",
@@ -344,8 +344,8 @@
     },
     {
       "path": "game/style.css",
-      "bytes": 66234,
-      "sha256": "d55fe15331f841b40cefeea359e0032ef023b394e12a89341f34f81642fe9d08"
+      "bytes": 67312,
+      "sha256": "384d7c6d4e9a303b66db4726d55db28131f0c7bdbc112d049b4901ff4b6c712f"
     },
     {
       "path": "game/weapon-traits.mjs",
@@ -419,8 +419,8 @@
     },
     {
       "path": "tests/account-shop.browser.cjs",
-      "bytes": 5458,
-      "sha256": "7eae65264b54ba13838e0124fc3aa1b200a7bfe24bec6f01a8fc7f4ed21451b9"
+      "bytes": 5698,
+      "sha256": "df4363912fefc8e666334f4ffe9d38a6365e6093c38d89527568fae1e68273d5"
     },
     {
       "path": "tests/asset-cache.browser.cjs",
@@ -514,8 +514,8 @@
     },
     {
       "path": "tests/hud-layout.browser.cjs",
-      "bytes": 5085,
-      "sha256": "e53197f9614a761a0b1ea1d2e35583f5b1fee0a1828678605610998085644eab"
+      "bytes": 6141,
+      "sha256": "7867c91302306a37886333b33056fd78cd671f1bc01414a3c3403bd2c8060bd6"
     },
     {
       "path": "tests/interaction-navigation.test.mjs",
@@ -909,8 +909,8 @@
     },
     {
       "path": "tools/setup-assets.py",
-      "bytes": 12115,
-      "sha256": "d9181d8fd53a7bb8ac8bf9e7df7059141dca5c25c020e8a2282134b0714f6a59"
+      "bytes": 12294,
+      "sha256": "203d3629b02de05b86925d442968c53143356f38d0dfcab6d5e4867d3c25e523"
     },
     {
       "path": "tools/simulate-balance.mjs",
