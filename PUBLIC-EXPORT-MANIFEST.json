@@ -9,13 +9,13 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "bytes": 1238,
-      "sha256": "670c696b63f9ab4e9894d1b7246cabe08cf7d2a38da0c61386835cf227d488f4"
+      "bytes": 1287,
+      "sha256": "245a7c64280a8b65c362783cb55dca47c0c70a4c55e65c7a449fab02c3cc5bc8"
     },
     {
       "path": ".github/workflows/release.yml",
-      "bytes": 3575,
-      "sha256": "1ebf2fd3dd5d5ba3f7fc5449e247ba0e432e24614a82e1b53c15b9661ce10878"
+      "bytes": 3635,
+      "sha256": "f5adf1e874029f89e9f9c0977d6c19b3479d9140fcb693633722b5b484978961"
     },
     {
       "path": ".gitignore",
@@ -474,8 +474,8 @@
     },
     {
       "path": "tests/desktop-release.test.mjs",
-      "bytes": 6046,
-      "sha256": "3e1e2a573b7bc8229c2f17cb0fa4ccf618e315433d8842f7b25f98761ebf2b66"
+      "bytes": 6440,
+      "sha256": "698ad8b55aee4ddee633838d30acde03935cdafbf7ac8be056cea68d3cdfdb76"
     },
     {
       "path": "tests/elemental-attacks.test.mjs",
@@ -784,8 +784,8 @@
     },
     {
       "path": "tools/collect-release.mjs",
-      "bytes": 5772,
-      "sha256": "c8234b7acc604e10835ccdfe15450c72acecb52235083f6db51bb7e8d0b7f232"
+      "bytes": 5968,
+      "sha256": "d7f0d0eca8be1d1e5b10256acd8c426a5589a85e11718d90df3dc458dfb496d3"
     },
     {
       "path": "tools/desktop-target.mjs",

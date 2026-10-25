@@ -36,5 +36,6 @@ jobs:
         run: python -m unittest discover -s tools -p test_ui_textures.py
       - name: Stage and audit resource-free desktop runtime
         run: |
+          node node_modules/electron/install.js
           node tools/stage-source-desktop.mjs BritanniaSurvivors-ci
           npm run desktop:audit -- dist/BritanniaSurvivors-ci

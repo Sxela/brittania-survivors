@@ -68,7 +68,9 @@ jobs:
         run: node tools/prepare-release.cjs "$RELEASE_VERSION"
       - run: npm run test:ci
       - name: Build and audit native binaries
-        run: npm run desktop:dist -- --${{ matrix.platform }}
+        run: |
+          node node_modules/electron/install.js
+          npm run desktop:dist -- --${{ matrix.platform }}
       - name: Prepare downloads within GitHub release size limits
         run: node tools/collect-release.mjs ${{ matrix.platform }}
       - uses: actions/upload-artifact@v7

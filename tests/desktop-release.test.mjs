@@ -42,7 +42,13 @@ test('release verification requires both complete native builds and rejects corr
 
 test('the downloaded platform reassembly script reconstructs and verifies a split binary',async()=>{
  await temporary(async root=>{const output=path.join(root,'downloads');await mkdir(output);const bytes=Buffer.from('A complete native binary with several numbered parts.'),source=path.join(root,'fixture.exe');await writeFile(source,bytes);const file=await splitReleaseFile(source,output,10),win=process.platform==='win32',script=win?'REASSEMBLE-Windows.cmd':'REASSEMBLE-Linux.sh';await writeFile(path.join(output,script),restoreScript(win?'win':'linux',[file]));
-  const result=await new Promise((resolve,reject)=>{const child=spawn(win?(process.env.ComSpec||'cmd.exe'):'sh',win?['/d','/c','.\\'+script]:[script],{cwd:output,stdio:['ignore','pipe','pipe'],windowsHide:true});let log='';child.stdout.on('data',chunk=>log+=chunk);child.stderr.on('data',chunk=>log+=chunk);child.on('error',reject);child.on('exit',code=>resolve({code,log}));});
+  const runScript=()=>new Promise((resolve,reject)=>{const child=spawn(win?(process.env.ComSpec||'cmd.exe'):'sh',win?['/d','/c','.\\'+script]:[script],{cwd:output,env:{...process.env,...(win?{PSModulePath:''}:{})},stdio:['ignore','pipe','pipe'],windowsHide:true});let log='';child.stdout.on('data',chunk=>log+=chunk);child.stderr.on('data',chunk=>log+=chunk);child.on('error',reject);child.on('exit',code=>resolve({code,log}));});
+  const result=await runScript();
   assert.equal(result.code,0,result.log);assert.deepEqual(await readFile(path.join(output,file.name)),bytes);
+  await rm(path.join(output,file.name));
+  await writeFile(path.join(output,file.parts[0].name),'corrupted numbered part');
+  const corrupt=await runScript();
+  assert.notEqual(corrupt.code,0,'Corrupt downloads must fail checksum verification');
+  assert.match(corrupt.log,/Checksum mismatch|FAILED/);
  });
 });
