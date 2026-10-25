@@ -43,8 +43,11 @@
         <canvas id="world" aria-label="Survival battlefield"></canvas>
         <div class="vignette"></div>
         <div id="hud" class="hidden">
+        <div class="meter experience hud-experience" role="progressbar" aria-label="Experience to next level" aria-valuemin="0" aria-valuemax="100"><i id="xp-fill"></i></div>
+        <div id="zone-title" role="status" aria-live="polite" hidden></div>
         <div id="top-hud" class="hidden">
-          <div class="hero-card panel">
+          <div class="player-panel panel">
+          <div class="hero-card">
             <span id="hero-icon"></span>
             <div>
               <button id="stats-button" title="Current stats / C" aria-label="Current stats (C)">Stats</button><small id="hero-title">THE ARCANIST</small
@@ -54,6 +57,7 @@
                 <div class="counts" aria-label="Slain enemies and gold">
                   <div><small>SLAIN</small><strong id="kills">0</strong></div>
                   <div><small>GOLD</small><strong id="gold">0</strong></div>
+                  <div class="ingot-balance"><img class="ingot-icon" src="assets/classic-ui/resources-gold-ingot.png" alt="Gold ingots"><strong id="ingots">0</strong></div>
                 </div>
               </div>
               <div class="meter health">
@@ -61,13 +65,14 @@
               </div>
             </div>
           </div>
-          <div class="run-clock panel">
+          <div class="run-clock">
             <small>HOLD THE REALM</small><strong id="clock">00:00</strong
             ><span id="chapter">The awakening</span><div id="zone-timeline" class="hidden"><div id="zone-time-track"><i id="zone-time-fill"></i></div><div id="zone-time-events"></div></div>
         <div id="zone">
           <span>FELUCCA</span><strong>The Yew Wilds</strong><i></i><button id="zone-action" class="hidden">Spell choices</button>
         </div>
           </div>
+        </div>
         </div>
         <div id="message"></div>
         <div id="side-hud">
@@ -78,14 +83,13 @@
           class="hidden"
           aria-label="Nearby enemies and pickups"
         ></canvas>
-        <button id="pause">Pause <kbd>ESC</kbd></button>
         </div>
+        <button id="pause">Pause <kbd>ESC</kbd></button>
         <div id="bottom-hud" class="hidden">
           <div id="pickup-feed" aria-live="polite"></div><div id="active-buffs"></div><div id="dash-status"></div>
-          <div class="xp-label">
+          <div class="xp-label" hidden>
             <span id="xp-label">LEVEL 1</span><span id="xp-text"></span>
           </div>
-          <div class="meter experience"><i id="xp-fill"></i></div>
           <div class="action-bar">
             <div id="skills"></div>
             <div class="actions">
@@ -109,7 +113,7 @@
               <button id="continue" class="hidden primary">Continue</button>
               <small id="saved-summary"></small>
               <button id="new-game">New Game</button>
-              <button id="camp-button">Camp</button>
+              <button id="account-shop-button">Upgrades</button>
               <button id="options-button">Options</button>
               <button id="exit-button">Exit</button>
             </div>

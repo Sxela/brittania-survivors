@@ -45,10 +45,10 @@ export function spellPreview(game,id,rank=1,itemOverride=null){
     if(['clumsy','curse','mass-curse'].includes(id))out.slow=25;
     if(['weaken','curse','mass-curse'].includes(id))out.weaken=20;
     if(['feeblemind','curse','mass-curse'].includes(id))out.castDelay=(3+rank)*t.duration;
-  }else if(id==='paralyze'){out.duration=Math.min(8,(1.5+rank*.5)*t.duration);out.note='Boss duration: 1 s. Damage breaks paralysis.';}
+  }else if(id==='paralyze'){out.duration=Math.min(3,(1.5+rank*.25)*t.duration);out.radius=100;out.note='Area paralysis; boss duration: 0.75 s. Damage breaks paralysis. Recovery: 2.5 s.';}
   else if(['paralyze-field','energy-field','wall-of-stone'].includes(id)){
     out.duration=(5+rank)*t.duration;
-    if(id==='paralyze-field')out.note='Paralysis: 2 s; bosses: 1 s. Damage breaks paralysis.';
+    if(id==='paralyze-field'){out.duration=Math.min(4,(2+rank*.15)*t.duration);out.note='Passable. Freeze lasts until field expiry; bosses: up to 1 s. Damage does not break field freeze. Recovery: 3 s.';}
   }
   const channelBonus=damageIncrease(game,spellDamageChannel(id,out.element));
   if(out.damage!==undefined)out.damage=Array.isArray(out.damage)?out.damage.map(n=>n*channelBonus):out.damage*channelBonus;
@@ -71,7 +71,7 @@ export function spellPreviewLines(game,id,rank=1,previousRank=0,previousStats=nu
   const stats=spellPreview(game,id,rank,itemOverride);if(!stats)return [];
   const before=previousStats||(previousRank?spellPreview(game,id,previousRank):null),lines=[];
   const r=stats.rankParts,oldRank=before?.rank,rankChanged=oldRank!==undefined&&number(oldRank)!==number(stats.rank);
-  if(r&&(r.gear||r.school||rankChanged))lines.push(`Effective rank: ${rankChanged?number(oldRank)+' → ':''}${number(stats.rank)} (learned ${number(r.learned)} + gear ${number(r.gear)} + school ${number(r.school)}${r.capped?', capped at 8':''})`);
+  if(r&&(r.gear||r.school||rankChanged))lines.push(`Effective rank: ${rankChanged?number(oldRank)+' â†’ ':''}${number(stats.rank)} (learned ${number(r.learned)} + gear ${number(r.gear)} + school ${number(r.school)}${r.capped?', capped at 8':''})`);
   const row=(label,key,unit='')=>{
     if(stats[key]===undefined)return;
     const old=before?.[key],now=value(stats[key]);

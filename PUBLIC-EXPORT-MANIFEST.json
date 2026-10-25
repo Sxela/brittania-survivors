@@ -39,8 +39,8 @@
     },
     {
       "path": "docs/britannia-survivors-reference.md",
-      "bytes": 12570,
-      "sha256": "387dd3270f8f4a8174e3fbb14f645ea6789bc35074d96c67e5231a5ca7aa0e7d"
+      "bytes": 18988,
+      "sha256": "f936b62653336244cb19348c87fa6ba3b1604cbd9be8c6a614f8a3c3a0f6c8b1"
     },
     {
       "path": "docs/game-to-survivors-mechanics.md",
@@ -78,14 +78,19 @@
       "sha256": "8ac9fa89688f081865962668a02c01e9beb273ac717f1bb264ebfc93770c79cb"
     },
     {
+      "path": "game/account.mjs",
+      "bytes": 2099,
+      "sha256": "b509b5f1b531ebb510d2e474d234ea93875d90beba7d1aa089fd02cffb211292"
+    },
+    {
       "path": "game/actor-placement.mjs",
       "bytes": 243,
       "sha256": "091066b473cb4eee7b9d87d73f536ab88fa82863a61ae18c1355c21a7faad708"
     },
     {
       "path": "game/app.mjs",
-      "bytes": 90928,
-      "sha256": "86265d3479ad7ddbb1e07db5a8081757d7d11d2305ba0d50669c2e42c9bc7758"
+      "bytes": 94713,
+      "sha256": "38546a82d8dff38a83d7cba87d7b39dddd388cf0790332388336f2e30d9cca7a"
     },
     {
       "path": "game/area-route.mjs",
@@ -129,8 +134,8 @@
     },
     {
       "path": "game/camp-ui.mjs",
-      "bytes": 2622,
-      "sha256": "74db87540ee3bfc6278450160f5249fac1bc1f80ea8a5aeab7c8e6ae43853d85"
+      "bytes": 2600,
+      "sha256": "40afbf15337f527db50568f4b4829e015b00f99f618a2a03c6af8aa7258f8779"
     },
     {
       "path": "game/choice-draw.mjs",
@@ -149,8 +154,8 @@
     },
     {
       "path": "game/core.mjs",
-      "bytes": 93202,
-      "sha256": "4f1668ba32375b6327e3489eb2a45e8fc863ccae8845cb15d0f0e80e760eeba6"
+      "bytes": 94497,
+      "sha256": "9e889eadc5125f1ddbbbe796ee81669983f8a3e81965bd4a646319f17a546deb"
     },
     {
       "path": "game/data/areas.json",
@@ -179,8 +184,8 @@
     },
     {
       "path": "game/equipment.mjs",
-      "bytes": 10555,
-      "sha256": "fa3d86a1975f05555e385ab2c695d7c3d99bf46e3a3f931d33b04fdc088cd7e8"
+      "bytes": 10683,
+      "sha256": "07f6d03ae79836d92b903c0e58ebaa2e6bbbd55c4cb5b265592371de438621ba"
     },
     {
       "path": "game/general-mechanics.mjs",
@@ -189,8 +194,8 @@
     },
     {
       "path": "game/guidance.mjs",
-      "bytes": 2820,
-      "sha256": "36cc1375cf39e6ebd8a50edcba936baeea7ec7e59fe2f2b2b1081461061c0825"
+      "bytes": 2925,
+      "sha256": "45b03e17129e70be62c574723166c945aa3ce13a10bf8366674c993a64d0114c"
     },
     {
       "path": "game/hues.mjs",
@@ -199,13 +204,13 @@
     },
     {
       "path": "game/index.html",
-      "bytes": 7416,
-      "sha256": "652c17b641e899d967b7722cf810e4fd183934444f3458da66365f2c24567427"
+      "bytes": 7688,
+      "sha256": "4b7246367adf1d93663aa15673edfc883c7b8b6d4e6885c84a25104cbd9a1fe8"
     },
     {
       "path": "game/inventory.mjs",
-      "bytes": 22433,
-      "sha256": "47d704d13047362361ea2e177d819636d647e43050be88c1b68950b638e10b26"
+      "bytes": 22379,
+      "sha256": "6989e2daed24cd079deba60a888a62964d599f417c1e76599fe794afdb99d00b"
     },
     {
       "path": "game/item-overlay.mjs",
@@ -229,8 +234,8 @@
     },
     {
       "path": "game/loot-chests.mjs",
-      "bytes": 877,
-      "sha256": "b542044644e75a061c0e9faab4e473fc3e1bd834849b08816ae82aed6f976ec4"
+      "bytes": 983,
+      "sha256": "da8e8acd6f760af7429709d6ad725e6b0972ffc35eca65613f5485df6451ad13"
     },
     {
       "path": "game/map-asset-store.mjs",
@@ -259,8 +264,8 @@
     },
     {
       "path": "game/mobile.mjs",
-      "bytes": 483,
-      "sha256": "7fa42316d4fcc6ebbf43615693f798b798a83f0f3231dddba1619c8b2fc22300"
+      "bytes": 5283,
+      "sha256": "0637fed78ec29fc03cc351ae58a94703645d8ec33fa9175a16720e481a8aa316"
     },
     {
       "path": "game/monster-behavior.mjs",
@@ -284,8 +289,8 @@
     },
     {
       "path": "game/navigation.mjs",
-      "bytes": 2256,
-      "sha256": "c5fa24cf3d194e2c29d4b5be7ef3340c0df412272f189a9722cbc22245e05103"
+      "bytes": 2277,
+      "sha256": "b2194f183a49898b2855c146aba39ade03b87118f794b00f715d3f489952091a"
     },
     {
       "path": "game/pathfinding.mjs",
@@ -299,13 +304,13 @@
     },
     {
       "path": "game/progression.mjs",
-      "bytes": 4096,
-      "sha256": "c7846ba33e44f7580ef89fb9ae8389399e0b2aebfe896eeb328bc8836e22a7ef"
+      "bytes": 9353,
+      "sha256": "e46c86ee3f291ed14d2c9ad26a28c843e0a13236e4bd5c42a1f753b4dbbb8ee8"
     },
     {
       "path": "game/reward-rules.mjs",
-      "bytes": 1918,
-      "sha256": "6cb48fa31c345107eca174619e05c651e6d6dd500fa33d06284a88d290367d3e"
+      "bytes": 2247,
+      "sha256": "844326017c880e33b21abc83076fdea0a24c69e21f71dfa28bb6ca0bd199d12a"
     },
     {
       "path": "game/route-maps.mjs",
@@ -319,18 +324,18 @@
     },
     {
       "path": "game/spell-preview.mjs",
-      "bytes": 8079,
-      "sha256": "3d665f2c1187c8dbe2ad7a3999b5ede5ec9d48a71735b418932ea05c20e804b1"
+      "bytes": 8145,
+      "sha256": "266c33b7fdcc3af8413f8022112e89830b65b2353653d9cfd29a8137229d523a"
     },
     {
       "path": "game/spell-system.mjs",
-      "bytes": 26184,
-      "sha256": "6d98122a72f8e6d37639a332e30b6b5cb2192635d2caf6284bf3eb182fe4d5d9"
+      "bytes": 27209,
+      "sha256": "ba4bb82c1f5178de55d41a4797dba35c3006ce6678b767de30f95c0b1f9bdcfd"
     },
     {
       "path": "game/spell-upgrades.mjs",
-      "bytes": 13313,
-      "sha256": "853ee3283922eacc5ea1a856c0b934aeb113ec599f05a0c02280dc67aeeb9dca"
+      "bytes": 13320,
+      "sha256": "b1a547090dbbc025c88853a12b8c8a551b676c6ab3e00ff060e549cda0e8373a"
     },
     {
       "path": "game/static-placement.mjs",
@@ -339,8 +344,8 @@
     },
     {
       "path": "game/style.css",
-      "bytes": 62300,
-      "sha256": "5145aafee057d3b7e1dcfd0bea826d06377ae4e05785f8502019ba2d85e46ffd"
+      "bytes": 66234,
+      "sha256": "d55fe15331f841b40cefeea359e0032ef023b394e12a89341f34f81642fe9d08"
     },
     {
       "path": "game/weapon-traits.mjs",
@@ -369,8 +374,8 @@
     },
     {
       "path": "game/zone-run.mjs",
-      "bytes": 15456,
-      "sha256": "aa73e704c85b95bffdd90b97d66ff74c3499111f3bfafb343520c4ac5f71c87b"
+      "bytes": 15697,
+      "sha256": "08764ad4f466fbe91af0191adc04746acf6793def6e52ca4541cfc5e0111fe1d"
     },
     {
       "path": "package-lock.json",
@@ -406,6 +411,16 @@
       "path": "Start-Survivors.cmd",
       "bytes": 53,
       "sha256": "4660507d69a4a938569475af6075d9cb822562c749e1b33054f952ad403cee71"
+    },
+    {
+      "path": "tests/account-progression.test.mjs",
+      "bytes": 5502,
+      "sha256": "3b01e1e2d5d9bc6218bf1557c0faa2fc1a7a78035bd3ed26cf0ded85d14acfe8"
+    },
+    {
+      "path": "tests/account-shop.browser.cjs",
+      "bytes": 5458,
+      "sha256": "7eae65264b54ba13838e0124fc3aa1b200a7bfe24bec6f01a8fc7f4ed21451b9"
     },
     {
       "path": "tests/asset-cache.browser.cjs",
@@ -478,6 +493,11 @@
       "sha256": "f8c7f9c66d017c0fc50d179fe4eba5834d32858ec7a489670a1b7d1cc04c7b95"
     },
     {
+      "path": "tests/fixed-shop-and-paralysis.test.mjs",
+      "bytes": 6984,
+      "sha256": "6ab334d9dda56cf4df53cca3b8a106f088d504b86ad8c434b88f8752868efa1e"
+    },
+    {
       "path": "tests/full-roster.test.mjs",
       "bytes": 7815,
       "sha256": "047b70e88c925986a6851faf974f5372507f01525fc6d9be66d7f235624e0f09"
@@ -491,6 +511,11 @@
       "path": "tests/general-mechanics.test.mjs",
       "bytes": 12737,
       "sha256": "0a93e06d3a56d338a56fb2065568bc2de0a0aabed62f66869cf68dbc40138a95"
+    },
+    {
+      "path": "tests/hud-layout.browser.cjs",
+      "bytes": 5085,
+      "sha256": "e53197f9614a761a0b1ea1d2e35583f5b1fee0a1828678605610998085644eab"
     },
     {
       "path": "tests/interaction-navigation.test.mjs",
@@ -524,8 +549,8 @@
     },
     {
       "path": "tests/magery-completeness.test.mjs",
-      "bytes": 8259,
-      "sha256": "d067083d0cc192cdad56e217da4dd8661897a73e11f9568c9fbb0d9092dca945"
+      "bytes": 8268,
+      "sha256": "f98f61f39577b8a79c56d4f34d8f7bbe50442a185a55318c25f575d7fbb83495"
     },
     {
       "path": "tests/map-asset-store.test.mjs",
@@ -564,8 +589,8 @@
     },
     {
       "path": "tests/navigation.test.mjs",
-      "bytes": 2356,
-      "sha256": "f02c05c05bbfa522790e8b5343ec5900ce51be51d1de073f200ced9e8c622c9d"
+      "bytes": 3194,
+      "sha256": "012e2b095f4d550b16e67deac6d0df7d803322ec5e8caa6fa05c721dd2cf5caa"
     },
     {
       "path": "tests/new-creatures.test.mjs",
@@ -589,8 +614,13 @@
     },
     {
       "path": "tests/progression.test.mjs",
-      "bytes": 6124,
-      "sha256": "2e5f1e6466953240be2ca25ff3fb715f583403b1bcc0ecd3d20c8f74f17f209b"
+      "bytes": 6264,
+      "sha256": "5757a02a68f106698596297ca67b592480daa1d8c0463e81f0f26819b62db3e5"
+    },
+    {
+      "path": "tests/retired-stone-wall.test.mjs",
+      "bytes": 3249,
+      "sha256": "c7636c7d97e139899f35c7c75daccf888cc0e914337e79dec6997a26cb6cb469"
     },
     {
       "path": "tests/reward-balance.test.mjs",
@@ -636,6 +666,16 @@
       "path": "tests/static-placement.test.mjs",
       "bytes": 2920,
       "sha256": "b4fcbf9c00dcf07ae6634a0b95480dd9c32c27977a57044c4a5940eb69eb5234"
+    },
+    {
+      "path": "tests/thumb-joystick.browser.cjs",
+      "bytes": 5383,
+      "sha256": "517c607edebb95d4baa30c5010a863e20e5b2ccc72b5e50ea19ca0b4a7f4a9fa"
+    },
+    {
+      "path": "tests/thumb-joystick.test.mjs",
+      "bytes": 1577,
+      "sha256": "d6678ae8dff45af595b2bec77749ea74cc6b543481e7d61fa7c9395420c2278d"
     },
     {
       "path": "tests/timed-zones.test.mjs",
@@ -869,18 +909,18 @@
     },
     {
       "path": "tools/setup-assets.py",
-      "bytes": 12259,
-      "sha256": "c2e542a6d96a956e49bf92f032c7f4bdde495d683088d4b0a399e740dc8cf34c"
+      "bytes": 12115,
+      "sha256": "d9181d8fd53a7bb8ac8bf9e7df7059141dca5c25c020e8a2282134b0714f6a59"
     },
     {
       "path": "tools/simulate-balance.mjs",
-      "bytes": 15572,
-      "sha256": "ce5ecc82927b2fecd851247bd1713bde8aa6b6a4f158b8ec6970bd3da0443558"
+      "bytes": 15617,
+      "sha256": "4435fbbe07be0543ed826d33d98f5790fe7bf7430dbed79898af3687bada2633"
     },
     {
       "path": "tools/stage-desktop.mjs",
-      "bytes": 9323,
-      "sha256": "477dbfee6aac38c04594570d66281d9cfcf0ce7bc56719ebf4cc140a8594f10e"
+      "bytes": 9346,
+      "sha256": "2bd78e123d6c3c7d5467bcd57c7913ec23d0e34160d1b8dfb6e8441b6d0b0109"
     },
     {
       "path": "tools/stage-source-desktop.mjs",

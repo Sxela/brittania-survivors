@@ -70,7 +70,9 @@ test('backpack cleanup profits survive restoring camp and camp banking',()=>{
 test('death clears progression and carried equipment while retaining the selected difficulty',()=>{
   const profile=finishProgress(freshProgress('hard'),winner('hard'));profile.upgrades.vitality=5;
   const game=createProgressRun(catalog,profile);game.status='dead';
-  assert.deepEqual(finishProgress(profile,game),freshProgress('hard'));
+  const ended=finishProgress(profile,game),expected=freshProgress('hard');
+  assert.equal(ended.account.receipts[game.accountRunId].finished,true);
+  ended.account.receipts={};assert.deepEqual(ended,expected);
 });
 
 test('camp purchases spend banked gold, cap ranks and affect subsequent starts',()=>{

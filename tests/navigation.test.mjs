@@ -30,6 +30,19 @@ test('elevated and underground players, nearby pickups and center clicks share o
 test('navigation cancellation and malformed destinations preserve a valid movement state',()=>{
   const n=new PointerNavigation();n.setDestination({x:100,y:20});n.setDestination({x:NaN,y:2});assert.deepEqual(n.destination,{x:100,y:20});n.cancel();assert.deepEqual(n.steer({x:0,y:0,speed:180},.02),{x:0,y:0});
 });
+
+test('camera and clicks center on the playable area below the HUD cutoff at every zoom',()=>{
+ const player={x:120,y:960},rect={left:10,top:20,width:390,height:844},cutoff=150;
+ for(const zoom of [.5,1,1.25,2])for(const z of [-20,0,40]){
+  const view={w:rect.width/zoom,h:rect.height/zoom,topInset:cutoff/zoom},camera=playerCamera(player,view,z);
+  const center=(rect.height+cutoff)/2;
+  assert.ok(Math.abs((player.y-camera.y-z*4)*zoom-center)<1e-8);
+  assert.deepEqual(cursorWorldPoint(rect.left+rect.width/2,rect.top+center,rect,player,view,()=>z),player);
+  const top=cursorWorldPoint(rect.left+rect.width/2,rect.top+cutoff,rect,player,view,()=>z);
+  const bottom=cursorWorldPoint(rect.left+rect.width/2,rect.top+rect.height,rect,player,view,()=>z);
+  assert.ok(Math.abs(player.y-top.y-(bottom.y-player.y))<1e-8);
+ }
+});
 test('original sound cues are bounded transient events and do not replay from saves',()=>{
   const g=new Game({}, {seed:7});for(let i=0;i<300;i++)g.audioCue('magic-arrow');assert.equal(g.audioEvents.length,128);
   const state=g.snapshot();assert.equal(state.audioEvents,undefined);

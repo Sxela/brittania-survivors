@@ -4,6 +4,31 @@ This profile records the implementation at 0.9.19. It accompanies the [reusable 
 
 The [Britannia playtesting case study](britannia-playtesting-and-balance-log.md) explains which observations and experiments motivated these settings, including historical decisions that were later superseded. The [general playtesting workflow](playtesting-and-balance-log.md) is reusable in other games.
 
+## Mobile controls
+
+The experience bar spans the top of the battlefield without a text row. Player
+health, level, gold and kills share one compact panel with the encounter timeline;
+the separate run/area text panel is removed. Pause sits at bottom right, and
+portrait layouts use a compact minimap (92?128 CSS pixels wide). The zone name appears in
+the center for two seconds when a journey starts or the player enters a new zone.
+`tests/hud-layout.browser.cjs` checks real extracted-asset layouts at desktop and
+phone sizes, including title expiry; screenshots go to `.cache/hud-layout/`.
+
+Options provides a continuous World zoom slider from 50% to 200% on desktop and mobile, saved between page loads. The player camera centers in the usable battlefield below the bottom of the player/minimap HUD, and clicks, spawns and edge guides share that origin. Touch controls default to tap-to-move and hold-to-steer. Joystick settings are
+also available in narrow portrait desktop windows (up to 760 pixels wide),
+without touch hardware or a forced mobile URL. In Options, enable
+**Thumb joystick** for an optional transparent fixed joystick. Adjust its size
+from 75% to 200% and its horizontal/vertical position with the sliders and preview.
+Settings persist on the device independently of run saves and world zoom. Position
+is relative to the available game view, keeping the entire control inside the
+screen when rotating. Reset joystick restores the default position/size and turns
+it off. Releasing or cancelling the thumb, opening a menu, or leaving the app
+stops steering. Other fingers can use the teleport button while steering.
+
+`tests/thumb-joystick.browser.cjs` checks emulated touch input, pointer ownership,
+cancellation, reload persistence and phone portrait/landscape layouts. Screenshots
+are saved under `.cache/thumb-joystick/`. This is not physical-device validation.
+
 ## Combat and classes
 
 The hero moves manually and attacks automatically. Mana, stamina, primary attributes, item durability and their dependent bonuses/requirements are excluded from the active equipment system. Physical and elemental are the two calculation channels; native elemental identities remain useful for effects and burn, slow and poison.
@@ -46,7 +71,7 @@ Equipment raises a spell's **effective rank**, an adaptation that revives native
 
 Each fifth successful individual spell improvement queues a separate Super Upgrade with 2 choices. Depending on the spell, choices include +50% cast speed with -20% potency, +60% potency with -20% cast speed, or an additional projectile/field/summon with -20% potency. Chain Lightning's extra-count Super adds 2 targets. Applicability and caps determine which options appear. Global and hero purchases do not advance an individual spell's milestone.
 
-Luck improves equipment and upgrade rarity; it does not grant extra equipment-chest occurrences. Upgrade rarity uses the clamped quality multiplier `min(6, 1 + luck / 1000)` for nonnegative luck. Shop prices multiply the base cost by 1/1.5/2/3/4 for Common through Legendary. Successful upgrade purchases refresh the five shop offers; the shop remains open for further purchases, inventory and item trading until Next Area.
+Luck improves equipment and upgrade rarity; it does not grant extra equipment-chest occurrences. Upgrade rarity uses the clamped quality multiplier `min(6, 1 + luck / 1000)` for nonnegative luck. Shop prices multiply the base cost by 1/1.5/2/3/4 for Common through Legendary. The shop shows five offers sorted by rarity, rarest first. Buying marks that slot Purchased without moving or rerolling the other cards. All five purchases generate a fresh batch; a paid manual reroll can replace the batch earlier. Sold flags and positions persist across saves. The equipment trader follows the same five-slot batch rule. Backpack items also display rarest first.
 
 If an ordinary level has no legal choice, it converts to 10 gold instead of opening an empty menu, and an empty menu cannot be rerolled. Repeatable hero passives make this a defensive fallback rather than a common path.
 
@@ -66,9 +91,9 @@ Guardian promotion applies 7.5 times HP and 2.5 times damage to the selected sou
 
 Guardian death opens the moongate immediately for 30 active seconds. Enemies and drops remain. Escape hordes begin after 10 seconds, then arrive faster toward a minimum 4-second interval and gain strength. Missing the gate ends the run. Pauses and reward menus freeze active simulation. Entering the gate clears combat and opens the safe upgrade shop; Next Area advances, or wins after the final area.
 
-Only bosses and champions drop equipment chests, with a guaranteed chest per kill. Walking over a chest opens it automatically subject to floor and reach/visibility rules; double-click also works. Ordinary enemies supply XP and probabilistic gold/healing/power-up rewards. Current ordinary drop chances are 12% gold, 4% healing, and 0.4% temporary power-up. Luck modifies quality independently.
+Only bosses and champions drop equipment chests, with a guaranteed chest per kill. Standing on a chest's original game tile or any of its eight adjacent tiles opens it automatically, subject to floor and reach/visibility rules; double-click also works. Ordinary enemies supply XP and probabilistic gold/healing/power-up rewards. Current ordinary drop chances are 1.2% gold, 4% healing, and 0.4% temporary power-up. Luck modifies quality independently.
 
-Deposits provide four mining strikes, each requiring 3 stationary seconds within 66 world units. Each strike gives zone-scaled gold, and the fourth depletes the deposit. Deposits use reachable walking floors and preserve remaining contents in saves.
+Gold ore spawns in reachable clusters. Each rock has 1 HP and takes one three-second strike while the player stays on its original tile or an adjacent tile, including while moving. Mining bonuses speed the strike and increase yield; progress and contents persist in saves. The ore budget compensates for reduced ordinary monster gold.
 
 Gold find is a separate adaptation stat, independent of Luck. It rolls 5–40% on worn non-weapon families, caps at +100%, and multiplies creature gold and ore strikes. Autosell income is unaffected.
 
@@ -94,3 +119,71 @@ The default simulator mode earns campaign XP, loot and purchases. It uses simple
 The 0.9.18 balance experiments exposed weak-enemy contact shielding, excessive passive recovery/leech, ranger coverage weaknesses and corner navigation failures. Fixes preserved the class resistance formula. Controlled defense stress clears changed from 6/9 to 1/9 for stationary builds and from 7/9 to 9/9 for moving builds. That result tests a specific generous synthetic allocation; it does not establish human win rates. Full earned 20/35/73-area campaign balance remains unproven, and simple bots struggled in opening native areas. The 0.9.19 map expansion changes geometry, so the older navigation and campaign results are historical rather than fresh coverage of the expanded maps.
 
 In the private development checkout, detailed evidence is available in `research/balance/index.html`, `research/balance/summary.json`, `research/zone-height-audit.json` and `research/zone-expansion-audit.json`. Research is intentionally excluded from the public export. The portable guide, this profile, runtime code and simulation tools are included in the public source export.
+
+
+## Permanent account shop and insured wardrobe
+
+Main Menu ? Upgrades opens the native backpack/paperdoll UI.
+The Wardrobe tab has a separate saved outfit for Magician, Warrior and Ranger,
+with one shared insured-item backpack. Equipping a shared item on a different
+character removes its assignment from the previous outfit; it never duplicates
+an owned item. Ordinary run gear is separate. Insured equipment is excluded from
+autosell; deliberately selling/discarding it removes ownership. New equipment
+chests roll a 4% chance for their item to be insured. The property appears on
+items and in their details. Only picked-up items enter account ownership.
+
+The Upgrades tab sells global damage, health, movement, attack/cast speed,
+resistance, pickup, regeneration, spell area/duration and gold-income bonuses.
+Each rank adds 5% of the relevant base (regeneration adds 0.5% of base health per
+second). Starting purse and Luck each add 5 points per rank, using a 100-point
+reference base. There are no specific-spell purchases. Ranks cap at 10; a rank
+costs 20 + 10 ? current rank gold ingots. Bonuses apply to future new runs and
+are stored independently of session legacy, ordinary gold, and run saves.
+
+Only bosses and champion/captain leaders can drop gold ingots. Boss chance is
+30%, paying 2?10 ingots; champion chance is 12%, paying 2?4. Ordinary mobs and
+escorts never roll them. A boss payout funds 10?50% of a first-rank upgrade;
+clearances can yield no ingots, and several leader drops can yield more. These
+are authored starting balance values, not measured human campaign reward rates.
+Ingots are collected like gold and shown with native gold-bar artwork in the HUD,
+pickup feed and account wallet. They survive death. Per-run receipts prevent
+repeat credits after autosave/reload. Starting gold is granted once at new-run
+creation, never on reopening camp or restoring a save.
+
+Death removes the resumable run, preserves account upgrades/ingots/insured gear,
+and clears ordinary carried gold, uninsured gear and session legacy. Continue,
+new-run restore and save import reject dead/zero-health or recorded finished runs.
+Old profiles migrate with an empty account without changing existing run gear.
+
+## Paralysis balance
+
+Paralyze is an area spell with a base radius of 100 world pixels, scaling with
+area upgrades. Duration is min(3, (1.5 + 0.25 ? rank) ? duration multiplier) seconds,
+with a 0.75-second boss cap. Damage breaks direct paralysis. A target resists
+further paralysis until 2.5 seconds after its original expiry; cast cooldown
+cannot fall below 5 seconds.
+
+Paralyze Field is passable to both sides. It lasts min(4, (2 + 0.15 ? rank) ?
+duration multiplier) seconds and freezes a crossing normal monster until the
+field expires. Boss freeze caps at 1 second. Damage does not break field freeze.
+Targets resist overlapping/repeated paralysis until 3 seconds after that field
+expires; field cooldown has an 8-second minimum. Frozen enemies cannot move,
+start/complete targeted casts or deal contact damage. The duration/cooldown caps
+bound single-field control uptime to 50% for ordinary enemies and 12.5% for bosses;
+these analytical limits and regression tests do not replace human balance trials.
+
+Validation: `tests/account-progression.test.mjs` and
+`tests/fixed-shop-and-paralysis.test.mjs` cover economy isolation, idempotent
+credits, account save migration, insured gear transfer, bounded crowd control,
+adjacent-tile collection and fixed shop batches. With extracted assets,
+`tests/account-shop.browser.cjs` verifies the real SPA on desktop and an emulated
+phone, including purchase/transfer/death/reload and screenshots under
+`.cache/account-shop/`.
+
+
+Wall of Stone is retired from learning, shops and active gameplay. Native source
+identity/artwork remains documented. Old saved Wall of Stone ranks and upgrades
+migrate to an available offensive spell (preferably Paralyze Field); pending
+milestones migrate with it, and active stone walls are removed. Existing item
+bonuses and insured account gear migrate to supported spell bonuses without
+changing item ownership. `tests/retired-stone-wall.test.mjs` checks migration.

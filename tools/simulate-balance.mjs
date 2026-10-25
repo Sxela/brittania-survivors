@@ -61,9 +61,9 @@ function equipBest(g){
 }
 function shop(g,build){
  enterZoneSpellShop(g);equipBest(g);
- const potion=g.shop.findIndex(i=>i.slot==='potion');if(g.player.hp<g.player.maxHp*.6&&potion>=0)g.buy(potion);
+ const potion=g.shop.findIndex(i=>i.slot==='potion'&&!i.sold);if(g.player.hp<g.player.maxHp*.6&&potion>=0)g.buy(potion);
  for(let n=0;n<100;n++){
-  resolveRewards(g,build);const offers=g.zoneSpellOffers.map((c,i)=>({i,v:value(g,c,build),cost:g.zoneUpgradePrice(c)})).filter(c=>c.cost<=g.player.gold).sort((a,b)=>b.v-a.v);
+  resolveRewards(g,build);const offers=g.zoneSpellOffers.map((c,i)=>({i,v:value(g,c,build),cost:g.zoneUpgradePrice(c),purchased:c.purchased})).filter(c=>!c.purchased&&c.cost<=g.player.gold).sort((a,b)=>b.v-a.v);
   if(!offers.length||!g.buyZoneSpell(offers[0].i))break;
  }
  finishZoneSpellShop(g);advanceZone(g);

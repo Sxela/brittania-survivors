@@ -42,6 +42,7 @@ export function sourceProperties(source){
 }
 export function propertyRows(item){
   const rows=[];
+  if(item?.insured)rows.push({key:'insured',label:'Insured',value:1,note:'Kept between runs in the shared account backpack'});
   if(item?.power)rows.push({key:'power',label:item.aosMode?'Weapon damage':'Power',value:item.power});
   if(item?.defense&&!item.aosMode)rows.push({key:'defense',label:'Defense',value:item.defense});
   for(const [k,v]of Object.entries(itemResistances(item)))if(v)rows.push({key:'resist:'+k,label:k+' resistance (flat points)',value:v});

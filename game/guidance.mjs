@@ -1,5 +1,5 @@
-export function championGuides(game,width,height,zoom=1,radar=null) {
-  const cx=width/2,cy=height/2,margin=30/zoom,top=Math.min(160/zoom,height*.3),bottom=Math.max(top+1,height-165/zoom);
+export function championGuides(game,width,height,zoom=1,radar=null,topInset=0) {
+  const cx=width/2,cy=(height+topInset)/2,margin=30/zoom,top=Math.max(topInset+12/zoom,Math.min(160/zoom,height*.3)),bottom=Math.max(top+1,height-165/zoom);
   const guides=[];
   for(const enemy of game.enemies){
     if(enemy.hp<=0||!(enemy.boss||enemy.captain||enemy.packChampion))continue;
@@ -17,8 +17,8 @@ export function championGuides(game,width,height,zoom=1,radar=null) {
   return guides;
 }
 
-export function pickupGuides(game,width,height,zoom=1) {
-  const p=game.player,cx=width/2,cy=height/2,margin=30/zoom,top=160/zoom,bottom=height-165/zoom;
+export function pickupGuides(game,width,height,zoom=1,topInset=0) {
+  const p=game.player,cx=width/2,cy=(height+topInset)/2,margin=30/zoom,top=Math.max(topInset+12/zoom,Math.min(160/zoom,height*.3)),bottom=Math.max(top+1,height-165/zoom);
   const nearest=new Map();
   for(const drop of game.pickups){
     if(drop.kind==='heal'&&p.hp>=p.maxHp)continue;
@@ -40,10 +40,10 @@ export function pickupGuides(game,width,height,zoom=1) {
 }
 
 // Reuse the native edge arrows once only the final few targets remain.
-export function lastEnemyGuides(game,width,height,zoom=1,radar=null){
+export function lastEnemyGuides(game,width,height,zoom=1,radar=null,topInset=0){
   const zone=game.zoneRun;
   if(!zone||zone.phase!=='combat'||zone.version>=4&&!zone.bossSpawned)return [];
   const alive=game.enemies.filter(e=>e.hp>0&&e.zoneIndex===zone.index);
   if(!alive.length||alive.length+Math.max(0,zone.quota-zone.spawned)>5)return [];
-  return championGuides({...game,enemies:alive.map(e=>({...e,boss:true}))},width,height,zoom,radar).map(g=>({...g,kind:'enemy'}));
+  return championGuides({...game,enemies:alive.map(e=>({...e,boss:true}))},width,height,zoom,radar,topInset).map(g=>({...g,kind:'enemy'}));
 }

@@ -1,7 +1,7 @@
 import { findPath, clearSegment } from './pathfinding.mjs';
 import {Z_SCALE} from './static-placement.mjs';
 export function playerCamera(player,view,elevation=0){
-  return {x:player.x-view.w/2,y:player.y-elevation*Z_SCALE-view.h/2};
+  return {x:player.x-view.w/2,y:player.y-elevation*Z_SCALE-(view.h+(view.topInset||0))/2};
 }
 // Movement stays continuous; only the sprite facing is quantized to eight directions.
 export function cursorWorldPoint(clientX, clientY, rect, player, view, elevationAt=null) {

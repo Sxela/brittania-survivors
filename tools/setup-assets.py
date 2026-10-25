@@ -78,7 +78,7 @@ def worker(client):
     extract_classic_menu.extract(client);extract_classic_hud.extract(client);extract_paperdoll_controls.extract(client)
     data=ClassicData(client)
     try:
-        for role,iid,hue in [('resources/gold-ore',0x19b9,0x8a5),('resources/gold-rock-0',0x1363,0x8a5),('resources/gold-rock-1',0x1364,0x8a5),('resources/gold-rock-2',0x1365,0x8a5),('loot/chest',0xe41,0),('inventory/trash',0xe77,0),('scenery/tree-stump',3671,0)]:
+        for role,iid,hue in [('resources/gold-ingot',0x1be9,0),('resources/gold-ore',0x19b9,0x8a5),('resources/gold-rock-0',0x1363,0x8a5),('resources/gold-rock-1',0x1364,0x8a5),('resources/gold-rock-2',0x1365,0x8a5),('loot/chest',0xe41,0),('inventory/trash',0xe77,0),('scenery/tree-stump',3671,0)]:
             image=data.art(iid)
             if image is None:raise ValueError('Missing required item art '+str(iid))
             file=ROOT/'game/assets/classic-ui'/(role.replace('/','-')+'.png');image.save(file)

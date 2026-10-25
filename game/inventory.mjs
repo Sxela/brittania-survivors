@@ -1,3 +1,4 @@
+import {rarestFirst} from './reward-rules.mjs';
 import {itemOverlayPosition} from './item-overlay.mjs';
 import {trackAsset} from './asset-loading.mjs';
 import { SLOT_LABELS, orderedEquipment, propertyRows, comparisonItem } from "./equipment.mjs";
@@ -18,7 +19,7 @@ function equipmentIcon(ui, item) {
 }
 function itemArtwork(ui, item) {
   const icon=equipmentIcon(ui,item);
-  return `${icon ? `<img src="${esc(icon)}" alt="">` : esc(item.name)}<span class="item-quality">${item.tier ? '+' + item.tier : ''}</span>`;
+  return `${icon ? `<img src="${esc(icon)}" alt="">` : esc(item.name)}<span class="item-quality">${item.insured?'Insured':item.tier ? '+' + item.tier : ''}</span>`;
 }
 function equipmentTooltip(game, hint, blocked=()=>false) {
   if(!tooltip){tooltip=document.createElement('div');tooltip.id='equipment-tooltip';tooltip.className='aos-properties hidden';tooltip.setAttribute('role','tooltip');tooltip.tabIndex=0;tooltip.onpointerenter=()=>clearTimeout(tooltipTimer);tooltip.onpointerleave=()=>{tooltipTimer=setTimeout(()=>{tooltip?.classList.add('hidden');tooltipItem=null;},200);};document.body.append(tooltip);}
@@ -53,7 +54,7 @@ function equipmentTooltip(game, hint, blocked=()=>false) {
 export function renderShopWindow({ root, game, ui, onBuy, onClose, onRestock, embedded=false }) {
   if(!embedded){clearEquipmentWindow();controller=new AbortController();}
   const signal=controller.signal;
-  root.innerHTML=`<div class="eyebrow">A FRIEND AMONG THE TREES</div><h2>The wandering trader</h2>${embedded?'':`<p>You carry <strong>${game.player.gold}</strong> gold.</p>`}<div class="items">${(game.shop||[]).map((item,i)=>`<div class="item shop-item" data-shop-item="${i}"><div class="shop-item-heading"><button class="pack-item" aria-label="${esc(item.name)}" type="button">${itemArtwork(ui,item)}</button><strong>${esc(item.name)}</strong></div><small>${esc(SLOT_LABELS[item.slot]||(item.slot==='potion'?'Potion':item.slot)||'Supplies')}</small><button data-buy="${i}" ${game.player.gold<(item.price||item.cost||0)?'disabled':''}>Buy &middot; ${item.price||item.cost||0} gold</button></div>`).join('')}</div><div class="dialog-actions"><button data-restock ${game.player.gold<game.restockPrice?'disabled':''}>Refresh stock - ${game.restockPrice} gold</button>${embedded?'':'<button id="close-dialog">Return <kbd>B</kbd></button>'}</div>`;
+  root.innerHTML=`<div class="eyebrow">A FRIEND AMONG THE TREES</div><h2>The wandering trader</h2>${embedded?'':`<p>You carry <strong>${game.player.gold}</strong> gold.</p>`}<div class="items">${(game.shop||[]).map((item,i)=>`<div class="item shop-item" data-shop-item="${i}"><div class="shop-item-heading"><button class="pack-item" aria-label="${esc(item.name)}" type="button">${itemArtwork(ui,item)}</button><strong>${esc(item.name)}${item.sold?' / Sold':''}</strong></div><small>${esc(SLOT_LABELS[item.slot]||(item.slot==='potion'?'Potion':item.slot)||'Supplies')}</small><button data-buy="${i}" ${item.sold||game.player.gold<(item.price||item.cost||0)?'disabled':''}>${item.sold?'Sold':'Buy &middot; '+(item.price||item.cost||0)+' gold'}</button></div>`).join('')}</div><div class="dialog-actions"><button data-restock ${game.player.gold<game.restockPrice?'disabled':''}>Refresh stock - ${game.restockPrice} gold</button>${embedded?'':'<button id="close-dialog">Return <kbd>B</kbd></button>'}</div>`;
   const {showTooltip,hideTooltip}=equipmentTooltip(game,'Buy to add this item to your backpack');
   root.querySelectorAll('[data-shop-item]').forEach(card=>{
     const index=Number(card.dataset.shopItem),item=game.shop[index];
@@ -104,7 +105,7 @@ export function renderEquipmentWindow({ root, game, ui, palettes={}, onChange, o
         <h3>Backpack</h3>
         <div class="leather-backpack" data-drop="pack" aria-label="Drop equipped items here to put them in your backpack">
           <img class="backpack-art" src="${image('equipment/backpack')}" alt="">
-          <div class="backpack-items">${game.inventory.map((item,i) => equipped(item) ? '' : itemButton(item,i)).join('')}</div>
+          <div class="backpack-items">${game.inventory.map((item,i)=>({item,i})).sort((a,b)=>rarestFirst(a.item,b.item)).map(({item,i})=>equipped(item)?'':itemButton(item,i)).join('')}</div>
         </div>
         <div class="backpack-tools"><p class="equipment-help">${document.body.classList.contains('touch-device')?'Tap for stats / Drag to equip':'Drag to equip / Hover to compare'}</p><button id="inventory-trash" data-drop="trash" type="button" aria-label="Discard selected item or drag an item here" title="Drag an item here to discard it"><img src="${image('inventory/trash')}" alt="Trash"><span>Trash</span></button></div>
         <div class="equipment-selection" aria-live="polite"><span id="selected-item-name">Select an item</span><button id="equip-selected" disabled hidden>Equip</button><button id="unequip-selected" disabled hidden>Unequip</button><button id="sell-selected" disabled hidden>Sell</button></div>

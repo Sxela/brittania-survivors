@@ -1,8 +1,9 @@
+import {rarestFirst} from './reward-rules.mjs';
 import {rollWaveSize} from './zone-pacing.mjs';
 import {globalSpellChoices,applyGlobalUpgrade,GLOBAL_SPELL_UPGRADES,HERO_UPGRADE_IDS,UPGRADE_RARITIES} from './spell-upgrades.mjs';
 import {decorateUpgrade} from './spell-upgrades.mjs';
 import {mixedChoiceDraw} from './choice-draw.mjs';
-import {spellChoices,applySpellOffer,SPELLS} from './spell-system.mjs';
+import {spellChoices,applySpellOffer,SPELLS,RETIRED_SPELLS} from './spell-system.mjs';
 import {waveCreature,bossAvailable} from './monster-stats.mjs';
 import {enemyCasterSpawnAllowed} from './monster-behavior.mjs';
 
@@ -139,7 +140,8 @@ export function zoneEnemyKilled(game,enemy){
 }
 
 export function rollZoneSpells(game){
-  game.zoneSpellOffers=mixedChoiceDraw(game.shopUpgradeChoices,5,()=>game.random()).map(choice=>decorateUpgrade(game,choice));
+  game.zoneSpellOffers=mixedChoiceDraw(game.shopUpgradeChoices,5,()=>game.random()).map(choice=>decorateUpgrade(game,choice)).sort(rarestFirst);
+  game.zoneRun.fixedShopVersion=1;
   return game.zoneSpellOffers;
 }
 export function rerollZoneSpells(game){
@@ -150,11 +152,13 @@ export function rerollZoneSpells(game){
 export function buyZoneSpell(game,index,replaceId=null){
   const offer=game.zoneSpellOffers[index];
   const price=zoneUpgradePrice(game,offer);
-  if(game.zoneRun?.phase!=='spellshop'||game.pendingSpellSupers?.length||!offer||game.player.gold<price)return false;
+  if(game.zoneRun?.phase!=='spellshop'||game.pendingSpellSupers?.length||!offer||offer.purchased||game.player.gold<price)return false;
   if(!game.shopUpgradeChoices.some(choice=>choice.id===offer.id))return false;
   const result=offer.type==='passive'?{ok:game.applyPassiveUpgrade(offer)}:offer.type==='global'?{ok:applyGlobalUpgrade(game,offer)}:applySpellOffer(game,offer,replaceId);
   if(!result.ok)return result.requiresReplacement?result:false;
-  game.player.gold-=price;game.refreshWeapons();rollZoneSpells(game);return true;
+  game.player.gold-=price;offer.purchased=true;game.refreshWeapons();
+  if(game.zoneSpellOffers.every(item=>item.purchased))rollZoneSpells(game);
+  return true;
 }
 export function finishZoneSpellShop(game){
   if(game.zoneRun?.phase!=='spellshop')return false;
@@ -197,8 +201,10 @@ export function validZoneState(state,catalog){
   if(zone.version<4&&zone.bossSpawned&&(zone.killed!==zone.quota||zone.spawned!==zone.quota))return false;
   if(zone.bossKilled&&!zone.bossSpawned||zone.phase!=='combat'&&!zone.bossKilled||zone.version===1&&zone.phase==='combat'&&zone.bossKilled)return false;
   if(!Array.isArray(state.zoneSpellOffers)||state.zoneSpellOffers.length>5||zone.phase!=='spellshop'&&state.zoneSpellOffers.length)return false;
+  if(zone.fixedShopVersion!==undefined&&zone.fixedShopVersion!==1)return false;
+  if(state.zoneSpellOffers.some(offer=>offer.purchased!==undefined&&typeof offer.purchased!=='boolean'))return false;
   const ids=new Set();
-  for(const offer of state.zoneSpellOffers){if(!offer||!(offer.type==='passive'?HERO_UPGRADE_IDS.includes(offer.id):offer.type==='global'?GLOBAL_SPELL_UPGRADES.some(d=>offer.id==='global:'+d.key):offer.type==='spell'&&SPELLS.some(spell=>spell.id===offer.spellId)&&(offer.id==='spell:'+offer.spellId||offer.id==='spell:'+offer.spellId+':'+offer.upgradeKind))||ids.has(offer.id))return false;ids.add(offer.id);}
+  for(const offer of state.zoneSpellOffers){if(!offer||!(offer.type==='passive'?HERO_UPGRADE_IDS.includes(offer.id):offer.type==='global'?GLOBAL_SPELL_UPGRADES.some(d=>offer.id==='global:'+d.key):offer.type==='spell'&&(SPELLS.some(spell=>spell.id===offer.spellId)||RETIRED_SPELLS.has(offer.spellId))&&(offer.id==='spell:'+offer.spellId||offer.id==='spell:'+offer.spellId+':'+offer.upgradeKind))||ids.has(offer.id))return false;ids.add(offer.id);}
   if(!Array.isArray(state.enemies))return false;
   for(const enemy of state.enemies)if(!enemy||enemy.zoneIndex!==zone.index||enemy.areaId!==state.areaRoute[zone.index].id||enemy.zoneBoss!==undefined&&typeof enemy.zoneBoss!=='boolean'||enemy.zoneRole!==undefined&&!['wave','champion','escort','reinforcement'].includes(enemy.zoneRole))return false;
   if(state.enemies.some(e=>e.pressureStats&&(!Number.isFinite(e.pressureStats.damage)||e.pressureStats.damage<0||e.pressureStats.damage>1e9||!Number.isFinite(e.pressureStats.speed)||e.pressureStats.speed<0||e.pressureStats.speed>1000)))return false;

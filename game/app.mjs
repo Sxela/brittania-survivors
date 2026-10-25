@@ -1,17 +1,18 @@
+import {ACCOUNT_CLASSES,ACCOUNT_UPGRADES,accountCost,buyAccountUpgrade} from './account.mjs';
 import {timelineEvents} from './zone-pacing.mjs';
 import {lootChestAtPoint} from './loot-chests.mjs';
 import {placeGoldOre,syncGoldOre,MINING_STRIKE_SECONDS} from './mining.mjs';
 import {mapPoint} from './map-regions.mjs';
 import {globalSpellChoices,UPGRADE_RARITIES,superUpgradeOptions,chooseSuperUpgrade} from './spell-upgrades.mjs';
 import {enterZoneSpellShop} from './zone-run.mjs';
-import {mobilePresentation,isTouchHold} from './mobile.mjs';
+import {mobilePresentation,isTouchHold,attachThumbJoystick,thumbJoystickAvailable} from './mobile.mjs';
 import {entityElevation,actorDepth} from './world-layers.mjs';
 import {spellPreviewLines,spellOfferPreviewLines} from './spell-preview.mjs';
 import {currentStats,spellBreakdown,statNumber} from './build-stats.mjs';
 import {actorAnchorY} from './actor-placement.mjs';
 import { Game, ENEMY_ARRIVAL_SECONDS } from "./core.mjs";
 import { DIFFICULTIES, POWERUPS } from "./general-mechanics.mjs";
-import { freshProgress, validateProgress, createProgressRun, finishProgress, bankCamp, buyLegacy } from "./progression.mjs";
+import { freshProgress, validateProgress, createProgressRun, finishProgress, bankCamp, buyLegacy, syncAccountProgress, createAccountWardrobe, resumableRun } from "./progression.mjs";
 import { renderCampControls, renderLegacy } from "./camp-ui.mjs";
 import { spellHud, SPELLS, SPELL_CAPACITY, passiveIcon,spellInvisible,spellChoices } from "./spell-system.mjs";
 import { applyHue, applySpectral, hueIdentity } from "./hues.mjs";
@@ -38,9 +39,11 @@ const assetLoading=createLoadingScreen(document);
 assetLoading.begin('Loading sound and interface');
 const forceMobile=new URLSearchParams(location.search).get('mobile')==='1';
 const touchDevice=()=>navigator.maxTouchPoints>0||matchMedia('(pointer:coarse)').matches;
+const joystickAvailable=()=>thumbJoystickAvailable({width:innerWidth,height:innerHeight,touch:touchDevice(),forced:forceMobile});
 const mobileClient=mobilePresentation({width:innerWidth,height:innerHeight,touch:touchDevice(),forced:forceMobile}).mobile;
-let worldZoom=1,mobileZoom=1.5;
-try{const saved=Number(localStorage.getItem('britannia-mobile-zoom'));if([1,1.5,2].includes(saved))mobileZoom=saved;}catch{}
+let worldZoom=1,mobileZoom=null,thumbJoystick=null;
+let shownZoneKey=null,zoneTitleUntil=0;
+try{const saved=Number(localStorage.getItem('britannia-mobile-zoom'));if(Number.isFinite(saved)&&saved>=.5&&saved<=2)mobileZoom=saved;}catch{}
 const navigation = new PointerNavigation();
 navigation.onUnreachable=()=>announce('That location is blocked. Choose an open path.');
 import { renderEquipmentWindow, renderShopWindow, clearEquipmentWindow } from "./inventory.mjs";
@@ -175,9 +178,9 @@ function zoneSpellShop(){
  if(game.status==='playing')game.pause();
  pendingZonePurchase=null;screen='zone-spells';soundtrack.setScene('paused');zoneShopDismissed=zoneShopKey();
  const available=new Map(game.shopUpgradeChoices.map(offer=>[offer.id,offer]));
- game.zoneSpellOffers=game.zoneSpellOffers.filter(offer=>available.has(offer.id));
+ // Preserve sold/unavailable offers in their original slots until batch completion or reroll.
  const reroll=game.zoneSpellRerollPrice;
- dialog(`<div class="eyebrow">BETWEEN AREAS</div><h2>Upgrade your build</h2><div class="shop-wallet"><img src="assets/classic-ui/hud/shop.png" alt=""><strong id="zone-shop-gold">${Math.floor(game.player.gold).toLocaleString("en-US")} gold</strong><small>${Math.round(game.aosBonuses.Luck||0)} Luck</small></div><div class="choices">${game.zoneSpellOffers.map((offer,i)=>`<article class="choice"><img class="choice-icon" src="${offer.icon}" alt="">${upgradeCard(offer)}<button class="choice-action" data-zone-spell="${i}" data-shop-action data-unaffordable="${game.player.gold<game.zoneUpgradePrice(offer)}">Buy / ${game.zoneUpgradePrice(offer)} gold</button></article>`).join('')||'<p>Learn spells at every fifth level to unlock upgrades here.</p>'}</div><div class="dialog-actions"><button id="zone-inventory" data-shop-action>Gear &amp; Shop</button><button id="zone-reroll" data-shop-action data-unaffordable="${game.player.gold<reroll||!available.size}">Reroll / ${reroll} gold</button><button id="zone-finish" data-shop-action>Next area</button></div>`);
+ dialog(`<div class="eyebrow">BETWEEN AREAS</div><h2>Upgrade your build</h2><div class="shop-wallet"><img src="assets/classic-ui/hud/shop.png" alt=""><strong id="zone-shop-gold">${Math.floor(game.player.gold).toLocaleString("en-US")} gold</strong><small>${Math.round(game.aosBonuses.Luck||0)} Luck</small></div><div class="choices">${game.zoneSpellOffers.map((offer,i)=>`<article class="choice"><img class="choice-icon" src="${offer.icon}" alt="">${upgradeCard(offer)}<button class="choice-action" data-zone-spell="${i}" data-shop-action data-unaffordable="${offer.purchased||!available.has(offer.id)||game.player.gold<game.zoneUpgradePrice(offer)}">${offer.purchased?'Purchased':'Buy / '+game.zoneUpgradePrice(offer)+' gold'}</button></article>`).join('')||'<p>Learn spells at every fifth level to unlock upgrades here.</p>'}</div><div class="dialog-actions"><button id="zone-inventory" data-shop-action>Gear &amp; Shop</button><button id="zone-reroll" data-shop-action data-unaffordable="${game.player.gold<reroll||!available.size}">Reroll / ${reroll} gold</button><button id="zone-finish" data-shop-action>Next area</button></div>`);
  document.querySelectorAll('[data-zone-spell]').forEach(button=>button.onclick=event=>{if(button.isConnected&&event.detail<2&&performance.now()>=spellShopReadyAt)buyZoneSpell(Number(button.dataset.zoneSpell));});
  $('zone-reroll').onclick=()=>{if(performance.now()<spellShopReadyAt)return;if(game.rerollZoneSpells()){zoneSpellShop();hud();save();soundtrack.play('gold');}};
  $('zone-finish').onclick=()=>{if(performance.now()>=spellShopReadyAt)completeZoneTravel();};
@@ -204,7 +207,7 @@ function showSuperUpgrade(returnTo='game'){
 }
 function buyZoneSpell(index){
   if(performance.now()<spellShopReadyAt)return;
-  const selected=game.zoneSpellOffers[index];if(!selected||!game.shopUpgradeChoices.some(offer=>offer.id===selected.id))return;
+  const selected=game.zoneSpellOffers[index];if(!selected||selected.purchased||!game.shopUpgradeChoices.some(offer=>offer.id===selected.id))return;
   if(game.buyZoneSpell(index)===true){zoneSpellShop();hud();save();soundtrack.play('gold');}
 }
 
@@ -250,7 +253,7 @@ function drawDrop(drop,camera,showOreHint=false){
     const icon=abilityImage(powerupIcon(drop.kind));if(icon)ctx.drawImage(icon,x-14,y-28,28,28);
     ctx.font='12px UOText';ctx.textAlign='center';ctx.fillStyle='#fff0a0';ctx.fillText(POWERUPS[drop.kind].name,x,y-35);return;
   }
-  const art=drop.kind==='loot'?uiManifest.images['loot/chest']:drop.kind==='ore'?(uiManifest.images['resources/gold-rock-'+(drop.rockVariant||0)]||uiManifest.images['resources/gold-ore']):dropImage(drop.kind,drop.item);if(!art)return;
+  const art=drop.kind==='loot'?uiManifest.images['loot/chest']:drop.kind==='ingot'?uiManifest.images['resources/gold-ingot']:drop.kind==='ore'?(uiManifest.images['resources/gold-rock-'+(drop.rockVariant||0)]||uiManifest.images['resources/gold-ore']):dropImage(drop.kind,drop.item);if(!art)return;
   const scale=Math.min(1.25,(['ore','loot'].includes(drop.kind)?52:36)/art.width,(['ore','loot'].includes(drop.kind)?60:40)/art.height),def={src:art.src,cellWidth:art.width,cellHeight:art.height,framesPerDirection:1,anchorX:art.width/2,anchorY:art.height};
   worldAppearance.sprite(def,x,y,{row:0,mirror:false},0,drop.kind==='ore'?0x8A5:drop.kind==='loot'?0:drop.item?.hue||0,scale);
   if(drop.kind==='loot'&&Math.hypot(drop.x-game.player.x,drop.y-game.player.y)<150){
@@ -263,8 +266,8 @@ function drawDrop(drop,camera,showOreHint=false){
 }
 function drawPickupGuidance(){
   const arrow=uiManifest.images['textures/buttons/arrowbuttonright'];const image=arrow&&abilityImage(arrow.src);
-  const radar=$('minimap').clientWidth/worldZoom,last=lastEnemyGuides(game,view.w,view.h,worldZoom,radar);
-  for(const guide of [...pickupGuides(game,view.w,view.h,worldZoom),...championGuides(game,view.w,view.h,worldZoom,radar).filter(g=>!last.some(e=>e.enemyId===g.enemyId)),...last]){
+  const radar=$('minimap').clientWidth/worldZoom,last=lastEnemyGuides(game,view.w,view.h,worldZoom,radar,view.topInset||0);
+  for(const guide of [...pickupGuides(game,view.w,view.h,worldZoom,view.topInset||0),...championGuides(game,view.w,view.h,worldZoom,radar,view.topInset||0).filter(g=>!last.some(e=>e.enemyId===g.enemyId)),...last]){
     ctx.save();ctx.translate(guide.x,guide.y);ctx.rotate(guide.angle);if(image)ctx.drawImage(image,0,0,Math.min(20,image.width),Math.min(20,image.height));ctx.restore();
     if(guide.kind==='champion'||guide.kind==='enemy')continue;
     ctx.save();ctx.font='12px UOText';ctx.textAlign=guide.x<view.w/2?'left':'right';ctx.fillStyle='#fff0a0';ctx.strokeStyle='#000';ctx.lineWidth=3;
@@ -274,7 +277,7 @@ function drawPickupGuidance(){
 function renderLootFeed(){
   while(lootFeed.length&&fxTime-lootFeed[0].time>5)lootFeed.shift();
   const feed=$('pickup-feed');
-  feed.innerHTML=[...lootFeed].reverse().map(e=>{const art=dropImage(e.kind==='autosell'?'loot':e.kind,e.item);return `<div class="pickup-notice ${e.item?.rarity||e.kind}" data-pickup="${esc(e.kind)}">${art?`<img src="${art.src}" alt="">`:''}<span>${esc(e.text)}${e.value&&e.kind==='autosell'?` <b>+${e.value} gold</b>`:''}</span></div>`;}).join('');
+  feed.innerHTML=[...lootFeed].reverse().map(e=>{const art=e.kind==='ingot'?uiManifest.images['resources/gold-ingot']:dropImage(e.kind==='autosell'?'loot':e.kind,e.item);return `<div class="pickup-notice ${e.item?.rarity||e.kind}" data-pickup="${esc(e.kind)}">${art?`<img src="${art.src}" alt="">`:''}<span>${esc(e.text)}${e.value&&e.kind==='autosell'?` <b>+${e.value} gold</b>`:''}</span></div>`;}).join('');
 }
 const spriteLoads = new Map();
 const spriteSizes = new Map(),
@@ -402,7 +405,7 @@ let game = null,
   lastLevel = 1,
   messageUntil = 0,
   saveAt = 0;
-let campMode=false, profile=freshProgress();
+let campMode=false,accountMode=false,accountClass='mage', profile=freshProgress();
 try{const raw=localStorage.getItem('britannia-progress-v1');if(raw)profile=validateProgress(JSON.parse(raw),runtimeCatalog);}catch{}
 const campRoot=document.createElement('section');campRoot.id='camp-controls';$('new-game-setup').after(campRoot);
 function persistProgress(){try{localStorage.setItem('britannia-progress-v1',JSON.stringify(profile));}catch{announce('Progress could not be saved. Export a backup.');}}
@@ -418,10 +421,29 @@ function refreshCamp(){renderCampControls(campRoot,profile,{
     $('erase-session').onclick=()=>{profile=freshProgress(profile.difficulty);persistProgress();localStorage.removeItem('britannia-run-v1');returnCamp();};
   },
 });}
-function returnCamp(){showMenuView('home');if(campMode&&game){profile=bankCamp(profile,game);persistProgress();}campMode=false;game=null;screen='menu';overlay(true);$('menu').classList.remove('hidden');for(const id of ['hud','top-hud','bottom-hud','minimap'])$(id).classList.add('hidden');$('continue').classList.toggle('hidden',!localStorage.getItem('britannia-run-v1'));refreshCamp();soundtrack.setScene('menu');}
+function returnCamp(){showMenuView('home');if(accountMode&&game){syncAccountProgress(profile,game,{wardrobe:true});persistProgress();accountMode=false;campMode=false;}if(campMode&&game){profile=bankCamp(profile,game);persistProgress();}campMode=false;game=null;screen='menu';overlay(true);$('menu').classList.remove('hidden');for(const id of ['hud','top-hud','bottom-hud','minimap'])$(id).classList.add('hidden');$('continue').classList.toggle('hidden',!localStorage.getItem('britannia-run-v1'));refreshCamp();soundtrack.setScene('menu');}
 function openLegacy(){screen='legacy';dialog('');renderLegacy($('dialog'),profile,{onBuy:id=>{if(buyLegacy(profile,id)){persistProgress();openLegacy();}},onClose:returnCamp});}
+function openAccountShop(archetype=accountClass,refresh=false){
+  if(!refresh){
+    if(game&&!campMode&&screen!=='menu')return;
+    if(accountMode&&game)syncAccountProgress(profile,game,{wardrobe:true});
+    accountClass=archetype;game=createAccountWardrobe(runtimeCatalog,profile,archetype);
+  }
+  accountMode=true;campMode=true;screen='account-shop';dialog('');
+  const render=()=>{syncAccountProgress(profile,game,{wardrobe:true});persistProgress();openAccountShop(accountClass,true);};
+  renderEquipmentWindow({root:$('dialog'),game,ui:uiManifest,palettes:huePalettes,onChange:render,onClose:returnCamp,onBuy:()=>{},onRestock:()=>{}});
+  const navigation=document.createElement('div');navigation.className='account-class-tabs';
+  navigation.innerHTML=`<p class="fine">Shared insured backpack / separate saved outfits.</p><div class="dialog-actions">${ACCOUNT_CLASSES.map(id=>`<button data-account-class="${id}" aria-pressed="${id===accountClass}">${id==='mage'?'Magician':id==='archer'?'Ranger':'Warrior'}</button>`).join('')}</div>`;
+  $('gear-content').prepend(navigation);navigation.querySelectorAll('[data-account-class]').forEach(button=>button.onclick=()=>openAccountShop(button.dataset.accountClass));
+  $('gear-tab').textContent='Wardrobe';$('shop-tab').textContent='Upgrades';
+  const shop=$('equipment-shop');shop.innerHTML=`<h2>Permanent upgrades</h2><p class="fine">Shared bonuses for new runs. Pay with gold ingots.</p><div class="items account-upgrades">${ACCOUNT_UPGRADES.map(entry=>{const rank=profile.account.upgrades[entry.id]||0;return `<article class="item"><strong>${entry.name} ${rank}/10</strong><p>${entry.description} per rank.</p><button data-account-upgrade="${entry.id}" ${rank>=10||profile.account.ingots<accountCost(rank)?'disabled':''}>${rank>=10?'Mastered':accountCost(rank)+' ingots'}</button></article>`;}).join('')}</div>`;
+  shop.querySelectorAll('[data-account-upgrade]').forEach(button=>button.onclick=()=>{if(buyAccountUpgrade(profile,button.dataset.accountUpgrade)){persistProgress();openAccountShop(accountClass,true);$('dialog').setInventoryTab('shop');}});
+  const wallet=$('dialog').querySelector('.inventory-toolbar > strong');wallet.innerHTML=`<img class="ingot-icon" src="assets/classic-ui/resources-gold-ingot.png" alt=""> ${profile.account.ingots} ingots`;
+  $('dialog').querySelector('.equipment-settings')?.classList.add('hidden');
+  $('dialog').dataset.inventoryTab='gear';$('dialog').setInventoryTab('gear');
+}
 function exportProgress(){save();const run=localStorage.getItem('britannia-run-v1');const blob=new Blob([JSON.stringify({format:'britannia-survivors',version:1,profile,run:run?JSON.parse(run):null},null,2)],{type:'application/json'});const link=document.createElement('a'),url=URL.createObjectURL(blob);link.href=url;link.download='Britannia-Survivors-save.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
-function importProgress(){const input=document.createElement('input');input.type='file';input.accept='.json,application/json';input.onchange=async()=>{try{const file=input.files[0];if(!file||file.size>16*1024*1024)throw Error('Save file is too large');const data=JSON.parse(await trackAsset('Save data',()=>file.text()));if(data.format!=='britannia-survivors'||data.version!==1)throw Error('Unsupported save file');const next=validateProgress(data.profile,runtimeCatalog);if(data.run){if(!paths.some(p=>p.id===data.run.archetype))throw Error('Invalid character');Game.restore(runtimeCatalog,data.run.state);}profile=next;persistProgress();if(data.run)localStorage.setItem('britannia-run-v1',JSON.stringify(data.run));else localStorage.removeItem('britannia-run-v1');campMode=false;returnCamp();announce('Progress imported.');}catch(error){announce('Import failed: '+error.message);}};input.click();}
+function importProgress(){const input=document.createElement('input');input.type='file';input.accept='.json,application/json';input.onchange=async()=>{try{const file=input.files[0];if(!file||file.size>16*1024*1024)throw Error('Save file is too large');const data=JSON.parse(await trackAsset('Save data',()=>file.text()));if(data.format!=='britannia-survivors'||data.version!==1)throw Error('Unsupported save file');const next=validateProgress(data.profile,runtimeCatalog);if(data.run){if(!paths.some(p=>p.id===data.run.archetype))throw Error('Invalid character');Game.restore(runtimeCatalog,data.run.state);if(!resumableRun(data.run,next))throw Error('Ended runs cannot be imported for resuming.');}profile=next;persistProgress();if(data.run)localStorage.setItem('britannia-run-v1',JSON.stringify(data.run));else localStorage.removeItem('britannia-run-v1');campMode=false;returnCamp();announce('Progress imported.');}catch(error){announce('Import failed: '+error.message);}};input.click();}
 const paths = [
   {
     id: "warrior",
@@ -487,7 +509,7 @@ const menuBack=document.createElement('button');menuBack.id='menu-back-home';men
 $('new-game').onclick=()=>showMenuView('setup');
 $('menu-back').onclick=()=>showMenuView('home');
 menuBack.onclick=()=>showMenuView('home');
-$('camp-button').onclick=()=>showMenuView('camp');
+$('account-shop-button').onclick=()=>openAccountShop();
 $('options-button').onclick=()=>openOptions(false);
 $('exit-button').onclick=()=>{save();window.close();};
 showMenuView();
@@ -505,7 +527,11 @@ function openOptions(inRun=!!game&&!campMode){
   const cacheStatus=document.createElement('p');cacheStatus.className='fine';cacheStatus.role='status';cacheStatus.textContent=assetCacheState.reason;
   cacheButton.onclick=async()=>{cacheButton.disabled=true;try{await clearAssetCache();cacheStatus.textContent='Downloaded assets cleared. Saves kept. Assets download again when needed.';}catch(error){cacheStatus.textContent=error.message;}finally{cacheButton.disabled=false;}};
   $('dialog').querySelector('.options-actions').append(cacheButton);cacheButton.after(cacheStatus);
-  if(touchDevice()||forceMobile){const button=document.createElement('button');button.id='option-zoom';button.textContent='World zoom: '+Math.round(mobileZoom*100)+'%';button.onclick=()=>{mobileZoom=mobileZoom===1?1.5:mobileZoom===1.5?2:1;localStorage.setItem('britannia-mobile-zoom',String(mobileZoom));resize();button.textContent='World zoom: '+Math.round(mobileZoom*100)+'%';};$('dialog').querySelector('.options-actions').append(button);}
+  const zoomControl=document.createElement('label');zoomControl.className='volume-control';
+  zoomControl.innerHTML=`<span>World zoom <output id="option-zoom-value">${Math.round(worldZoom*100)}%</output></span><input id="option-zoom" type="range" min="50" max="200" step="5" value="${Math.round(worldZoom*100)}" aria-label="World zoom">`;
+  $('option-volume').closest('label').after(zoomControl);
+  $('option-zoom').oninput=e=>{mobileZoom=Number(e.target.value)/100;try{localStorage.setItem('britannia-mobile-zoom',String(mobileZoom));}catch{}resize();$('option-zoom-value').textContent=Math.round(worldZoom*100)+'%';};
+  if(joystickAvailable())thumbJoystick?.options($('dialog'));
   $('options-back').onclick=()=>{if(inRun){resume();pause();}else returnCamp();};
 }
 function resize() {
@@ -520,8 +546,14 @@ function resize() {
   canvas.height = Math.round(r.height * dpr);
   ctx.setTransform(dpr*worldZoom, 0, 0, dpr*worldZoom, 0, 0);
   ctx.imageSmoothingEnabled=!policy.mobile;
-  movableHud.refresh();
-  game?.setViewport?.(view.w, view.h);
+  movableHud.refresh();thumbJoystick?.refresh();
+  if(screen==='options'){
+    const settings=$('dialog').querySelector('.joystick-settings');
+    if(joystickAvailable()&&!settings)thumbJoystick?.options($('dialog'));
+    else if(!joystickAvailable())settings?.remove();
+  }
+  measureCameraInset();
+  game?.setViewport?.(view.w, view.h-(view.topInset||0));
   if (screen === "bestiary") {
     document.querySelectorAll("[data-portrait]").forEach((c) => {
       const monster = catalog.monsters.find((m) => m.id === c.dataset.portrait);
@@ -531,6 +563,14 @@ function resize() {
   }
 }
 new ResizeObserver(resize).observe(canvas);
+function measureCameraInset(){
+  const r=canvas.getBoundingClientRect();
+  const panels=[document.querySelector('.player-panel'),$('minimap')].filter(el=>el?.getClientRects().length);
+  const cutoff=panels.length?Math.max(...panels.map(el=>el.getBoundingClientRect().bottom))-r.top+8:0;
+  view.topInset=Math.max(0,Math.min(r.height*.4,cutoff))/worldZoom;
+}
+const cameraHudObserver=new ResizeObserver(measureCameraInset);
+for(const el of [document.querySelector('.player-panel'),$('minimap')])cameraHudObserver.observe(el);
 function announce(text) {
   const inRun=!$("hud").classList.contains("hidden");
   $("message").textContent = inRun?text:"";
@@ -548,6 +588,9 @@ function overlay(visible) {
   $("dialog").classList.add("hidden");
 }
 async function start({saved=null,seed}={}) {
+  shownZoneKey=null;zoneTitleUntil=0;
+  if(saved&&!resumableRun(saved,profile))throw Error('This run has ended and cannot be resumed.');
+  accountMode=false;
   if(mapLoading)return;
   mapLoading=true;$('start').disabled=true;$('continue').disabled=true;
   pendingChestId=null;lastChestTap=null;
@@ -588,6 +631,9 @@ async function start({saved=null,seed}={}) {
 $("start").onclick = start;
 const AUTOSAVE_SECONDS=2;let lastAutosave=-Infinity;
 function save() {
+  if(accountMode&&game){syncAccountProgress(profile,game,{wardrobe:true});persistProgress();return;}
+  if(game&&!campMode){syncAccountProgress(profile,game);persistProgress();}
+  if(game?.status==='dead'){localStorage.removeItem('britannia-run-v1');return;}
   if(campMode&&game){profile=bankCamp(profile,game);persistProgress();return;}
   if (mapLoading || !game || ["dead", "victory"].includes(game.status)) return;
   try {
@@ -601,8 +647,8 @@ function save() {
   }
 }
 try {
-  if (localStorage.getItem("britannia-run-v1"))
-    $("continue").classList.remove("hidden");
+  const saved=JSON.parse(localStorage.getItem('britannia-run-v1'));
+  if(resumableRun(saved,profile))$('continue').classList.remove('hidden');else localStorage.removeItem('britannia-run-v1');
 } catch {}
 $("continue").onclick = async () => {
   try {
@@ -951,7 +997,7 @@ canvas.addEventListener("contextmenu",e=>e.preventDefault());
 canvas.addEventListener("pointerdown", e => {
   if(screen!=="game" || ![0,2].includes(e.button))return;
   e.preventDefault();
-  if(pointer)return;
+  if(pointer||thumbJoystick?.engaged)return;
   pointer={id:e.pointerId,clientX:e.clientX,clientY:e.clientY,originX:e.clientX,originY:e.clientY,startedAt:performance.now(),touch:e.pointerType==='touch',held:false,steer:e.button===2};
   const chest=e.button===0?chestUnderPointer(e):null;
   if(chest){const now=performance.now();if(lastChestTap?.id===chest.id&&now-lastChestTap.time<450){lastChestTap=null;lastDoubleChestTapAt=now;requestChest(chest);}else{lastChestTap={id:chest.id,time:now};pendingChestId=null;navigation.setDestination({x:chest.x,y:chest.y});}}
@@ -963,28 +1009,15 @@ canvas.addEventListener("pointermove",e=>{
   if(pointer?.id!==e.pointerId)return;
   pointer.clientX=e.clientX;pointer.clientY=e.clientY;pointDestination(e);
 });
-function release(e) {if(e&&pointer&&e.pointerId!==pointer.id)return;if(isTouchHold(pointer,performance.now()))navigation.cancel();pointer=null;touch={x:0,y:0};}
+function release(e) {if(e&&(!pointer||e.pointerId!==pointer.id))return;if(isTouchHold(pointer,performance.now()))navigation.cancel();pointer=null;touch={x:0,y:0};thumbJoystick?.cancel();}
 canvas.addEventListener("pointerup",release);
-canvas.addEventListener("pointercancel",()=>{release();navigation.cancel();});
-const stick = $("joystick");
-stick.addEventListener("pointerdown", (e) => {
-  navigation.cancel();
-  pointer = { id: e.pointerId, x: e.clientX, y: e.clientY };
-  stick.setPointerCapture(e.pointerId);
+canvas.addEventListener("pointercancel",e=>{if(e.pointerId===pointer?.id){release(e);navigation.cancel();}});
+thumbJoystick=attachThumbJoystick($('joystick'),{
+ available:joystickAvailable,
+ active:()=>screen==='game'&&game?.status==='playing'&&!mapLoading,
+ onStart:()=>{release();navigation.cancel();pendingChestId=null;},
+ onMove:vector=>{touch=vector;},
 });
-stick.addEventListener("pointermove", (e) => {
-  if (pointer?.id !== e.pointerId) return;
-  touch = {
-    x: Math.max(-1, Math.min(1, (e.clientX - pointer.x) / 35)),
-    y: Math.max(-1, Math.min(1, (e.clientY - pointer.y) / 35)),
-  };
-  stick.firstElementChild.style.transform = `translate(${touch.x * 25}px,${touch.y * 25}px)`;
-});
-stick.addEventListener("pointerup", () => {
-  release();
-  stick.firstElementChild.style.transform = "";
-});
-stick.addEventListener("pointercancel",()=>{release();stick.firstElementChild.style.transform="";});
 let skillSignature = "";
 try { sound=localStorage.getItem('britannia-sound')!=='off';const volume=localStorage.getItem('britannia-volume');if(volume!==null&&volume.trim()!=='')soundtrack.setVolume(Number(volume)); } catch {}
 soundtrack.setEnabled(sound);
@@ -1007,9 +1040,11 @@ function hud() {
   $("clock").textContent =
     `${String(Math.floor(game.time / 60)).padStart(2, "0")}:${String(Math.floor(game.time % 60)).padStart(2, "0")}`;
   for(const [id,value] of [["kills",game.kills],["gold",Math.floor(p.gold)],["hud-gold",Math.floor(p.gold)]]){const node=$(id);node.textContent=value<10000?value:compactCount.format(value);node.title=value.toLocaleString("en-US");}
+  $('ingots').textContent=String(profile.account.ingots);
   $("xp-label").textContent = `LEVEL ${p.level}`;
   $("xp-text").textContent = `${Math.floor(p.xp)} / ${p.nextXp} EXPERIENCE`;
   $("xp-fill").style.width = `${(100 * p.xp) / p.nextXp}%`;
+  document.querySelector('.hud-experience').setAttribute('aria-valuenow',String(Math.min(100,Math.round(100*p.xp/p.nextXp))));
   $("chapter").textContent =
     game.time < 120
       ? "The awakening"
@@ -1021,6 +1056,9 @@ function hud() {
   $('zone').querySelector('strong').textContent=mapRegions.regionName(p.x,p.y,game.time);
   $('zone').querySelector('span').textContent=(game.currentArea(mapRegions.areaAt(p.x,p.y,game.time))?.facet||'Felucca').toUpperCase();
   const zoneProgress=game.zoneProgress();
+  const zoneKey=game.zoneRun?game.currentArea()?.id+':'+game.zoneRun.index:mapRegions.regionName(p.x,p.y,game.time);
+  if(!mapLoading&&zoneKey!==shownZoneKey){shownZoneKey=zoneKey;zoneTitleUntil=performance.now()+2000;$('zone-title').textContent=mapRegions.regionName(p.x,p.y,game.time);}
+  $('zone-title').hidden=performance.now()>=zoneTitleUntil;
   const zoneAction=$('zone-action');zoneAction.classList.toggle('hidden',!zoneProgress||zoneProgress.phase==='combat');
   if(zoneProgress){
     document.querySelector('.run-clock small').textContent=`AREA ${zoneProgress.index+1} OF ${zoneProgress.total}`;
@@ -1406,7 +1444,7 @@ function ending() {
   profile=finishProgress(profile,game);persistProgress();refreshCamp();
   try{localStorage.removeItem('britannia-run-v1');}catch{}
   soundtrack.setScene('menu');
-  dialog(`<div class="eyebrow">${DIFFICULTIES[game.difficulty]?.name||'Normal'} difficulty</div><h2>${won?'Guardian of Britannia':game.zoneRun?.gateExpired?'Moongate closed':'Return to the moongate'}</h2><p>${won?'Victory! Equipment, gold and legacy are kept for your next journey.':game.zoneRun?.gateExpired?'The moongate closed before you escaped. Your run has ended; your next character starts fresh.':'Death erased equipment, gold and legacy. Your next character starts fresh.'}</p><div class="equipment"><span>${Math.floor(game.time/60)}m ${Math.floor(game.time%60)}s survived</span><span>${game.kills} slain</span><span>Level ${game.player.level}</span><span>${profile.gold} gold banked</span></div><div class="dialog-actions"><button id="again">Begin a new chronicle</button><button id="return-camp">Return to camp</button></div>`);
+  dialog(`<div class="eyebrow">${DIFFICULTIES[game.difficulty]?.name||'Normal'} difficulty</div><h2>${won?'Guardian of Britannia':game.zoneRun?.gateExpired?'Moongate closed':'Return to the moongate'}</h2><p>${won?'Victory! Equipment, gold and legacy are kept for your next journey.':game.zoneRun?.gateExpired?'The moongate closed before you escaped. Your run has ended; your next character starts fresh.':'Your run has ended. Gold ingots, account upgrades and insured equipment are kept; ordinary gear, gold and session legacy are lost.'}</p><div class="equipment"><span>${Math.floor(game.time/60)}m ${Math.floor(game.time%60)}s survived</span><span>${game.kills} slain</span><span>Level ${game.player.level}</span><span>${profile.gold} gold banked</span></div><div class="dialog-actions"><button id="again">Begin a new chronicle</button><button id="return-camp">Main Menu</button></div>`);
   $('again').onclick=start;$('return-camp').onclick=returnCamp;
 }
 const slowFrames=[];
@@ -1434,7 +1472,7 @@ function loop(now) {
         Number(keys.has("s") || keys.has("arrowdown")) -
         Number(keys.has("w") || keys.has("arrowup")) +
         touch.y + pathInput.y;
-    game.setViewport?.(view.w, view.h);
+    game.setViewport?.(view.w, view.h-(view.topInset||0));
     framePhase('navigation');
     if(!mapRegions.loadingGround)game.update(dt, { x, y });
     // Autosave on active time so pauses and menus do not repeat writes.
@@ -1465,7 +1503,7 @@ function loop(now) {
     hud();
     framePhase('hud');
   }
-  if(game){for(const cue of game.drainAudioEvents()) soundtrack.play(cue.role,cue,game.player);for(const e of game.drainLootEvents()){if(e.kind==='xp')continue;const recent=e.kind==='autosell'&&lootFeed.findLast(n=>n.kind==='autosell'&&fxTime-n.time<2);if(recent){recent.count=(recent.count||1)+1;recent.value=(recent.value||0)+(e.value||0);recent.text=`Sold ${recent.count} items`;recent.time=fxTime;}else lootFeed.push({...e,time:fxTime});}while(lootFeed.length>5)lootFeed.shift();}
+  if(game){if(!campMode&&game.ingotsEarned>(profile.account.receipts[game.accountRunId]?.ingots||0)){syncAccountProgress(profile,game);persistProgress();}for(const cue of game.drainAudioEvents()) soundtrack.play(cue.role,cue,game.player);for(const e of game.drainLootEvents()){if(e.kind==='xp')continue;const recent=e.kind==='autosell'&&lootFeed.findLast(n=>n.kind==='autosell'&&fxTime-n.time<2);if(recent){recent.count=(recent.count||1)+1;recent.value=(recent.value||0)+(e.value||0);recent.text=`Sold ${recent.count} items`;recent.time=fxTime;}else lootFeed.push({...e,time:fxTime});}while(lootFeed.length>5)lootFeed.shift();}
   if(lootFeed.length||$("pickup-feed").childElementCount)renderLootFeed();
   const ambientRole=mapRegions.regionName(game?.player.x||0,game?.player.y||0,game?.time||0).includes('desert')||mapRegions.regionName(game?.player.x||0,game?.player.y||0,game?.time||0).includes('snow')?'ambience-wind':'ambience-forest';
   soundtrack.setScene(document.hidden?'hidden':screen==='game'&&game?.status==='playing'?'playing':'menu',ambientRole);

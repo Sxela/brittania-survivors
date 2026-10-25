@@ -1,8 +1,10 @@
 ﻿// Chests retain the existing item drop payload, including legacy saves.
-export const LOOT_CHEST_RANGE=88;
+import {mapCell} from './map-regions.mjs';
+export const LOOT_CHEST_RANGE=1;
 export function canOpenLootChest(game,chest){
  if(game.status!=='playing'||game.player.hp<=0||chest?.kind!=='loot'||!chest.item||chest.collected)return false;
- if(Math.hypot(chest.x-game.player.x,chest.y-game.player.y)>LOOT_CHEST_RANGE)return false;
+ const a=mapCell(game.player.x,game.player.y),b=mapCell(chest.x,chest.y);
+ if(Math.max(Math.abs(a.a-b.a),Math.abs(a.b-b.b))>LOOT_CHEST_RANGE)return false;
  const z=game.elevationAt?.(game.player.x,game.player.y,game.time);
  return (!Number.isFinite(z)||!Number.isFinite(chest.z)||Math.abs(z-chest.z)<=2)&&(!game.clearSight||game.clearSight(game.player,chest));
 }

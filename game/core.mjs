@@ -1,3 +1,4 @@
+import {accountRanks,validAccountRanks,ingotReward} from './account.mjs';
 import {buildZonePacing} from './zone-pacing.mjs';
 import {canOpenLootChest} from './loot-chests.mjs';
 import {tickGoldOre,validGoldOre} from './mining.mjs';
@@ -5,13 +6,13 @@ import {damageChannel,combatResistances,damageDistribution,damageIncrease,itemRe
 import {applyWeaponIdentity,WEAPON_TRAITS} from './weapon-traits.mjs';
 import {decorateUpgrade,normalizeUpgradeOffer,UPGRADE_RARITIES,globalSpellChoices,applyGlobalUpgrade,GLOBAL_SPELL_UPGRADES,HERO_UPGRADE_IDS} from './spell-upgrades.mjs';
 import {mixedChoiceDraw} from './choice-draw.mjs';
-import {rollSpellPower,withGoldFind,validSpellLevels} from './spell-levels.mjs';
+import {rollSpellPower,withGoldFind,validSpellLevels,SPELL_LEVEL_ITEM_CAP} from './spell-levels.mjs';
 import {difficultyAreaCount,chooseProgressiveRoute,buildZoneProgression} from './zone-progression.mjs';
 import { EQUIPMENT_SLOTS, activeProperty, hasGameplayStats, aosFamily, lootSourceEligible, attributesOf, artifactItem, itemScore, sourceProperties, rollAosProperty } from "./equipment.mjs";
 import { DIFFICULTIES, POWERUPS, strictlyDominates } from "./general-mechanics.mjs";
 import { SPELLS, MAGERY_BOOK, RETIRED_SPELLS, spellImpact, initSpellState, spellChoices, newSpellChoices, chooseSpell, applySpellOffer, tickSpellSystem, passiveIcon, spellResistanceBonus, validSpellState,tryReflectSpell,spellBlocksMovement,spellMovementMultiplier,spellDamageBonus,spellEnemyMovementMultiplier,spellEnemyDamageMultiplier,spellInvisible } from "./spell-system.mjs";
 import { initMonsterBehavior, tickMonsterBehavior, applyMonsterContact, tickMonsterStatus,monsterProfile,enemyCasterSpawnAllowed,tickEnemyCasts } from "./monster-behavior.mjs";
-import { dropsLootChest, POWERUP_DROP_CHANCE, HEAL_DROP_CHANCE, GOLD_DROP_CHANCE, ORDINARY_GOLD_RETAINED, monsterGoldBase, bossSchedule, championSchedule, lootRarity, lootLeader } from './reward-rules.mjs';
+import { dropsLootChest, POWERUP_DROP_CHANCE, HEAL_DROP_CHANCE, GOLD_DROP_CHANCE, ORDINARY_GOLD_RETAINED, monsterGoldBase, rarestFirst, bossSchedule, championSchedule, lootRarity, lootLeader } from './reward-rules.mjs';
 import {nativeMonsterStats,waveCreature,bossAvailable} from './monster-stats.mjs';
 import {generateEnemyEquipment,isEquipmentBody} from './enemy-equipment.mjs';
 import {chooseAreaRoute,areaForTime} from './area-route.mjs';
@@ -88,7 +89,7 @@ const UPGRADES = [
 export class Game {
   constructor(
     catalog = {},
-    { seed = 1, archetype = "mage", duration = 600, difficulty = "normal", autoequip = true, legacyBonuses = {}, enemyArrival = GAME_DEFAULTS.enemyArrival } = {},
+    { seed = 1, archetype = "mage", duration = 600, difficulty = "normal", autoequip = true, legacyBonuses = {}, accountBonuses = {}, enemyArrival = GAME_DEFAULTS.enemyArrival } = {},
   ) {
     Object.defineProperty(this, "audioEvents", { value: [], enumerable: false });
     Object.defineProperty(this, "isPassable", { value: null, writable:true, enumerable:false });
@@ -131,6 +132,7 @@ export class Game {
     this.autoequip=!!autoequip;
     this.difficulty=Object.hasOwn(DIFFICULTIES,difficulty)?difficulty:"normal";
     this.legacyBonuses=Object.fromEntries(["power","vitality","magnet"].map(id=>[id,Math.max(0,Math.min(5,Math.floor(Number(legacyBonuses[id])||0)))]));
+    this.accountBonuses=accountRanks(accountBonuses);this.ingotsEarned=0;this.accountRunId='';this.accountItemVersion=0;
     this.buffs={};
     this.encounterVersion=1;
     this.monsterStatsVersion=1;
@@ -196,8 +198,9 @@ export class Game {
       this.player.maxHp = this.player.hp = 150;
       this.player.armor = 2;
     }
-    this.player.maxHp+=this.legacyBonuses.vitality*10;this.player.hp=this.player.maxHp;
+    this.player.maxHp*=1+this.accountBonuses.vitality*.05;this.player.maxHp+=this.legacyBonuses.vitality*10;this.player.hp=this.player.maxHp;
     if (this.attackKind === "arrow") this.player.speed = 165;
+    this.player.speed*=1+this.accountBonuses.speed*.05;
     const weapon = (this.attackKind==='magic'?(catalog.weapons||[]).find(w=>w.id==='fireball-wand')|| (catalog.items||[]).find(w=>w.id==='fireball-wand'):null)||
       (catalog.weapons || []).find(
         (w) => w.id === roleDesign.weapon || w.name === roleDesign.weapon,
@@ -264,17 +267,18 @@ export class Game {
   }
   get wornItems() { return Object.values(this.equipment).map(uid=>this.inventory.find(i=>i.uid===uid)).filter(Boolean); }
   get aosBonuses() {
-    const total={};for(const item of this.wornItems)for(const [key,value]of Object.entries(attributesOf(item)))total[key]=(total[key]||0)+value;
+    const total={Luck:(this.accountBonuses?.luck||0)*5,GoldFind:(this.accountBonuses?.gold||0)*5};for(const item of this.wornItems)for(const [key,value]of Object.entries(attributesOf(item)))total[key]=(total[key]||0)+value;
     return total;
   }
-  get baseMaxHp(){return (this.attackKind==='melee'?150:110)+this.legacyBonuses.vitality*10;}
+  get baseMaxHp(){return (this.attackKind==='melee'?150:110)*(1+this.accountBonuses.vitality*.05)+this.legacyBonuses.vitality*10;}
   get baseRegeneration(){return this.baseMaxHp/10*this.heroUpgradeBonus('regen')+(this.aosBonuses.RegenHits||0)/10;}
   get regeneration(){return this.regenDelay>1e-8?Math.min(this.baseRegeneration*.25,this.baseMaxHp*.01):this.baseRegeneration;}
   get baseDamage(){return (this.attackKind==='melee'?28:this.attackKind==='arrow'?23:25)+(this.equipped('weapon')?.power||0);}
   heroUpgradeBonus(id){
-    if(Object.hasOwn(this.heroStatUpgrades||{},id))return this.heroStatUpgrades[id];
+    const persistent=(this.accountBonuses?.[id]||0)*.05;
+    if(Object.hasOwn(this.heroStatUpgrades||{},id))return this.heroStatUpgrades[id]+persistent;
     const n=this.upgrades[id]||0;
-    return id==='power'?n*.2:id==='haste'?Math.pow(.88,-n)-1:id==='speed'?Math.pow(1.1,n)-1:id==='magnet'?n*65/90:id==='regen'?n/(this.baseMaxHp/10):id==='vitality'?n*25/this.baseMaxHp:id==='multishot'?(this.attackKind==='melee'?n*12/92:n):0;
+    return persistent+(id==='power'?n*.2:id==='haste'?Math.pow(.88,-n)-1:id==='speed'?Math.pow(1.1,n)-1:id==='magnet'?n*65/90:id==='regen'?n/(this.baseMaxHp/10):id==='vitality'?n*25/this.baseMaxHp:id==='multishot'?(this.attackKind==='melee'?n*12/92:n):0);
   }
   get spellDamageAddition(){return this.legacyBonuses.power*.04+spellDamageBonus(this,false);}
   channelDamageBuff(channel){return this.legacyBonuses.power*.04+spellDamageBonus(this,channel==='Physical');}
@@ -363,7 +367,7 @@ export class Game {
     if(this.autosell==='off')return 0;
     const worn=new Set(Object.values(this.equipment)),candidates=[...this.inventory];let sold=0;
     for(const item of candidates){
-      if(worn.has(item.uid)||item.artifact||item.predefined)continue;
+      if(worn.has(item.uid)||item.insured||item.artifact||item.predefined)continue;
       const common=this.autosell==='common'&&(item.rarity==='normal'||!item.rarity);
       const inferior=this.autosell==='inferior'&&this.inventory.some(other=>other.uid!==item.uid&&strictlyDominates(other,item));
       if(!common&&!inferior)continue;
@@ -569,7 +573,7 @@ export class Game {
         dy = p.y - enemy.y,
         d = Math.hypot(dx, dy) || 1;
       const visible=!hiddenFromEnemies&&(!this.clearSight||this.clearSight(enemy,p));
-      const stop=hiddenFromEnemies?Infinity:visible?tickMonsterBehavior(this,enemy,dt,true).stop:0;
+      const stop=enemy.spellParalyzedUntil>this.time||hiddenFromEnemies?Infinity:visible?tickMonsterBehavior(this,enemy,dt,true).stop:0;
       if(d>stop){
         const waypoint=this.enemyWaypoint?.(enemy,p);
         const goal=waypoint&&Number.isFinite(waypoint.x)&&Number.isFinite(waypoint.y)?waypoint:p;
@@ -577,7 +581,7 @@ export class Game {
         if(wd>0){enemy.dx=wx/wd;enemy.dy=wy/wd;enemy.moving=true;const slow=spellEnemyMovementMultiplier(this,enemy),travel=Math.min(wd,enemy.speed*slow*dt);this.moveActor(enemy,wx/wd*travel,wy/wd*travel);}
       }
       else {enemy.moving=false;enemy.dx=dx/d;enemy.dy=dy/d;}
-      if(visible&&d<enemy.radius+p.radius){
+      if(visible&&d<enemy.radius+p.radius&&!(enemy.spellParalyzedUntil>this.time)){
         const threat=enemy.damage*(enemy.lowerAttackUntil>this.time?.75:1)*spellEnemyDamageMultiplier(this,enemy);
         if(threat>contactThreat){contact=enemy;contactThreat=threat;}
       }
@@ -635,7 +639,7 @@ export class Game {
     for (const drop of this.pickups) {
       if(drop.kind==='ore')continue;
       if(drop.kind==='loot'){
-        if(distance(drop,p)<p.radius+8&&canOpenLootChest(this,drop)){
+        if(canOpenLootChest(this,drop)){
           drop.collected=true;this.collect(drop);
           this.effect(drop.x,drop.y,28,'#edcc7a','spark',.5);
         }
@@ -1037,7 +1041,7 @@ export class Game {
   }
   hurtEnemy(enemy,damage,weaponHit=false,element=null,damageOverTime=false) {
     if (enemy.hp <= 0||enemy.arrival>0) return;
-    if(damage>0)enemy.spellParalyzedUntil=0;
+    if(damage>0&&!(enemy.spellFrozenUntil>this.time))enemy.spellParalyzedUntil=0;
     const weapon=this.equipped('weapon');
     if(weaponHit&&weapon?.aosMode&&this.random()>Math.min(1,.9+(this.aosBonuses.AttackChance||0)/150)){this.audioCue(this.attackKind==='arrow'?'bow-miss':'melee-miss');return;}
     const distribution=element?(typeof element==='object'?element:{[element]:100}):weaponHit?(Object.values(weapon?.damageTypes||{}).some(v=>v>0)?weapon.damageTypes:{Physical:100}):{Physical:100};
@@ -1085,6 +1089,8 @@ export class Game {
       this.bossesKilled++;
     }
     if(dropsLootChest(enemy))this.dropLoot(enemy);
+    const ingots=ingotReward(enemy,()=>this.random());
+    if(ingots)this.pickups.push({id:this.nextId++,kind:'ingot',x:enemy.x,y:enemy.y,z:this.elevationAt?.(enemy.x,enemy.y,this.time)??enemy.z??0,value:ingots,radius:9});
     if (enemy.boss || enemy.captain || enemy.packChampion || this.random() < GOLD_DROP_CHANCE*ORDINARY_GOLD_RETAINED) {
       const gold=withGoldFind(this,monsterGoldBase(this,enemy));
       if(enemy.boss||enemy.captain||enemy.packChampion){this.player.gold+=gold;this.notifyLoot({kind:'gold',value:gold,text:`+${gold} gold`});}
@@ -1138,6 +1144,7 @@ export class Game {
       this.notifyLoot({kind:"xp",value:drop.value,text:`+${drop.value} XP`});
       this.checkLevel();
     }
+    if(drop.kind==='ingot'){this.ingotsEarned+=drop.value;this.audioCue('gold');this.notifyLoot({kind:'ingot',value:drop.value,text:`+${drop.value} gold ingots`});}
     if (drop.kind === "gold") {this.player.gold += drop.value;this.notifyLoot({kind:"gold",value:drop.value,text:`+${drop.value} gold`});}
     if (drop.kind === "heal") {
       this.player.hp = Math.min(this.player.maxHp,this.player.hp+drop.value*(1+(this.aosBonuses.EnhancePotions||0)/100));
@@ -1173,7 +1180,7 @@ export class Game {
     const pool=[...(unlearned.length?unlearned:passives).map(u=>({...u,icon:passiveIcon(u.id)})),...spellChoices(this),...globalSpellChoices(this,SPELLS)];
     this.choices=mixedChoiceDraw(pool,3,()=>this.random(),choice=>choice.type==='spell'?'spell':choice.type==='global'?'global':'passive').map(choice=>({...choice,level:choice.type==='spell'?choice.level:(this.upgrades[choice.id]||0)+1}));
     this.ensurePassiveChoice();
-    this.choices=this.choices.map(choice=>decorateUpgrade(this,choice));
+    this.choices=this.choices.map(choice=>decorateUpgrade(this,choice)).sort(rarestFirst);
   }
 
   ensurePassiveChoice() {
@@ -1214,7 +1221,7 @@ export class Game {
     const id=choice.id;if(!HERO_UPGRADE_IDS.includes(id))return false;
     const rarity=UPGRADE_RARITIES.find(r=>r.id===(choice.rarity||'common'));if(!rarity)return false;
     const bonus=rarity.statBonus;if(choice.bonus!==undefined&&choice.bonus!==bonus)return false;
-    this.heroStatUpgrades??={};this.heroStatUpgrades[id]=Math.round((this.heroUpgradeBonus(id)+bonus)*10000)/10000;
+    this.heroStatUpgrades??={};this.heroStatUpgrades[id]=Math.round((this.heroUpgradeBonus(id)-(this.accountBonuses?.[id]||0)*.05+bonus)*10000)/10000;
     this.upgrades[id]=(this.upgrades[id]||0)+1;
     if(id==='vitality'){const gain=this.baseMaxHp*bonus;this.player.maxHp+=gain;this.player.hp=Math.min(this.player.maxHp,this.player.hp+gain);}
     if(id==='speed')this.player.speed+=(this.attackKind==='arrow'?165:150)*bonus;
@@ -1245,6 +1252,7 @@ export class Game {
       power:slot==='weapon'?(aosMode?Math.max(1,Math.round((min+max)/2)):Math.round(max*.3+tier*5)):0,
       defense:slot!=='weapon'?(aosMode?resist:Math.round(Number(stats.ArmorBase||stats.armorBase||stats.armor||source.armor||3)*.3+tier*2)):0,
       serverLayer:source.serverLayer,allowMale:source.stats?.AllowMaleWearer!==false,allowFemale:source.stats?.AllowFemaleWearer!==false,price:25+tier*30,source:source.source||null,aosMode,artifact:fixed,predefined,rarity:fixed?'artifact':predefined?'magic':tier>=2?'rare':tier?'magic':'normal',twoHanded:!!source.twoHanded,damageTypes:source.damageTypes||{},...props};
+    if(source.insured===true)item.insured=true;
     if(!fixed&&!predefined&&tier>0&&this.catalog.aosAffixRules?.families){
       const family=aosFamily({...source,slot:item.slot});
       const pack=['AosPoor','AosAverage','AosRich','AosFilthyRich','AosSuperBoss'][Math.min(4,tier)];
@@ -1311,6 +1319,7 @@ export class Game {
     const source=this.pick(pool.filter(source=>slotOf(source)===slot));
     const tier=rarity==='normal'?0:Math.min(4,Math.floor(zoneCombatTime(this)/this.duration*3)+(rarity==='magic'?1:2));
     const item=this.makeLootItem(source,slot,tier);if(!item)return;
+    item.insured=item.insured||this.random()<.04;
     if(!item.artifact&&!item.predefined){item.rarity=rarity==='artifact'?'rare':rarity==='normal'&&item.tier>0?'magic':rarity;item.name=item.name.replace(/^(?:Magic|Rare) /,item.rarity==='rare'?'Rare ':'Magic ');}
     this.pickups.push({
       id: this.nextId++,
@@ -1346,6 +1355,8 @@ export class Game {
       price: 20,
       healing: 65,
     });
+    while(this.shop.length<5)this.shop.push({...copy(this.shop.at(-1)),uid:this.nextId++});
+    this.shop=this.shop.slice(0,5).sort(rarestFirst);
   }
 
   equip(index) {
@@ -1372,6 +1383,7 @@ export class Game {
 
   buy(index) {
     const item = this.shop[index];
+    if(item?.sold)return false;
     if (
       !item ||
       this.player.gold < item.price ||
@@ -1387,8 +1399,9 @@ export class Game {
         this.player.maxHp,
         this.player.hp + item.healing,
       );
-    } else this.acquireItem(item);
-    this.shop.splice(index, 1);
+    } else this.acquireItem(copy(item));
+    this.shop[index]={...copy(item),uid:this.nextId++,sold:true};
+    if(this.shop.every(offer=>offer.sold))this.refreshShop();
     return true;
   }
 
@@ -1430,6 +1443,7 @@ export class Game {
       duration: snapshot.duration,
       difficulty: snapshot.difficulty||"normal",
       legacyBonuses: snapshot.legacyBonuses||{},
+      accountBonuses:snapshot.accountBonuses||{},
       autoequip: snapshot.autoequip??true,
     });
     const state = copy(snapshot);
@@ -1466,6 +1480,10 @@ export class Game {
       game.bossesSpawned=bossSchedule(game.duration).slice(0,-1).filter(mark=>mark<=game.time);
       game.championMarks=championSchedule(game.duration).filter(mark=>mark<=game.time);
     }
+    for(const item of [...game.inventory,...game.shop,...game.pickups.filter(p=>p.kind==='loot').map(p=>p.item)]){
+      if(item.grantedSpell==='wall-of-stone')item.grantedSpell='paralyze-field';
+      if(item.spellLevels?.['wall-of-stone']){const replacement=['paralyze-field','fire-field','poison-field','lightning'].find(id=>!item.spellLevels[id])||'paralyze-field';item.spellLevels[replacement]=Math.min(SPELL_LEVEL_ITEM_CAP,(item.spellLevels[replacement]||0)+item.spellLevels['wall-of-stone']);delete item.spellLevels['wall-of-stone'];}
+    }
     initSpellState(game);
     if(game.zoneRun){game.zoneRun.pressureElapsed??=0;}
     if(game.zoneRun&&!game.zoneRun.flowVersion){game.zoneRun.flowVersion=2;if(game.zoneRun.phase==='spellshop'){game.zoneRun.phase='cleared';game.zoneSpellOffers=[];}}
@@ -1475,7 +1493,7 @@ export class Game {
       else game.ensurePassiveChoice();
     }
     game.spellLearningVersion=2;
-    if(game.zoneRun?.phase==='spellshop'){const before=game.zoneSpellOffers.length;game.zoneSpellOffers=game.zoneSpellOffers.filter(c=>[...game.shopUpgradeChoices].some(s=>s.id===c.id));if(game.zoneSpellOffers.length!==before||game.zoneSpellOffers.length!==Math.min(5,game.shopUpgradeChoices.length))rollZoneSpells(game);}
+    if(game.zoneRun?.phase==='spellshop'&&!game.zoneRun.fixedShopVersion){const before=game.zoneSpellOffers.length;game.zoneSpellOffers=game.zoneSpellOffers.filter(c=>[...game.shopUpgradeChoices].some(s=>s.id===c.id));if(game.zoneSpellOffers.length!==before||game.zoneSpellOffers.length!==Math.min(5,game.shopUpgradeChoices.length))rollZoneSpells(game);}
     for (const enemy of game.enemies) {
       const source=catalog.monsters?.find(m=>m.id===enemy.type);
       if(snapshot.monsterStatsVersion===undefined&&source){
@@ -1499,6 +1517,9 @@ export class Game {
     // then add only supported hit-point bonuses. Vitality gains remain intact.
     game.choices=game.choices.map(offer=>normalizeUpgradeOffer(game,offer));
     game.zoneSpellOffers=game.zoneSpellOffers.map(offer=>normalizeUpgradeOffer(game,offer));
+    game.choices.sort(rarestFirst);
+    if(!game.shop.some(item=>item.sold))game.shop.sort(rarestFirst);
+    if(!game.zoneSpellOffers.some(offer=>offer.purchased))game.zoneSpellOffers.sort(rarestFirst);
     migrateZonePacing(game);
     initWaveChampions(game);
     game.refreshEquipmentStats();
@@ -1687,7 +1708,7 @@ function validateSnapshot(state,catalog={}) {
         fail();
       if (
         key === "pickups" &&
-        (!["xp", "gold", "heal", "loot", "ore", ...Object.keys(POWERUPS)].includes(entity.kind) ||
+        (!["xp", "gold", "ingot", "heal", "loot", "ore", ...Object.keys(POWERUPS)].includes(entity.kind) ||
           (entity.kind !== "loot" && !number(entity.value, 0)))
       )
         fail();
@@ -1718,10 +1739,13 @@ function validateSnapshot(state,catalog={}) {
       (!number(item.power, 0) || !number(item.defense, 0))
     )
       fail();
+    if(item.insured!==undefined&&typeof item.insured!=='boolean')fail();
+    if(item.sold!==undefined&&typeof item.sold!=='boolean')fail();
+    if(item.accountItemId!==undefined&&(!Number.isSafeInteger(item.accountItemId)||item.accountItemId<1||item.accountItemId>1e9))fail();
     if(item.hue!==undefined&&(!Number.isInteger(item.hue)||!number(item.hue,0,65535)))fail();
     if(item.itemId!==undefined&&(!Number.isInteger(item.itemId)||!number(item.itemId,0,0x1ffff)))fail();
-    if(item.grantedSpell!==undefined&&(item.slot!=='weapon'||!SPELLS.some(s=>s.id===item.grantedSpell)))fail();
-    if(!validSpellLevels(item)||Object.keys(item.spellLevels||{}).some(id=>!SPELLS.some(s=>s.id===id)))fail();
+    if(item.grantedSpell!==undefined&&(item.slot!=='weapon'||!SPELLS.some(s=>s.id===item.grantedSpell)&&item.grantedSpell!=='wall-of-stone'))fail();
+    if(!validSpellLevels(item)||Object.keys(item.spellLevels||{}).some(id=>!SPELLS.some(s=>s.id===id)&&id!=='wall-of-stone'))fail();
     if(item.weaponTrait!==undefined&&(item.slot!=='weapon'||!Object.hasOwn(WEAPON_TRAITS,item.weaponTrait)))fail();
     if(item.weaponIdentityVersion!==undefined&&item.weaponIdentityVersion!==1)fail();
     for(const field of ['aosAttributes','weaponAttributes','armorAttributes','resistances','weaponBonuses'])if(item[field]!==undefined){if(!object(item[field])||Object.keys(item[field]).length>128||Object.values(item[field]).some(v=>!number(v,-1000,10000)))fail();}
@@ -1748,6 +1772,10 @@ function validateSnapshot(state,catalog={}) {
   for(const key of ['mana','maxMana'])if(state.player[key]!==undefined&&!number(state.player[key],0,100000))fail();
   if(state.player.poison!==undefined&&state.player.poison!==null){const poison=state.player.poison;if(!object(poison)||!Number.isInteger(poison.level)||!number(poison.level,1,5)||!number(poison.tick,-1,2)||!number(poison.damage,0,100))fail();}
   if(state.player.poisonUntil!==undefined&&!number(state.player.poisonUntil,0,1000000))fail();
+  if(state.accountBonuses!==undefined&&!validAccountRanks(state.accountBonuses))fail();
+  if(state.ingotsEarned!==undefined&&(!Number.isInteger(state.ingotsEarned)||!number(state.ingotsEarned,0,1e9)))fail();
+  if(state.accountRunId!==undefined&&(typeof state.accountRunId!=='string'||!/^[A-Za-z0-9-]{0,100}$/.test(state.accountRunId)))fail();
+  if(state.accountItemVersion!==undefined&&![0,1].includes(state.accountItemVersion))fail();
   if(state.legacyBonuses!==undefined){if(!object(state.legacyBonuses)||Object.keys(state.legacyBonuses).some(id=>!["power","vitality","magnet"].includes(id)))fail();for(const id of ["power","vitality","magnet"])if(!Number.isInteger(state.legacyBonuses[id])||!number(state.legacyBonuses[id],0,5))fail();}
   if(state.difficulty!==undefined&&!Object.hasOwn(DIFFICULTIES,state.difficulty))fail();
   if(state.autoequip!==undefined&&typeof state.autoequip!=='boolean')fail();

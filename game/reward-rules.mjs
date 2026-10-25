@@ -5,6 +5,9 @@ export const dropsLootChest=enemy=>!!(enemy.boss||enemy.zoneBoss||enemy.captain|
 export const POWERUP_DROP_CHANCE=.004;
 export const HEAL_DROP_CHANCE=.04;
 export const GOLD_DROP_CHANCE=.12;
+// Shared display order for equipment, shop stock and upgrade cards.
+export function rarityRank(item){return item?.artifact?5:({artifact:5,unique:5,legendary:4,epic:3,rare:2,uncommon:1,magic:1,common:0,normal:0}[item?.rarity]??(item?.tier>=2?2:item?.tier>0?1:0));}
+export const rarestFirst=(a,b)=>rarityRank(b)-rarityRank(a);
 export const ORDINARY_GOLD_RETAINED=.1;
 export function monsterGoldBase(game,enemy={},combatTime=null){
  const zone=game.zoneRun,fraction=Math.min(1,(zone?.pressureElapsed||0)/Math.max(1,game.zonePlan?.bossAt||1));
